@@ -1,0 +1,58 @@
+plugins {
+	id 'org.springframework.boot' version '2.7.2'
+	id 'io.spring.dependency-management' version '1.0.12.RELEASE'
+	id 'java'
+}
+
+group = 'com.blucharge'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+	mavenLocal()
+}
+configurations.all {
+	exclude group: 'org.slf4j', module: 'slf4j-simple'
+}
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-jooq'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'mysql:mysql-connector-java'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	// https://mvnrepository.com/artifact/software.amazon.awssdk/protocol-core
+	implementation 'software.amazon.awssdk:protocol-core:2.17.261'
+	// https://mvnrepository.com/artifact/software.amazon.awssdk/secretsmanager
+	implementation 'software.amazon.awssdk:secretsmanager:2.17.261'
+	// https://mvnrepository.com/artifact/com.google.code.gson/gson
+	implementation 'com.google.code.gson:gson:2.9.1'
+	// https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-ui
+	implementation 'org.springdoc:springdoc-openapi-ui:1.6.11'
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-actuator
+	implementation 'org.springframework.boot:spring-boot-starter-actuator:2.7.3'
+	implementation("io.micrometer:micrometer-registry-prometheus")
+	// https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-sleuth
+	implementation 'org.springframework.cloud:spring-cloud-starter-sleuth:3.1.4'
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security
+	implementation 'org.springframework.boot:spring-boot-starter-security:2.7.3'
+
+	implementation 'com.blucharge:core:1.0'
+	if (System.getenv("ENV") == 'local' || System.getenv("ENV") == null)
+		implementation 'com.blucharge:charging-db-local:1.0'
+	else if (System.getenv("ENV") == 'dev')
+		implementation 'com.blucharge:charging-db-dev:1.0'
+	else if (System.getenv("ENV") == 'prod')
+		implementation 'com.blucharge:charging-db-prod:1.0'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
