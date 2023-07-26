@@ -44,13 +44,16 @@ dependencies {
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security
 	implementation 'org.springframework.boot:spring-boot-starter-security:2.7.3'
 
-	implementation 'com.blucharge:core:1.0'
-	if (System.getenv("ENV") == 'local' || System.getenv("ENV") == null)
-		implementation 'com.blucharge:charging-db-local:1.0'
-	else if (System.getenv("ENV") == 'dev')
-		implementation 'com.blucharge:charging-db-dev:1.0'
-	else if (System.getenv("ENV") == 'prod')
-		implementation 'com.blucharge:charging-db-prod:1.0'
+	if (System.getenv("ENV") == 'local' || System.getenv("ENV") == null) {
+		implementation 'com.blucharge.db:ocpp-db-local:1.0'
+		implementation 'com.blucharge:core-local:1.0-SNAPSHOT'
+	} else if (System.getenv("ENV") == 'staging') {
+		implementation 'com.blucharge.db:ocpp-db-staging:1.0'
+		implementation 'com.blucharge:core-staging:1.0-SNAPSHOT'
+	} else if (System.getenv("ENV") == 'prod') {
+		implementation 'com.blucharge.db:ocpp-db-prod:1.0'
+		implementation 'com.blucharge:core-prod:1.0-SNAPSHOT'
+	}
 }
 
 tasks.named('test') {
