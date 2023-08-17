@@ -35,3 +35,14 @@ out/
 
 ### VS Code ###
 .vscode/
+
+.DS_Store
+src/.DS_Store
+src/main/.DS_Store
+src/main/java/.DS_Store
+src/main/java/com/.DS_Store
+src/main/java/com/blucharge/.DS_Store
+src/main/java/com/blucharge/ocpp/.DS_Store
+src/main/java/com/blucharge/ocpp/web/.DS_Store
+src/main/java/com/blucharge/ocpp/ws/.DS_Store
+src/main/java/com/blucharge/ocpp/ws/data/.DS_Store

@@ -24,21 +24,11 @@ public class SecretsManager {
 
     @Bean
     public Credentials getSecret() {
-
-        log.info("Env : {}",System.getenv("ENV"));
         if("local".equals(System.getenv("ENV"))){
-            return Credentials.builder().mysqlPoolSize("5")
-                    .mysqlDatabase("bluchargeOcppLocal")
-                    .mysqlHostName("localhost")
-                    .mysqlUserName("root")
-                    .mysqlPassword("root")
-                    .mysqlPort("3306")
-                    .mysqlPoolSize("10")
-                    .build();
+            return Credentials.builder().mysqlDatabase("bluchargeOcppLocal").mysqlHostName("localhost").mysqlUserName("root").mysqlPassword("root").mysqlPort("3306").mysqlPoolSize("10").build();
         }
-
-        String secretName = System.getenv("ENV")+"/ocpp/mysql";
-
+        log.info("Env : {}",System.getenv("ENV"));
+        String secretName = "ocpp/"+System.getenv("ENV")+"/mysql";
         Region region = Region.of("ap-south-1");
 
         SecretsManagerClient client = SecretsManagerClient.builder()
