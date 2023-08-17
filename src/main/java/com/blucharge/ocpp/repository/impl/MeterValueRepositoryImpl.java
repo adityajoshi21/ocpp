@@ -2,10 +2,13 @@ package com.blucharge.ocpp.repository.impl;
 
 import com.blucharge.db.ocpp.tables.ConnectorMeterValue;
 import com.blucharge.db.ocpp.tables.Transaction;
+import com.blucharge.db.ocpp.tables.records.ChargerRecord;
 import com.blucharge.db.ocpp.tables.records.ConnectorMeterValueRecord;
+import com.blucharge.db.ocpp.tables.records.ConnectorRecord;
 import com.blucharge.db.ocpp.tables.records.TransactionRecord;
 import com.blucharge.ocpp.dto.ws.MeterValue;
 import com.blucharge.ocpp.dto.ws.SampledValue;
+import com.blucharge.ocpp.repository.ChargerRepository;
 import com.blucharge.ocpp.repository.ConnectorRepository;
 import com.blucharge.ocpp.repository.MeterValueRepository;
 import com.blucharge.ocpp.repository.TransactionsRepository;
@@ -32,6 +35,8 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
     private ConnectorRepository connectorRepository;
     @Autowired
     private TransactionsRepository transactionsRepository;
+    @Autowired
+    private ChargerRepository chargerRepository;
     @Override
     public void insertMeterValues(String chargerIdentity, List<MeterValue> meterValues, Long connectorId, Long transactionId) {
 
@@ -49,7 +54,9 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
         if(transaction ==null)
             return;
 
-        Long connectorPk = connectorRepository.getConnectorPkForChargeBoxAndConnector(chargerIdentity, connectorId);
+        ChargerRecord charger = chargerRepository.getChargerFromChargerId(chargerIdentity);
+        Integer connectorNo = connectorRepository.getConnectorNoFromConnectorId(connectorId);
+        Long connectorPk = connectorRepository.getConnectorPkForChargeBoxAndConnector(charger.getId(), connectorNo);
 
         if(transactionId != null){
             TransactionRecord rec= ctx.selectFrom(TRANSACTION).where(TRANSACTION.ID.eq(transactionId)).and(TRANSACTION.IS_ACTIVE.eq(true)).orderBy(TRANSACTION.ID.desc()).fetchAnyInto(TransactionRecord.class);

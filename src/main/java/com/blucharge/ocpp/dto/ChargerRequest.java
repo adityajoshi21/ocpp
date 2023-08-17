@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChargerRequest {
-    private String chargerId;
+    private String chargerName;
     private  String endPointUrl;
     private String ocppVersion;
     private Long lastHeartbeatOn;

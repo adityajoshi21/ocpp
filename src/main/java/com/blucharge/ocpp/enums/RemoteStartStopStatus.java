@@ -1,21 +1,13 @@
 package com.blucharge.ocpp.enums;
 
-public enum RegistrationStatus {
+public enum RemoteStartStopStatus {
     ACCEPTED("Accepted"),
-    PENDING("Pending"),
     REJECTED("Rejected");
 
     private final String value;
 
-    private RegistrationStatus(String value) {
+
+    private RemoteStartStopStatus(String value) {
         this.value = value;
     }
-
-
 }
-
-
-
-
-
-

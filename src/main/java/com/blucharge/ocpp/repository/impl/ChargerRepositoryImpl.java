@@ -51,18 +51,18 @@ public class ChargerRepositoryImpl implements ChargerRepository {
     }
 
     @Override
-    public void updateCharger(BootNotificationRequest p, OcppProtocol protocol, String chargerIdentity) {
+    public void updateBootNotificationForCharger(BootNotificationRequest request, OcppProtocol protocol, String chargerIdentity) {
         ctx.update(charger)
                 .set(charger.OCPP_VERSION, protocol.getCompositeValue())
-                .set(charger.CHARGE_POINT_VENDOR, p.getChargePointVendor())
-                .set(charger.CHARGE_POINT_MODEL, p.getChargePointModel())
-                .set(charger.CHARGE_POINT_SERIAL_NUMBER, p.getChargePointSerialNumber())
-                .set(charger.CHARGE_BOX_SERIAL_NUMBER, p.getChargeBoxSerialNumber())
-                .set(charger.FIRMWARE_VERSION, p.getFirmwareVersion())
-                .set(charger.ICCID, p.getIccid())
-                .set(charger.IMSI, p.getImsi())
-                .set(charger.METER_TYPE, p.getMeterType())
-                .set(charger.METER_SERIAL_NUMBER, p.getMeterSerialNumber())
+                .set(charger.CHARGE_POINT_VENDOR, request.getChargePointVendor())
+                .set(charger.CHARGE_POINT_MODEL, request.getChargePointModel())
+                .set(charger.CHARGE_POINT_SERIAL_NUMBER, request.getChargePointSerialNumber())
+                .set(charger.CHARGE_BOX_SERIAL_NUMBER, request.getChargeBoxSerialNumber())
+                .set(charger.FIRMWARE_VERSION, request.getFirmwareVersion())
+                .set(charger.ICCID, request.getIccid())
+                .set(charger.IMSI, request.getImsi())
+                .set(charger.METER_TYPE, request.getMeterType())
+                .set(charger.METER_SERIAL_NUMBER, request.getMeterSerialNumber())
                 .set(charger.LAST_HEARTBEAT_ON, DateTime.now())
                 .where(charger.CHARGER_NAME.equal(chargerIdentity)).and(charger.IS_ACTIVE.eq(true))
                 .execute();

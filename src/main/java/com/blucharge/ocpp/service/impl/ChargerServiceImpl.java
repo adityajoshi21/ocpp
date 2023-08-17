@@ -1,5 +1,6 @@
 package com.blucharge.ocpp.service.impl;
 
+import com.blucharge.ocpp.constants.ApplicationConstants;
 import com.blucharge.ocpp.constants.OcppConstants;
 import com.blucharge.ocpp.dto.ChargerRequest;
 import com.blucharge.ocpp.dto.ws.BootNotificationRequest;
@@ -17,8 +18,10 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 
+import static com.blucharge.ocpp.constants.ApplicationConstants.HEARTBEAT_INTERVAL;
 
 
 @Slf4j
@@ -42,32 +45,16 @@ public class ChargerServiceImpl implements ChargerService {
 
         if (isRegistered) {
             log.info("The charger '{}' is registered and its boot notification is acknowledged.", chargerIdentity);
-//            UpdateChargerParams params =
-//                    UpdateChargerParams.builder()
-//                            .ocppProtocol(protocol)
-//                            .vendor(parameters.getChargePointVendor())
-//                            .model(parameters.getChargePointModel())
-//                            .pointSerial(parameters.getChargePointSerialNumber())
-//                            .boxSerial(parameters.getChargeBoxSerialNumber())
-//                            .fwVersion(parameters.getFirmwareVersion())
-//                            .iccid(parameters.getIccid())
-//                            .imsi(parameters.getImsi())
-//                            .meterType(parameters.getMeterType())
-//                            .meterSerial(parameters.getMeterSerialNumber())
-//                            .chargerId(chargerIdentity)
-//                            .heartbeatTimestamp(now)
-//                            .build();
-
-            chargerRepository.updateCharger(parameters, protocol, chargerIdentity);
+            chargerRepository.updateBootNotificationForCharger(parameters, protocol, chargerIdentity);
         } else {
-            log.error("The charger '{}' is NOT registered and its boot is NOT acknowledged.", OcppConstants.TEST_CHARGER);
+            log.error("The charger '{}' is NOT registered and its boot is NOT acknowledged.", ApplicationConstants.TEST_CHARGER);
             //chargePointHelperService.rememberNewUnknowns(chargerIdentity);       //To clarify in review
         }
 
         return new BootNotificationResponse()
                 .withStatus(isRegistered ? RegistrationStatus.ACCEPTED : RegistrationStatus.REJECTED)
                 .withCurrentTime(now)
-                .withInterval(2);
+                .withInterval(HEARTBEAT_INTERVAL);
     }
 
     @Override
@@ -78,27 +65,27 @@ public class ChargerServiceImpl implements ChargerService {
     }
 
     @Override
-    public boolean isRegistered(String chargerId) {
-        Lock l = isRegisteredLocks.get(chargerId);
+    public boolean isRegistered(String chargerName) {
+        Lock l = isRegisteredLocks.get(chargerName);
         l.lock();
 
         try {
-            if (chargerRepository.isRegisteredInternal(chargerId)) {
+            if (chargerRepository.isRegisteredInternal(chargerName)) {
                 return true;
             }
             try {
                 ChargerRequest request = new ChargerRequest();
-                request.setChargerId(chargerId);
-                request.setUuid("jijibiji");
+                request.setChargerName(chargerName);
+                request.setUuid(UUID.randomUUID().toString());
                 Integer noOfConnectors = 0;       //Need to find out how to fetch this value
                 request.setNoOfConnectors(noOfConnectors);
 
-                  Long insertedChargerId = chargerRepository.addCharger(request);
+                Long insertedChargerId = chargerRepository.addCharger(request);
 
-                log.warn("Auto-registered unknown charger '{}'", chargerId);
+                log.warn("Auto-registered unknown charger '{}' with chargerId '{}'", chargerName, insertedChargerId);
                 return true;
             } catch (Exception e) {
-                log.error("Failed to auto-register unknown charger '" + chargerId + "'", e);
+                log.error("Failed to auto-register unknown charger '" + chargerName + "'", e);
                 return false;
             }
         } finally {

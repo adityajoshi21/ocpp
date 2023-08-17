@@ -11,7 +11,7 @@ public interface ChargerRepository {
 
     boolean isRegisteredInternal(String chargerId);
 
-    void updateCharger(BootNotificationRequest parameters, OcppProtocol protocol, String chargerIdentity);
+    void updateBootNotificationForCharger(BootNotificationRequest parameters, OcppProtocol protocol, String chargerIdentity);
     void updateChargerHeartbeat(String chargeBoxIdentity, DateTime ts);
 
     ChargerRecord getChargerFromChargerId(String chargerIdentity);

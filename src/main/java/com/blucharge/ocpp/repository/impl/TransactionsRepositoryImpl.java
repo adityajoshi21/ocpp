@@ -19,9 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
-import static com.blucharge.ocpp.constants.OcppConstants.TEST_CHARGER;
+
 
 
 @Repository
@@ -48,49 +47,24 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
 
 
 
-    @Override
-    public TransactionRecord getTransactionForParams(Long chargerId, String idTag, Integer connectorId, BigDecimal meterStartVal) {
-        return ctx.select(transaction.fields()).from(transaction)
-                .join(connector, JoinType.JOIN).on(connector.ID.eq(transaction.CONNECTOR_ID))
-                .where(connector.CHARGER_ID.eq(chargerId))
-                .and(transaction.METER_START_VALUE.eq(meterStartVal))
-                .and(transaction.METER_STOP_VALUE.isNull())
-                .and(transaction.ID_TAG.eq(idTag))
-                .and(connector.IS_ACTIVE.equal(true))
-                .and(connector.CONNECTOR_NUMBER.eq(connectorId))
-                .fetchAnyInto(TransactionRecord.class);
-    }
+//    @Override
+//    public TransactionRecord getTransactionForParams(Long chargerId, String idTag, Integer connectorId, BigDecimal meterStartVal) {
+//        return ctx.select(transaction.fields()).from(transaction)
+//                .join(connector, JoinType.JOIN).on(connector.ID.eq(transaction.CONNECTOR_ID))
+//                .where(connector.CHARGER_ID.eq(chargerId))
+//                .and(transaction.METER_START_VALUE.eq(meterStartVal))
+//                .and(transaction.METER_STOP_VALUE.isNull())
+//                .and(transaction.ID_TAG.eq(idTag))
+//                .and(connector.IS_ACTIVE.equal(true))
+//                .and(connector.CONNECTOR_NUMBER.eq(connectorId))
+//                .fetchAnyInto(TransactionRecord.class);
+//    }
+
+
 
 
     @Override
-    public Long insertTransaction(InsertTransactionParams params, Long chargerId) {
-        //Step 0 : Fetching connectorId from DB
-        SelectConditionStep<Record1<Long>> connectorIdQuery = DSL.select(connector.ID)
-                .from(connector).where(connector.CHARGER_ID.eq(chargerId)).and(connector.CONNECTOR_NUMBER.eq(params.getConnectorId()));
-
-        //Step 1: Insert Transaction
-
-        Long transactionId = ctx.insertInto(transaction)
-                .set(transaction.CONNECTOR_ID, connectorIdQuery)      ///Setting connectorPk found by the query in Step 0
-                .set(transaction.CHARGER_ID, TEST_CHARGER)
-                .set(transaction.ID_TAG, params.getIdTag())
-                .set(transaction.METER_START_VALUE, params.getStartMeterValue())
-                .set(transaction.START_ON, params.getStartTimestamp())
-                .set(transaction.METER_STOP_VALUE, params.getStartMeterValue())
-                .set(transaction.STATUS, TransactionStatus.STARTED.name())
-                .returning(transaction.ID)
-                .fetchOne()
-                .getId();
-
-        log.info("Transaction created with Transaction ID : {}", transactionId);
-
-
-        return transactionId;
-    }
-
-    @Override
-    public Transaction updateTransaction(UpdateTransactionParams params) {
-        // Step 1 : Update transaction table
+    public void updateTransaction(UpdateTransactionParams params) {
 
         ctx.update(transaction)
                 .set(transaction.STOP_ON, params.getStopTimestamp() == null ? DateTime.now() : params.getStopTimestamp())
@@ -100,26 +74,14 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
                 .where(transaction.ID.eq(params.getTransactionId()))
                 .execute();
 
-            //If Transaction record exists in Transaction table and State is Charging change to IDLE
-        return null;
     }
 
     @Override
     public TransactionRecord getActiveTransctionForTxnId(Long txnId) {
-        Record result = ctx.select()
-                .from(transaction)
-                .join(connector).on(transaction.CONNECTOR_ID.eq(connector.ID))
-                .join(charger).on(charger.CHARGER_ID.eq(charger.CHARGER_ID))
-                .join(ocppTag).on(ocppTag.ID_TAG.eq(transaction.ID_TAG))
-                .where(transaction.ID.eq(txnId))
-                .and(transaction.IS_ACTIVE.eq(true))
-                .fetchOne();
-
-        if (result != null) {
-            return map(result);
-        }
-
-        return null;
+        TransactionRecord rec = ctx.selectFrom(transaction)
+                .where(transaction.ID.eq(txnId)
+                        .and(transaction.IS_ACTIVE.eq(true))).fetchOneInto(TransactionRecord.class);
+        return  rec;
     }
 
     @Override
@@ -129,28 +91,12 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
         return record1.getId();
     }
 
-    private TransactionRecord map(Record r) {
-        return TransactionRecord.builder()
-                .id(r.getValue(transaction.ID))
-                .chargeBoxId(r.getValue(connector.CHARGER_ID))
-                .apiSource(r.getValue(charger.API_SOURCE))
-                .connectorId(r.getValue(connector.CONNECTOR_NUMBER))
-                .ocppIdTag(r.getValue(transaction.ID_TAG))
-                .startTimestampDT(r.getValue(transaction.START_ON))
-                .startTimestamp(DateTimeUtils.humanize(r.getValue(transaction.START_ON)))
-                .startValue(r.getValue(transaction.METER_START_VALUE))
-                .stopTimestampDT(r.getValue(transaction.STOP_ON))
-                .stopTimestamp(DateTimeUtils.humanize(r.getValue(transaction.STOP_ON)))
-                .stopValue(r.getValue(transaction.METER_STOP_VALUE))
-                .stopReason(Optional.ofNullable(r.getValue(transaction.STOP_REASON)).orElse("COMPLETED"))
-                .chargeBoxPk(r.getValue(charger.ID))
-                .ocppTagPk(r.getValue(ocppTag.ID))
-                .connectorPk(r.getValue(connector.ID))
-                .createdTimestamp(r.getValue(transaction.CREATED_ON))
-                .build();
+    @Override
+    public Long findConnectorPkForTransactionId(Long transactionId) {
+        Long connectorPkQuery = DSL.select(transaction.CONNECTOR_ID)
+                .from(transaction)
+                .where((transaction.ID.equal(transactionId))).fetchOneInto(Long.class);
+        return connectorPkQuery;
     }
-
-
-
 
 }

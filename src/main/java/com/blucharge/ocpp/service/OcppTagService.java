@@ -7,7 +7,6 @@ import org.joda.time.DateTime;
 
 public interface OcppTagService {
      IdTagInfo getIdTagInfo(String idTag);
-     IdTagInfo getIdTagInfo(String idTag, String chargerId, DateTime transactionTime);
     AuthorizeResponse authorize(AuthorizeRequest parameters, String chargerIdentity);
 
 }

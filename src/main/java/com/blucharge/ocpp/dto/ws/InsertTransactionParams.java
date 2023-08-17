@@ -14,7 +14,7 @@ public class InsertTransactionParams {
     private  String  idTag;
     private  DateTime startTimestamp;
     private  BigDecimal startMeterValue;
-    private  TransactionStatusUpdate statusUpdate = TransactionStatusUpdate.AfterStart;
+    private  final TransactionStatusUpdate statusUpdate = TransactionStatusUpdate.AfterStart;
 
     //private final Long reservationId;
 }

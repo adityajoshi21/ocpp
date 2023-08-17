@@ -19,17 +19,17 @@ public interface ConnectorRepository {
     Long getConnectorPkFromConnector(Long chargerId, Long connectorId);
     String getConnectorStateByConnectorPk(Long connectorId);
     void updateConnectorStateToIdle(Long connectorPk);
-    void updateConnectorStateFromIdle(Long transactionId, Long connectorPk,  ConnectorState status);
+    void updateConnectorState(Long transactionId, Long connectorPk, ConnectorState status);
 
     ConnectorRecord getConnectorForChargerIdWithConnectorNumber(Long chargerId, Integer connectorNo);
     List<ConnectorRecord> getAllConnectorsForChargerId(Long chargerId);
     Long addConnector(ConnectorRecord request);
-    void insertIgnoreConnector(Long chargerId, Long connectorId);
+    //void insertIgnoreConnector(Long chargerId, Long connectorId);
 
     void insertConnector(ConnectorRequest connectorRequest);
     Integer getConnectorNoFromConnectorId(Long ConnectorId);
     void insertConnectorStatus(
-                          SelectConditionStep<Record1<Long>> connectorPkQuery,
+                          Long connectorPk,
                           DateTime timestamp,
                           TransactionStatusUpdate statusUpdate);
 

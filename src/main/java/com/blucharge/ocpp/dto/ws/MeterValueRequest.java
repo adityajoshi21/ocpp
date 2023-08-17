@@ -10,7 +10,6 @@ public class MeterValueRequest{
     @NotNull
     private Long connectorId;
     private Long transactionId;
-    @NotNull
     private List<MeterValue> meterValue;
 
     public boolean isSetMeterValue() {

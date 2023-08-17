@@ -21,12 +21,6 @@ public class OcppTagServiceImpl implements OcppTagService {
 
     @Override
     public IdTagInfo getIdTagInfo(String idTag) {
-        return (getIdTagInfo(idTag, null, null));
-    }
-
-    @Override
-    public IdTagInfo getIdTagInfo(String idTag, String chargerId, DateTime transactionTime) {
-
         OcppTagRecord record = ocppTagRepository.getRecord(idTag);
         IdTagInfo idTagInfo = new IdTagInfo();
 
@@ -34,7 +28,7 @@ public class OcppTagServiceImpl implements OcppTagService {
         if (record == null) {
             log.error("The user with idTag '{}' is INVALID (not present in DB).", idTag);
             idTagInfo.setStatus(AuthorizationStatus.INVALID);
-           // unknownChargePointService.processNewUnidentified(idTag);
+            // unknownChargePointService.processNewUnidentified(idTag);
         } else {
 
             //When Authorisation status for user is blocked
@@ -61,6 +55,7 @@ public class OcppTagServiceImpl implements OcppTagService {
         }
         return idTagInfo;
     }
+
 
     @Override
     public AuthorizeResponse authorize(AuthorizeRequest parameters, String chargerIdentity) {

@@ -39,15 +39,6 @@ private static final Connector connector = Connector.CONNECTOR;
     @Override
     public void updateConnectorStatus(StatusNotificationRequest params, Long chargerId) {
 
-
-
-            // Step 1
-            //insertIgnoreConnector(ctx, params.getChargerId(), params.getConnectorId());
-
-            // Step 2: We store a log of connector statuses for the different connector numbers
-            // ----------------------------------------------- --------------------------
-
-
             ctx.update(connector).set(connector.STATUS_NOTIFICATION_ON, params.getTimestamp())
                                     .set(connector.STATUS, params.getStatus())
                                     .set(connector.ERROR_CODE, params.getErrorCode())
@@ -86,7 +77,7 @@ private static final Connector connector = Connector.CONNECTOR;
     }
 
     @Override
-    public void updateConnectorStateFromIdle(Long transactionId, Long connectorPk, ConnectorState status) {
+    public void updateConnectorState(Long transactionId, Long connectorPk, ConnectorState status) {
         ctx.update(connector)
                 .set(connector.ID, connectorPk)
                 .set(connector.STATUS, status.name())
@@ -114,21 +105,21 @@ private static final Connector connector = Connector.CONNECTOR;
     }
 
 
-    @Override
-    public void insertIgnoreConnector(Long chargerId, Long connectorId) {
-        Integer connectorNumber = getConnectorNoFromConnectorId(connectorId);
-        Boolean flag = getConnectorForChargerIdWithConnectorNumber(chargerId, connectorNumber);
-        if(!flag) {
-            ctx.insertInto(connector)
-                    .set(connector.STATUS, ConnectorState.IDLE.name())
-                    .set(connector.IS_ACTIVE, true)
-                    .set(connector.CREATED_ON, DateTime.now())
-                    .set(connector.UPDATED_ON, DateTime.now())
-                    .set(connector.CONNECTOR_NUMBER, connectorNumber)
-                    .set(connector.CHARGER_ID, chargerId)
-                    .execute();
-        }
-    }
+//    @Override
+//    public void insertIgnoreConnector(Long chargerId, Long connectorId) {
+//        Integer connectorNumber = getConnectorNoFromConnectorId(connectorId);
+//        Boolean flag = getConnectorForChargerIdWithConnectorNumber(chargerId, connectorNumber);
+//        if(!flag) {
+//            ctx.insertInto(connector)
+//                    .set(connector.STATUS, ConnectorState.IDLE.name())
+//                    .set(connector.IS_ACTIVE, true)
+//                    .set(connector.CREATED_ON, DateTime.now())
+//                    .set(connector.UPDATED_ON, DateTime.now())
+//                    .set(connector.CONNECTOR_NUMBER, connectorNumber)
+//                    .set(connector.CHARGER_ID, chargerId)
+//                    .execute();
+//        }
+//    }
 
     @Override
     public List<ConnectorRecord> getAllConnectorsForChargerId(Long chargerId) {
@@ -161,12 +152,12 @@ private static final Connector connector = Connector.CONNECTOR;
 
     @Override
     public void insertConnectorStatus(
-                                       SelectConditionStep<Record1<Long>> connectorPkQuery,
+                                       Long connectorPk,
                                        DateTime timestamp,
                                        TransactionStatusUpdate statusUpdate) {
 
         ctx.insertInto(connector)
-                .set(connector.ID, connectorPkQuery)
+                .set(connector.ID, connectorPk)
                 .set(connector.STATUS_NOTIFICATION_ON, timestamp)
                 .set(connector.STATUS, statusUpdate.getStatus())
                 .set(connector.ERROR_CODE, statusUpdate.getErrorCode())

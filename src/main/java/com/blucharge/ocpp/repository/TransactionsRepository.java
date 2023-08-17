@@ -8,14 +8,12 @@ import com.blucharge.ocpp.dto.ws.UpdateTransactionParams;
 import java.math.BigDecimal;
 
 public interface TransactionsRepository {
-    TransactionRecord getTransactionForParams(Long chargerId, String idTag, Integer connectorId, BigDecimal meterStartVal);
+    //TransactionRecord getTransactionForParams(Long chargerId, String idTag, Integer connectorId, BigDecimal meterStartVal);
 
-    Long insertTransaction(InsertTransactionParams params, Long chargerId);
-    Transaction updateTransaction(UpdateTransactionParams params);
+    void updateTransaction(UpdateTransactionParams params);
     TransactionRecord getActiveTransctionForTxnId(Long transactionId);
     Long addTransaction(TransactionRecord record);
-
-//    Transaction getDetails(Long transactionPk);
+    Long findConnectorPkForTransactionId(Long transactionId);
 
 
 }
