@@ -7,8 +7,6 @@ import com.blucharge.ocpp.dto.ws.StatusNotificationRequest;
 import com.blucharge.ocpp.enums.ConnectorState;
 import com.blucharge.ocpp.enums.TransactionStatusUpdate;
 import org.joda.time.DateTime;
-import org.jooq.Record1;
-import org.jooq.SelectConditionStep;
 
 import java.util.List;
 
@@ -28,10 +26,8 @@ public interface ConnectorRepository {
 
     void insertConnector(ConnectorRequest connectorRequest);
     Integer getConnectorNoFromConnectorId(Long ConnectorId);
-    void insertConnectorStatus(
-                          Long connectorPk,
-                          DateTime timestamp,
-                          TransactionStatusUpdate statusUpdate);
+    void insertConnectorStatus(Long connectorPk, DateTime timestamp, TransactionStatusUpdate statusUpdate);
+    ConnectorRecord getConnectorFromConnectorNameAndChargerId(String connectorName, Long chargerId);
 
 
 }

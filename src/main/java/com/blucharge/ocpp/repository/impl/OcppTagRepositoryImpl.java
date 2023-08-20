@@ -27,7 +27,7 @@ public class OcppTagRepositoryImpl implements OcppTagRepository {
         return ctx.selectFrom(ocppTag)
                 .where(ocppTag.ID_TAG.equal(idTag))
                 .and(ocppTag.IS_ACTIVE.equal(true))
-                .fetchOne();
+                .fetchOneInto(OcppTagRecord.class);
     }
 
 //    @Override
@@ -38,28 +38,18 @@ public class OcppTagRepositoryImpl implements OcppTagRepository {
 //                .fetchOne();
 //    }
 
-    @Override
-    public boolean insertIgnoreIdTag( StartTransactionRequest req) {
-        String notes = "This is an unknown IdTag used in a transaction, that started at : "
-                + req.getTimestamp() + ". It was reported on :" + DateTime.now()+ ".";
+//    @Override
+//    public boolean insertIgnoreIdTag( StartTransactionRequest req) {
+//        String notes = "This is an unknown IdTag used in a transaction, that started at : "
+//                + req.getTimestamp() + ". It was reported on :" + DateTime.now()+ ".";
+//
+//        int count = ctx.insertInto(ocppTag)
+//                .set(ocppTag.ID_TAG, req.getIdTag())
+//                .set(ocppTag.NOTES, notes)
+//                .set(ocppTag.BLOCKED, true)
+//                .onDuplicateKeyIgnore()
+//                .execute();
+//        return count == 1;
+//    }
 
-        int count = ctx.insertInto(ocppTag)
-                .set(ocppTag.ID_TAG, req.getIdTag())
-                .set(ocppTag.NOTES, notes)
-                .set(ocppTag.BLOCKED, true)
-                .onDuplicateKeyIgnore()
-                .execute();
-        return count == 1;
-    }
-
-    @Override
-    public void updateInTransactionForIdTag(String idTag, Boolean value) {
-        int count = ctx.update(ocppTag)
-                .set(ocppTag.IN_TRANSACTION, value)
-                .where(ocppTag.ID_TAG.eq(idTag))
-                .execute();
-        if (count == 0) {
-            log.warn("Failed to set in_transaction=true of OCPP tag for STARTED transaction");
-        }
-    }
 }

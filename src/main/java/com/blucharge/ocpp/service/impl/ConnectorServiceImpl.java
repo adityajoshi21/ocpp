@@ -29,7 +29,6 @@ public class ConnectorServiceImpl implements ConnectorService {
 @Override
     public StatusNotificationResponse statusNotification(StatusNotificationRequest parameters, String chargerIdentity){
 
-        //DateTime timestamp = parameters.isSetTimestamp() ? parameters.getTimestamp() : DateTime.now();
 
     ChargerRecord charger =chargerRepository.getChargerFromChargerId(chargerIdentity);   //Exception handler needed if charger is null & charger doesnt exists in table
 

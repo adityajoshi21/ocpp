@@ -34,7 +34,7 @@ public class OcppController {
 
     @PostMapping(value = "/boot-notification")
     public BootNotificationResponse handleBootNotification(@RequestBody BootNotificationRequest request) {
-        return chargerService.bootNotification(request, OcppProtocol.V_16_JSON, TEST_CHARGER);
+        return chargerService.bootNotification(request,  TEST_CHARGER);
     }
 
     @PostMapping(value = "/status-notification")

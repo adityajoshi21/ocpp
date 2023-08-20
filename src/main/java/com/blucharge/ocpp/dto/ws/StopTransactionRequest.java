@@ -16,11 +16,12 @@ public class StopTransactionRequest {
 
         private String idTag;
         @NotNull
-        private BigDecimal meterStop;
+        private BigDecimal meterStopValue;
         @NotNull
         private DateTime timestamp;
         @NotNull
         private Long transactionId;
+        private String connectorName;
         private String reason;
         protected List<MeterValue> transactionData;
 

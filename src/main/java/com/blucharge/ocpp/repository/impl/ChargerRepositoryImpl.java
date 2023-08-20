@@ -10,6 +10,7 @@ import com.google.common.util.concurrent.Striped;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.jooq.DSLContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.concurrent.locks.Lock;
@@ -22,6 +23,7 @@ import java.util.concurrent.locks.Lock;
 public class ChargerRepositoryImpl implements ChargerRepository {
     private static final Charger charger = Charger.CHARGER;
 
+    @Autowired
     private final DSLContext ctx;
 
 
@@ -42,18 +44,17 @@ public class ChargerRepositoryImpl implements ChargerRepository {
     }
 
     @Override
-    public Long addCharger(ChargerRequest request) {        //To Do : If needs to be moved to service?
-
-        ChargerRecord record = ctx.newRecord(charger, request);
+    public Long addCharger(ChargerRequest chargerRequest) {
+        ChargerRecord record = ctx.newRecord(charger, chargerRequest);
         record.setIsActive(true);
         record.store();
         return record.getId();
     }
 
     @Override
-    public void updateBootNotificationForCharger(BootNotificationRequest request, OcppProtocol protocol, String chargerIdentity) {
+    public void updateBootNotificationForCharger(BootNotificationRequest request,  String chargerIdentity) {
         ctx.update(charger)
-                .set(charger.OCPP_VERSION, protocol.getCompositeValue())
+                .set(charger.OCPP_VERSION, "OCPP1.6")
                 .set(charger.CHARGE_POINT_VENDOR, request.getChargePointVendor())
                 .set(charger.CHARGE_POINT_MODEL, request.getChargePointModel())
                 .set(charger.CHARGE_POINT_SERIAL_NUMBER, request.getChargePointSerialNumber())

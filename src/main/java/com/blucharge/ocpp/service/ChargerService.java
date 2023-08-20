@@ -7,7 +7,7 @@ import com.blucharge.ocpp.dto.ws.HeartbeatResponse;
 import com.blucharge.ocpp.enums.OcppProtocol;
 
 public interface ChargerService {
-    BootNotificationResponse bootNotification(BootNotificationRequest parameters,  OcppProtocol  ocppProtocol, String chargerIdentity);
+    BootNotificationResponse bootNotification(BootNotificationRequest parameters, String chargerIdentity);
     HeartbeatResponse heartbeat(HeartbeatRequest request, String chargerIdentity);
     boolean isRegistered(String chargerId);
 }

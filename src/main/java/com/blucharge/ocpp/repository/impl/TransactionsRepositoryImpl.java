@@ -86,16 +86,18 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
 
     @Override
     public Long addTransaction(TransactionRecord record) {
-        TransactionRecord record1 = ctx.newRecord(transaction, record);
-        record1.store();
-        return record1.getId();
+        TransactionRecord transactionRecord = ctx.newRecord(transaction, record);
+        transactionRecord.setIsActive(true);
+        transactionRecord.store();
+        return transactionRecord.getId();
     }
 
     @Override
     public Long findConnectorPkForTransactionId(Long transactionId) {
-        Long connectorPkQuery = DSL.select(transaction.CONNECTOR_ID)
+        Long connectorPkQuery = ctx.select(transaction.CONNECTOR_ID)
                 .from(transaction)
-                .where((transaction.ID.equal(transactionId))).fetchOneInto(Long.class);
+                .where((transaction.ID.equal(transactionId)))
+                .fetchOneInto(Long.class);
         return connectorPkQuery;
     }
 

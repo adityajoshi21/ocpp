@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface MeterValueRepository {
     void insertMeterValues(String chargerIdentity, List<MeterValue> meterValues, Long connectorId, Long transactionId);
-    void insertMeterValues(String chargeBoxIdentity, List<MeterValue> list, Long transactionId);
+    void updateMeterValues(String chargeBoxIdentity, List<MeterValue> list, Long transactionId);
     void batchInsertMeterValues(DSLContext ctx, List<MeterValue> list, Long connectorPk, Long transactionId);
 }

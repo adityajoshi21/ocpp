@@ -1,5 +1,6 @@
 package com.blucharge.ocpp.service.impl;
 
+import com.blucharge.db.ocpp.tables.records.ChargerRecord;
 import com.blucharge.ocpp.constants.ApplicationConstants;
 import com.blucharge.ocpp.constants.OcppConstants;
 import com.blucharge.ocpp.dto.ChargerRequest;
@@ -30,22 +31,21 @@ public class ChargerServiceImpl implements ChargerService {
 
     @Autowired
     private ChargerRepository chargerRepository;
-   // @Autowired private ChargerHelperService chargePointHelperService;
-
 
     private final Striped<Lock> isRegisteredLocks = Striped.lock(16);
+
     @Override
-    public BootNotificationResponse bootNotification(BootNotificationRequest parameters,  OcppProtocol protocol, String chargerIdentity) {
-        if (protocol.getVersion() != OcppVersion.V_16) {
-            throw new IllegalArgumentException("Unexpected OCPP version: " + protocol.getVersion() + "We only support 1.6");
-        }
+    public BootNotificationResponse bootNotification(BootNotificationRequest parameters,  String chargerIdentity) {
+//        if (protocol.getVersion() != OcppVersion.V_16) {
+//            throw new IllegalArgumentException("Unexpected OCPP version: " + protocol.getVersion() + "We only support 1.6");
+//        }
 
         boolean isRegistered = isRegistered(chargerIdentity);         //check if charger exists in DB
         DateTime now = DateTime.now();
 
         if (isRegistered) {
             log.info("The charger '{}' is registered and its boot notification is acknowledged.", chargerIdentity);
-            chargerRepository.updateBootNotificationForCharger(parameters, protocol, chargerIdentity);
+            chargerRepository.updateBootNotificationForCharger(parameters, chargerIdentity);
         } else {
             log.error("The charger '{}' is NOT registered and its boot is NOT acknowledged.", ApplicationConstants.TEST_CHARGER);
             //chargePointHelperService.rememberNewUnknowns(chargerIdentity);       //To clarify in review
@@ -73,10 +73,11 @@ public class ChargerServiceImpl implements ChargerService {
             if (chargerRepository.isRegisteredInternal(chargerName)) {
                 return true;
             }
+
             try {
                 ChargerRequest request = new ChargerRequest();
                 request.setChargerName(chargerName);
-                request.setUuid(UUID.randomUUID().toString());
+                request.setUuid("test");
                 Integer noOfConnectors = 0;       //Need to find out how to fetch this value
                 request.setNoOfConnectors(noOfConnectors);
 
@@ -94,3 +95,4 @@ public class ChargerServiceImpl implements ChargerService {
     }
 
 }
+

@@ -1,12 +1,13 @@
 plugins {
-	id 'org.springframework.boot' version '2.7.2'
-	id 'io.spring.dependency-management' version '1.0.12.RELEASE'
 	id 'java'
+	id 'org.springframework.boot' version '2.7.8'
+	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+	id 'idea'
 }
 
 group = 'com.blucharge'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+
 
 configurations {
 	compileOnly {
@@ -38,26 +39,18 @@ dependencies {
 	implementation 'org.springdoc:springdoc-openapi-ui:1.6.11'
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-actuator
 	implementation 'org.springframework.boot:spring-boot-starter-actuator:2.7.3'
-	implementation("io.micrometer:micrometer-registry-prometheus")
-	// https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-sleuth
-	implementation 'org.springframework.cloud:spring-cloud-starter-sleuth:3.1.4'
 	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security
 	implementation 'org.springframework.boot:spring-boot-starter-security:2.7.3'
-	// https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations
-	implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.5'
+// https://mvnrepository.com/artifact/com.google.guava/guava
+	implementation 'com.google.guava:guava:32.1.1-jre'
 	// https://mvnrepository.com/artifact/joda-time/joda-time
-	implementation group: 'joda-time', name: 'joda-time', version: '2.9.9'
-	implementation 'com.google.guava:guava:23.0'
+// https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-joda
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.13.3'
+	implementation "com.fasterxml.jackson.core:jackson-databind:2.12.5"
 
-	// https://mvnrepository.com/artifact/org.springframework/spring-websocket
-	implementation group: 'org.springframework', name: 'spring-websocket', version: '5.3.18'
-	implementation "org.eclipse.jetty.websocket:websocket-server:9.4.9.v20180320"
 
-	// https://mvnrepository.com/artifact/javax.xml.ws/jaxws-api
-	implementation 'javax.xml.ws:jaxws-api:2.3.1'
-// https://mvnrepository.com/artifact/com.fasterxml.jackson.module/jackson-module-jaxb-annotations
-	implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-jaxb-annotations', version: '2.13.3'
-	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.5'
+
+
 
 	if (System.getenv("ENV") == 'local' || System.getenv("ENV") == null) {
 		implementation 'com.blucharge.db:ocpp-db-local:1.0'

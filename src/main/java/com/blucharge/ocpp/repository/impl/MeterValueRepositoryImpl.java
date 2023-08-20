@@ -4,7 +4,6 @@ import com.blucharge.db.ocpp.tables.ConnectorMeterValue;
 import com.blucharge.db.ocpp.tables.Transaction;
 import com.blucharge.db.ocpp.tables.records.ChargerRecord;
 import com.blucharge.db.ocpp.tables.records.ConnectorMeterValueRecord;
-import com.blucharge.db.ocpp.tables.records.ConnectorRecord;
 import com.blucharge.db.ocpp.tables.records.TransactionRecord;
 import com.blucharge.ocpp.dto.ws.MeterValue;
 import com.blucharge.ocpp.dto.ws.SampledValue;
@@ -50,8 +49,8 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
             return;
         }
 
-        TransactionRecord transaction = ctx.selectFrom(TRANSACTION).where(TRANSACTION.IS_ACTIVE).and(TRANSACTION.ID.eq(transactionId)).fetchAnyInto(TransactionRecord.class);
-        if(transaction ==null)
+        TransactionRecord transactionRecord = ctx.selectFrom(TRANSACTION).where(TRANSACTION.IS_ACTIVE).and(TRANSACTION.ID.eq(transactionId)).fetchAnyInto(TransactionRecord.class);
+        if(transactionRecord ==null)
             return;
 
         ChargerRecord charger = chargerRepository.getChargerFromChargerId(chargerIdentity);
@@ -61,7 +60,7 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
         if(transactionId != null){
             TransactionRecord rec= ctx.selectFrom(TRANSACTION).where(TRANSACTION.ID.eq(transactionId)).and(TRANSACTION.IS_ACTIVE.eq(true)).orderBy(TRANSACTION.ID.desc()).fetchAnyInto(TransactionRecord.class);
 
-            boolean update = false;
+
             BigDecimal unit =null, startSoc=null, endSoc=null, meterStopValue = null;
 
             log.info(" Transction Id : {} Meter Value list {}", transactionId,meterValues);
@@ -77,13 +76,13 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
                 if(startSoc !=null){
                     rec.setStartSoc(startSoc);
                 }
-                update = true;
+
             }
 
             if (rec!=null && endSoc != null && rec.getStartSoc().compareTo(endSoc) < 0) {   //For End Soc
                 log.info("Setting end SoC for transaction ID :  {}", transactionId);
                 rec.setEndSoc(endSoc);
-                update = true;
+
             }
             if (rec!=null && unit != null) {                                     //For units consumed
                 log.info("Setting end unit for transaction ID : {} ", transactionId);
@@ -96,7 +95,7 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
 
                 }
                 rec.setMeterStopValue(unit);
-                update = true;
+
             }
 
         }
@@ -105,16 +104,21 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
 
 
     @Override
-    public void insertMeterValues(String chargeBoxIdentity, List<MeterValue> meterValues, Long transactionId) {             //used while stopping an ongoing transaction
+    public void updateMeterValues(String chargeBoxIdentity, List<MeterValue> meterValues, Long transactionId) {             //used while stopping an ongoing transaction
 
         // Step 1 : Fetching connector from transaction table
         Long  connectorPk = ctx.select(transaction.CONNECTOR_ID).from(transaction)
                 .where(transaction.ID.equal(transactionId)).fetchOne().value1();
 
-        TransactionRecord transactionRecord = (TransactionRecord) ctx.selectFrom(transaction).where(transaction.ID.eq(transactionId)).and(transaction.IS_ACTIVE.eq(true));
+        TransactionRecord transactionRecord =  ctx.selectFrom(transaction)
+                                                                     .where(transaction.ID.eq(transactionId))
+                                                                     .and(transaction.IS_ACTIVE.eq(true))
+                                                                     .orderBy(transaction.ID.desc())
+                                                                     .fetchOneInto(TransactionRecord.class);
 
-        boolean update = false;
-        BigDecimal soc = null, unit = null;
+
+        BigDecimal soc = null;
+        BigDecimal unit = null;
 
         for( MeterValue value : meterValues ) {
             soc = value.getSampledValue().stream().filter( x -> "SoC".equalsIgnoreCase(x.getMeasurand().value()) && x.getValue()!=null)
@@ -125,18 +129,17 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
         }
         if(transactionRecord.getStartSoc() == null && soc != null) {
             transactionRecord.setStartSoc(soc);
-            update = true;
+
         }
         if(soc != null && transactionRecord.getStartSoc().compareTo(soc) < 0) {
             transactionRecord.setEndSoc(soc);
-            update = true;
-        }
 
+        }
 
         if(unit != null) {
             log.info("Setting end meter value for Transaction ID {}", transactionId);
             transactionRecord.setMeterStopValue(unit);
-            update = true;
+
         }
     batchInsertMeterValues(ctx, meterValues, connectorPk, transactionId);
     }
@@ -147,31 +150,31 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
         for(MeterValue mv : list){
             List<SampledValue> sampledValues = mv.getSampledValue();
             for(SampledValue sampledValue : sampledValues) {
-                ConnectorMeterValueRecord record = ctx.newRecord(connectorMeterValue);
-                record.setConnectorId(connectorPk);
-                record.setTransactionId(transactionId);
-                record.setValue(sampledValue.getValue());
-                record.setSampledValueOn(mv.getTimestamp());
+                ConnectorMeterValueRecord connectorMeterValueRecord = ctx.newRecord(connectorMeterValue);
+                connectorMeterValueRecord.setConnectorId(connectorPk);
+                connectorMeterValueRecord.setTransactionId(transactionId);
+                connectorMeterValueRecord.setValue(sampledValue.getValue());
+                connectorMeterValueRecord.setSampledValueOn(mv.getTimestamp());
 
                 //Following are optional fields, so we put a conditional check if the values are set
                 if (sampledValue.isSetContext()) {
-                    record.setReadingContext(sampledValue.getContext().name());}
+                    connectorMeterValueRecord.setReadingContext(sampledValue.getContext().name());}
 
                 if (sampledValue.isSetFormat()) {
-                    record.setFormat(sampledValue.getFormat().name());}
+                    connectorMeterValueRecord.setFormat(sampledValue.getFormat().name());}
 
                 if (sampledValue.isSetMeasurand()) {
-                    record.setMeasurand(sampledValue.getMeasurand().name());}
+                    connectorMeterValueRecord.setMeasurand(sampledValue.getMeasurand().name());}
 
                 if (sampledValue.isSetLocation()) {
-                    record.setLocation(sampledValue.getLocation().name());}
+                    connectorMeterValueRecord.setLocation(sampledValue.getLocation().name());}
 
                 if (sampledValue.isSetUnit()) {
-                    record.setUnit(sampledValue.getUnit());}
+                    connectorMeterValueRecord.setUnit(sampledValue.getUnit());}
                 if (sampledValue.isSetPhase()) {
-                    record.setPhase(sampledValue.getPhase().value());}
+                    connectorMeterValueRecord.setPhase(sampledValue.getPhase().value());}
 
-                batch.add(record);
+                batch.add(connectorMeterValueRecord);
             }
         }
         ctx.batchInsert(batch).execute();

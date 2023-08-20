@@ -7,11 +7,11 @@ import com.blucharge.ocpp.enums.OcppProtocol;
 import org.joda.time.DateTime;
 
 public interface ChargerRepository {
-    Long addCharger(ChargerRequest chargerRequest);
+    Long addCharger(ChargerRequest request);
 
     boolean isRegisteredInternal(String chargerId);
 
-    void updateBootNotificationForCharger(BootNotificationRequest parameters, OcppProtocol protocol, String chargerIdentity);
+    void updateBootNotificationForCharger(BootNotificationRequest parameters,  String chargerIdentity);
     void updateChargerHeartbeat(String chargeBoxIdentity, DateTime ts);
 
     ChargerRecord getChargerFromChargerId(String chargerIdentity);
