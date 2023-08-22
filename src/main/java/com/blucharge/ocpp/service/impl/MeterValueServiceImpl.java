@@ -3,7 +3,6 @@ package com.blucharge.ocpp.service.impl;
 import com.blucharge.db.ocpp.tables.records.TransactionRecord;
 import com.blucharge.ocpp.dto.ws.MeterValueRequest;
 import com.blucharge.ocpp.dto.ws.MeterValueResponse;
-import com.blucharge.ocpp.repository.ConnectorRepository;
 import com.blucharge.ocpp.repository.MeterValueRepository;
 import com.blucharge.ocpp.repository.TransactionsRepository;
 import com.blucharge.ocpp.service.MeterValueService;
@@ -28,10 +27,6 @@ public class MeterValueServiceImpl implements MeterValueService {
             TransactionRecord rec = transactionsRepository.getActiveTransctionForTxnId(request.getTransactionId());
             if(Objects.nonNull(rec)){
                 meterValueRepository.insertMeterValues(chargerId, request.getMeterValue(), request.getConnectorId(), request.getTransactionId());
-            }
-            if(request.getTransactionId() != null){
-                // get Transaction values from DB : To Do
-               // transactionsRepository.getDetails(parameters.getConnectorId());
             }
         }
         return new MeterValueResponse();

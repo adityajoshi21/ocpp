@@ -57,19 +57,19 @@ public class TransactionServiceImpl implements TransactionService {
 
         OcppTagRecord ocppTagRecord = ocppTagRepository.getRecord(request.getIdTag());
 
-            TransactionRecord transactionRecord = new TransactionRecord();
-            transactionRecord.setIdTag(ocppTagRecord.getIdTag());
-            transactionRecord.setConnectorId(connectorRecord.getId());
-            transactionRecord.setConnectorName(connectorRecord.getName());
-            transactionRecord.setMeterStartValue(request.getMeterStartValue());
-            transactionRecord.setStartOn(request.getTimestamp());
-            transactionRecord.setStatus(TransactionStatus.STARTED.name());
-            Long txnId = transactionsRepository.addTransaction(transactionRecord);
+        TransactionRecord transactionRecord = new TransactionRecord();
+        transactionRecord.setIdTag(ocppTagRecord.getIdTag());
+        transactionRecord.setConnectorId(connectorRecord.getId());
+        transactionRecord.setConnectorName(connectorRecord.getName());
+        transactionRecord.setMeterStartValue(request.getMeterStartValue());
+        transactionRecord.setStartOn(request.getTimestamp());
+        transactionRecord.setStatus(TransactionStatus.STARTED.name());
+        Long txnId = transactionsRepository.addTransaction(transactionRecord);
 
-            log.info("Transaction accepted on Charger : {} with start value :{} and transaction Id : {}", chargerIdentity, request.getMeterStartValue(), txnId);
+        log.info("Transaction accepted on Charger : {} with start value :{} and transaction Id : {}", chargerIdentity, request.getMeterStartValue(), txnId);
 
-            //Update state for the connector on which txn started
-            connectorRepository.updateConnectorState(txnId, connectorRecord.getId(), ConnectorState.CHARGING);
+        //Update state for the connector on which txn started
+        connectorRepository.updateConnectorState(txnId, connectorRecord.getId(), ConnectorState.CHARGING);
 
         return  new StartTransactionResponse()
                 .withIdTagInfo(idTagInfo)
@@ -90,7 +90,7 @@ public class TransactionServiceImpl implements TransactionService {
 
             if (new BigDecimal(String.valueOf(tr.getMeterStartValue())).setScale(0, RoundingMode.HALF_EVEN).intValueExact() > parameters.getMeterStopValue().setScale(0, RoundingMode.HALF_EVEN).intValueExact())
             {
-                parameters.setMeterStopValue(BigDecimal.valueOf(new BigDecimal(String.valueOf(new BigDecimal(String.valueOf(tr.getMeterStartValue())))).setScale(0, RoundingMode.HALF_EVEN).intValueExact()));
+                parameters.setMeterStopValue(BigDecimal.valueOf(tr.getMeterStartValue().setScale(0, RoundingMode.HALF_EVEN).intValueExact()));
             }
             UpdateTransactionParams params =
                     UpdateTransactionParams.builder()
@@ -99,6 +99,7 @@ public class TransactionServiceImpl implements TransactionService {
                             .stopTimestamp(parameters.getTimestamp())
                             .stopMeterValue((parameters.getMeterStopValue()))
                             .stopReason(stopReason)
+                            .transactionData(parameters.getTransactionData())
                             .build();
 
             log.info("Stop transaction with parameters : {}", params);
@@ -112,7 +113,7 @@ public class TransactionServiceImpl implements TransactionService {
 
             //TODO move to repo and do not remove
             Long connectorPkQuery = transactionsRepository.findConnectorPkForTransactionId(parameters.getTransactionId());
-            connectorRepository.insertConnectorStatus (connectorPkQuery, params.getStopTimestamp(), params.getStatusUpdate());
+            connectorRepository.updateConnectorStatus(connectorPkQuery, params.getStopTimestamp(), params.getStatusUpdate());
         }
 
         // Updating meter value for ongoing transaction

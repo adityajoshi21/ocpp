@@ -4,7 +4,6 @@ public enum ValueFormat {
     RAW ("Raw"),
     SIGNED_DATA("Signed.Data");
 
-
     private final String value;
     public String value() {
         return  value;

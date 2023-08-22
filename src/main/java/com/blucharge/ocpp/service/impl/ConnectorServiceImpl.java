@@ -26,32 +26,31 @@ public class ConnectorServiceImpl implements ConnectorService {
     @Autowired
     private ChargerRepository chargerRepository;
 
-@Override
+    @Override
     public StatusNotificationResponse statusNotification(StatusNotificationRequest parameters, String chargerIdentity){
 
 
-    ChargerRecord charger =chargerRepository.getChargerFromChargerId(chargerIdentity);   //Exception handler needed if charger is null & charger doesnt exists in table
+        ChargerRecord charger =chargerRepository.getChargerFromChargerId(chargerIdentity);   //Exception handler needed if charger is null & charger doesnt exists in table
 
-            Integer noOfConnectors = charger.getNoOfConnectors();
+        Integer noOfConnectors = charger.getNoOfConnectors();
 
-                if(parameters.getConnectorId() == 0){       // if it is 0; update heartbeat in Charger Table and move on
-                    log.info("No of connectors for Charger Id {} , found to be 0 updating heartbeat", chargerIdentity);
-                    chargerRepository.updateChargerHeartbeat(chargerIdentity, DateTime.now());
-                    return new StatusNotificationResponse("Success");
-                }
-                ConnectorRecord connector = connectorRepository.getConnectorForChargerIdWithConnectorNumber(charger.getId(),parameters.getConnectorId());
+        if(parameters.getConnectorId() == 0){       // if it is 0; update heartbeat in Charger Table and move on
+            log.info("No of connectors for Charger Id {} , found to be 0 updating heartbeat", chargerIdentity);
+            chargerRepository.updateChargerHeartbeat(chargerIdentity, DateTime.now());
+            return new StatusNotificationResponse("Success");
+        }
+        ConnectorRecord connector = connectorRepository.getConnectorForChargerIdWithConnectorNumber(charger.getId(),parameters.getConnectorId());
 
-                 if(Objects.isNull(connector))   //Connector doesn't exist in Connector Table
-                 {
-                     ConnectorRecord connectorRecord = new ConnectorRecord();
-                     connectorRecord.setChargerId(charger.getId());
-                     connectorRecord.setConnectorNumber(parameters.getConnectorId());
-                     connectorRecord.setState(ConnectorState.IDLE.name()); // do we need this
-                     connectorRepository.addConnector(connectorRecord);
-                     chargerRepository.updateNumberOfConnectors(charger.getId(), noOfConnectors+1);
-                 }
-                    connectorRepository.updateConnectorStatus(parameters, charger.getId());
-
+        if(Objects.isNull(connector))   //Connector doesn't exist in Connector Table
+        {
+            ConnectorRecord connectorRecord = new ConnectorRecord();
+            connectorRecord.setChargerId(charger.getId());
+            connectorRecord.setConnectorNumber(parameters.getConnectorId());
+            connectorRecord.setState(ConnectorState.IDLE.name()); // do we need this
+            connectorRepository.addConnector(connectorRecord);
+            chargerRepository.updateNumberOfConnectors(charger.getId(), noOfConnectors+1);
+        }
+        connectorRepository.updateConnectorStatus(parameters, charger.getId());
 
         return new StatusNotificationResponse("Success");
     }

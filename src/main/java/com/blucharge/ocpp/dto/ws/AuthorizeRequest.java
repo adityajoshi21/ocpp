@@ -7,5 +7,4 @@ import javax.validation.constraints.NotNull;
 public class AuthorizeRequest {
     @NotNull
     private String idTag;
-
 }

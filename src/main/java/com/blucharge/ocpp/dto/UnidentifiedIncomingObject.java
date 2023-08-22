@@ -4,8 +4,7 @@ import lombok.Getter;
 import lombok.ToString;
 import org.joda.time.DateTime;
 
-//Some alien UFO stuff going on here ..
-
+//Some alien UFO stuff going on here
 
 @ToString
 @Getter

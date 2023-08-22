@@ -6,6 +6,7 @@ import lombok.Data;
 import org.joda.time.DateTime;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Builder
@@ -15,6 +16,7 @@ public class UpdateTransactionParams {
     private final DateTime stopTimestamp;
     private final BigDecimal stopMeterValue;
     private final String stopReason;
+    private List<MeterValue> transactionData;
 
     private  final TransactionStatusUpdate statusUpdate = TransactionStatusUpdate.AfterStop;
 }

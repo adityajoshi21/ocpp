@@ -12,5 +12,4 @@ public class AuthorizeResponse {
         setIdTagInfo(value);
         return this;
     }
-
 }

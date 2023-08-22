@@ -65,5 +65,3 @@ public class OcppTagServiceImpl implements OcppTagService {
         return new AuthorizeResponse().withIdTagInfo(idTagInfo);
     }
 }
-
-

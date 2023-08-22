@@ -16,5 +16,5 @@ public class InsertTransactionParams {
     private  BigDecimal startMeterValue;
     private  final TransactionStatusUpdate statusUpdate = TransactionStatusUpdate.AfterStart;
 
-    //private final Long reservationId;
+    //private final Long reservationId; ToDo in v2
 }

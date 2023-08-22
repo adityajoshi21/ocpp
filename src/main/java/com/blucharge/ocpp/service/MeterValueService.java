@@ -5,5 +5,4 @@ import com.blucharge.ocpp.dto.ws.MeterValueResponse;
 
 public interface MeterValueService {
     MeterValueResponse meterValue(MeterValueRequest request, String chargerId);
-
 }

@@ -40,16 +40,18 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
     public void insertMeterValues(String chargerIdentity, List<MeterValue> meterValues, Long connectorId, Long transactionId) {
 
         log.info("Saving meter values for Transaction ID : {}", transactionId);
+        Boolean update = false;
         if(transactionId == null){
             log.info("Transaction ID was returned NULL for ChargerId : {}", chargerIdentity);
-            return ;
+            return;
         }
         if(transactionId == 0){
             log.info("Meter Value are being taken from the chargeBox, Txn Id found 0 for ChargerId; {}", chargerIdentity);
             return;
         }
 
-        TransactionRecord transactionRecord = ctx.selectFrom(TRANSACTION).where(TRANSACTION.IS_ACTIVE).and(TRANSACTION.ID.eq(transactionId)).fetchAnyInto(TransactionRecord.class);
+        TransactionRecord transactionRecord= ctx.selectFrom(TRANSACTION).where(TRANSACTION.ID.eq(transactionId)).and(TRANSACTION.IS_ACTIVE.eq(true)).orderBy(TRANSACTION.ID.desc()).fetchAnyInto(TransactionRecord.class);
+
         if(transactionRecord ==null)
             return;
 
@@ -58,10 +60,8 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
         Long connectorPk = connectorRepository.getConnectorPkForChargeBoxAndConnector(charger.getId(), connectorNo);
 
         if(transactionId != null){
-            TransactionRecord rec= ctx.selectFrom(TRANSACTION).where(TRANSACTION.ID.eq(transactionId)).and(TRANSACTION.IS_ACTIVE.eq(true)).orderBy(TRANSACTION.ID.desc()).fetchAnyInto(TransactionRecord.class);
 
-
-            BigDecimal unit =null, startSoc=null, endSoc=null, meterStopValue = null;
+            BigDecimal unit =null, startSoc=null, endSoc=null;
 
             log.info(" Transction Id : {} Meter Value list {}", transactionId,meterValues);
             for(MeterValue value : meterValues){
@@ -69,37 +69,37 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
                 endSoc = value.getSampledValue().stream().filter( x -> "SoC".equalsIgnoreCase(x.getMeasurand().value()) && x.getValue()!= null && x.getContext()!=null && ! "Transaction.Begin".equalsIgnoreCase(x.getContext().value())).map(p -> new BigDecimal(p.getValue())).max(BigDecimal::compareTo).orElse(endSoc);
                 unit = value.getSampledValue().stream().filter( x -> "Energy.Active.Import.Register".equalsIgnoreCase(x.getMeasurand().value()) && x.getValue()!=null).map(p -> new BigDecimal(p.getValue())).max(BigDecimal::compareTo).orElse(unit);
             }
-            if (rec!=null && rec.getStartSoc() == null && startSoc != null) {  //For Start Soc
-                log.info("Setting start Soc for transaction ID : {} transaction Details Id : {}", transactionId, rec.getId());
+            if (transactionRecord!=null && transactionRecord.getStartSoc() == null && startSoc != null) {  //For Setting Start SoC
+                log.info("Setting start Soc for transaction ID : {} transaction Details Id : {}", transactionId, transactionRecord.getId());
 
-                rec.setStartSoc(startSoc);
                 if(startSoc !=null){
-                    rec.setStartSoc(startSoc);
+                    transactionRecord.setStartSoc(startSoc);
                 }
-
+                update = true;
             }
 
-            if (rec!=null && endSoc != null && rec.getStartSoc().compareTo(endSoc) < 0) {   //For End Soc
+            if (transactionRecord!=null && endSoc != null && transactionRecord.getStartSoc().compareTo(endSoc) < 0) {   //For cases when End SoC > Start SoC
                 log.info("Setting end SoC for transaction ID :  {}", transactionId);
-                rec.setEndSoc(endSoc);
-
+                transactionRecord.setEndSoc(endSoc);
+                update = true;
             }
-            if (rec!=null && unit != null) {                                     //For units consumed
+            if (transactionRecord!=null && unit != null) {                                     //For units consumed
                 log.info("Setting end unit for transaction ID : {} ", transactionId);
-                if (rec.getMeterStartValue() == null || rec.getMeterStartValue().doubleValue() < 0) {
-                    rec.setMeterStartValue(unit);
+                if (transactionRecord.getMeterStartValue() == null || transactionRecord.getMeterStartValue().doubleValue() < 0) {      //For falsy meter start values
+                    transactionRecord.setMeterStartValue(unit);
                     ctx.update(TRANSACTION)
-                            .set(TRANSACTION.METER_START_VALUE, (unit))
-                            .where(TRANSACTION.ID.equal(transactionId))
+                            .set(TRANSACTION.METER_START_VALUE, unit)
+                            .where(TRANSACTION.ID.equal(transactionRecord.getId()))
                             .execute();
-
                 }
-                rec.setMeterStopValue(unit);
-
+                transactionRecord.setMeterStopValue(unit);
+                update = true;
             }
-
+            if (update) {
+                log.info("Update Details for transaction ID : {} ", transactionRecord.getId());
+            }
+            batchInsertMeterValues(ctx, meterValues, connectorPk,transactionId);
         }
-        batchInsertMeterValues(ctx, meterValues, connectorPk,transactionId);
     }
 
 
@@ -107,14 +107,15 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
     public void updateMeterValues(String chargeBoxIdentity, List<MeterValue> meterValues, Long transactionId) {             //used while stopping an ongoing transaction
 
         // Step 1 : Fetching connector from transaction table
-        Long  connectorPk = ctx.select(transaction.CONNECTOR_ID).from(transaction)
+        Long  connectorId = ctx.select(transaction.CONNECTOR_ID).from(transaction)
                 .where(transaction.ID.equal(transactionId)).fetchOne().value1();
 
         TransactionRecord transactionRecord =  ctx.selectFrom(transaction)
-                                                                     .where(transaction.ID.eq(transactionId))
-                                                                     .and(transaction.IS_ACTIVE.eq(true))
-                                                                     .orderBy(transaction.ID.desc())
-                                                                     .fetchOneInto(TransactionRecord.class);
+                .where(transaction.ID.eq(transactionId))
+                .and(transaction.IS_ACTIVE.eq(true))
+                .and(transaction.CONNECTOR_ID.eq(connectorId))
+                .orderBy(transaction.ID.desc())
+                .fetchOneInto(TransactionRecord.class);
 
 
         BigDecimal soc = null;
@@ -129,11 +130,9 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
         }
         if(transactionRecord.getStartSoc() == null && soc != null) {
             transactionRecord.setStartSoc(soc);
-
         }
         if(soc != null && transactionRecord.getStartSoc().compareTo(soc) < 0) {
             transactionRecord.setEndSoc(soc);
-
         }
 
         if(unit != null) {
@@ -141,7 +140,7 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
             transactionRecord.setMeterStopValue(unit);
 
         }
-    batchInsertMeterValues(ctx, meterValues, connectorPk, transactionId);
+        batchInsertMeterValues(ctx, meterValues, connectorId, transactionId);
     }
 
     @Override

@@ -14,20 +14,21 @@ public interface ConnectorRepository {
 
     Long getConnectorPkForChargeBoxAndConnector(Long chargerId,Integer connectorId);
     void updateConnectorStatus(StatusNotificationRequest p, Long chargerId);
-    Long getConnectorPkFromConnector(Long chargerId, Long connectorId);
-    String getConnectorStateByConnectorPk(Long connectorId);
-    void updateConnectorStateToIdle(Long connectorPk);
+
+Integer getConnectorNoFromConnectorId(Long ConnectorId);
+
     void updateConnectorState(Long transactionId, Long connectorPk, ConnectorState status);
-
     ConnectorRecord getConnectorForChargerIdWithConnectorNumber(Long chargerId, Integer connectorNo);
-    List<ConnectorRecord> getAllConnectorsForChargerId(Long chargerId);
     Long addConnector(ConnectorRecord request);
-    //void insertIgnoreConnector(Long chargerId, Long connectorId);
 
-    void insertConnector(ConnectorRequest connectorRequest);
-    Integer getConnectorNoFromConnectorId(Long ConnectorId);
-    void insertConnectorStatus(Long connectorPk, DateTime timestamp, TransactionStatusUpdate statusUpdate);
     ConnectorRecord getConnectorFromConnectorNameAndChargerId(String connectorName, Long chargerId);
+    void updateConnectorStatus(Long connectorPk, DateTime timestamp, TransactionStatusUpdate statusUpdate);
 
+
+//    String getConnectorStateByConnectorPk(Long connectorId);
+//    Long getConnectorPkFromConnector(Long chargerId, Long connectorId);
+//void insertIgnoreConnector(Long chargerId, Long connectorId);
+//    List<ConnectorRecord> getAllConnectorsForChargerId(Long chargerId);
+//    void insertConnector(ConnectorRequest connectorRequest);
 
 }

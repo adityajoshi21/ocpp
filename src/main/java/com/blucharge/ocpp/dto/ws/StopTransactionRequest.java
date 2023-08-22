@@ -27,10 +27,10 @@ public class StopTransactionRequest {
 
 
         public boolean isSetIdTag() {
-            return (this.idTag!=null);
+                return (this.idTag!=null);
         }
 
         public boolean isSetTransactionData() {
-            return ((this.transactionData!=null) && !(this.transactionData.isEmpty()));
+                return ((this.transactionData!=null) && !(this.transactionData.isEmpty()));
         }
 }

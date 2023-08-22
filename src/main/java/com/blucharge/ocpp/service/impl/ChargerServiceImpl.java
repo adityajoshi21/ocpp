@@ -1,8 +1,6 @@
 package com.blucharge.ocpp.service.impl;
 
-import com.blucharge.db.ocpp.tables.records.ChargerRecord;
 import com.blucharge.ocpp.constants.ApplicationConstants;
-import com.blucharge.ocpp.constants.OcppConstants;
 import com.blucharge.ocpp.dto.ChargerRequest;
 import com.blucharge.ocpp.dto.ws.BootNotificationRequest;
 import com.blucharge.ocpp.dto.ws.BootNotificationResponse;
@@ -93,6 +91,5 @@ public class ChargerServiceImpl implements ChargerService {
             l.unlock();
         }
     }
-
 }
 
