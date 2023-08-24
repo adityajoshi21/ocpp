@@ -16,11 +16,7 @@ public enum ConnectorStatus {
     private final String value;
 
     ConnectorStatus(String v) {
-        value = v;
-    }
-
-    public String getValue() {
-        return value;
+        this.value = v;
     }
 
 

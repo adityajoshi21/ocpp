@@ -10,8 +10,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RemoteStartTransactionRequest {
-    @NotNull
+    @NotNull (message = "IdTag cant be left empty")
     private String idTag;
-    private String connectorName;
-    private String userId;
+    private Integer connectorId;
 }

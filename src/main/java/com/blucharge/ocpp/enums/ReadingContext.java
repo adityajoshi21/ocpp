@@ -16,12 +16,9 @@ public enum ReadingContext {
     }
 
     ReadingContext(String v) {
-        value = v;
+        this.value = v;
     }
 
-    public String getValue() {
-        return value;
-    }
 }
 
 

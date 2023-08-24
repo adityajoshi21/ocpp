@@ -2,6 +2,9 @@ package com.blucharge.ocpp.service.impl;
 
 import com.blucharge.ocpp.constants.ApplicationConstants;
 import com.blucharge.ocpp.dto.ChargerRequest;
+import com.blucharge.ocpp.dto.ConfigurationKey;
+import com.blucharge.ocpp.dto.GetConfigRequest;
+import com.blucharge.ocpp.dto.GetConfigResponse;
 import com.blucharge.ocpp.dto.ws.BootNotificationRequest;
 import com.blucharge.ocpp.dto.ws.BootNotificationResponse;
 import com.blucharge.ocpp.dto.ws.HeartbeatRequest;
@@ -17,7 +20,11 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 
 import static com.blucharge.ocpp.constants.ApplicationConstants.HEARTBEAT_INTERVAL;
@@ -90,6 +97,37 @@ public class ChargerServiceImpl implements ChargerService {
         } finally {
             l.unlock();
         }
+    }
+
+    @Override
+    public GetConfigResponse getConfiguration(GetConfigRequest getConfigRequest, String chargerIdentity) {
+
+        Boolean doesChargerExist = isRegistered(chargerIdentity);
+        if(!doesChargerExist){
+            log.error("Charger {} doesn't exist for which we are seeking configurations", chargerIdentity);
+        }
+
+        List<String> keys = getConfigRequest.getKey();
+        List<ConfigurationKey> recognizedKeys = new ArrayList<>();
+        List<String> unknownKeys = new ArrayList<>();
+            if(!Objects.isNull(keys) || !keys.isEmpty()) {        // If list in request is null or missing return all configs
+                for(String key : keys){
+                    if(true) //check if key is recognised for CP or not
+                    recognizedKeys.add(createConfigurationSetting(key));
+                    else
+                        unknownKeys.add(key);
+
+                }
+                return new GetConfigResponse(recognizedKeys, unknownKeys);
+
+            }
+            return new GetConfigResponse();
+    }
+
+    private ConfigurationKey createConfigurationSetting(String key) {
+        String value = "Test Value";
+        Boolean readOnly = true;
+        return  new ConfigurationKey(key,value,readOnly);
     }
 }
 

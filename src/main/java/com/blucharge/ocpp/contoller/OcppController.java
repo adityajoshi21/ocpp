@@ -1,18 +1,11 @@
 package com.blucharge.ocpp.contoller;
 
-import com.blucharge.ocpp.dto.RemoteStartTransactionRequest;
-import com.blucharge.ocpp.dto.RemoteStartTransactionResponse;
-import com.blucharge.ocpp.dto.RemoteStopTransactionRequest;
-import com.blucharge.ocpp.dto.RemoteStopTransactionResponse;
+import com.blucharge.ocpp.dto.*;
 import com.blucharge.ocpp.dto.ws.*;
-import com.blucharge.ocpp.enums.OcppProtocol;
 import com.blucharge.ocpp.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static com.blucharge.ocpp.constants.ApplicationConstants.TEST_CHARGER;
 
@@ -70,17 +63,19 @@ public class OcppController {
 
     @PostMapping(value = "/remote-start-transaction")
     public RemoteStartTransactionResponse handleRemoteStart(@RequestBody RemoteStartTransactionRequest request ) {
-        return transactionService.remoteStart(request, TEST_CHARGER);
+        return transactionService.remoteStartTransaction(request, TEST_CHARGER);
     }
 
     @PostMapping(value = "/remote-stop-transaction")
     public RemoteStopTransactionResponse handleRemoteStop(@RequestBody RemoteStopTransactionRequest request ) {
-        return transactionService.remoteStop(request, TEST_CHARGER);
+        return transactionService.remoteStopTransaction(request, TEST_CHARGER);
+    }
+
+    @GetMapping(value = "/get-config")
+    public GetConfigResponse handleGetConfig(@RequestBody GetConfigRequest request) {
+        return chargerService.getConfiguration(request, TEST_CHARGER);
     }
 
 }
-
-
-
 
 

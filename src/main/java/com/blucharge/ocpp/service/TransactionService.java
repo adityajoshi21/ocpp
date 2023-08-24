@@ -12,6 +12,6 @@ import com.blucharge.ocpp.dto.ws.StopTransactionResponse;
 public interface TransactionService {
     StartTransactionResponse startTransaction(StartTransactionRequest request, String chargerIdentity);
     StopTransactionResponse stopTransaction(StopTransactionRequest request, String chargerIdentity);
-    RemoteStartTransactionResponse remoteStart(RemoteStartTransactionRequest request, String chargerIdentity);
-    RemoteStopTransactionResponse remoteStop(RemoteStopTransactionRequest request, String chargerIdentity);
+    RemoteStartTransactionResponse remoteStartTransaction(RemoteStartTransactionRequest request, String chargerIdentity);
+    RemoteStopTransactionResponse remoteStopTransaction(RemoteStopTransactionRequest request, String chargerIdentity);
 }

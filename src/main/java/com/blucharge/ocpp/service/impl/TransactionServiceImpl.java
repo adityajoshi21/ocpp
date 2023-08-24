@@ -11,6 +11,7 @@ import com.blucharge.ocpp.dto.RemoteStopTransactionResponse;
 import com.blucharge.ocpp.dto.ws.*;
 import com.blucharge.ocpp.enums.AuthorizationStatus;
 import com.blucharge.ocpp.enums.ConnectorState;
+import com.blucharge.ocpp.enums.RemoteStartStopStatus;
 import com.blucharge.ocpp.enums.TransactionStatus;
 import com.blucharge.ocpp.repository.*;
 import com.blucharge.ocpp.service.OcppTagService;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Objects;
 
 
 @Service
@@ -131,12 +133,40 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public RemoteStartTransactionResponse remoteStart(RemoteStartTransactionRequest request, String chargerIdentity) {
-        return null;
+    public RemoteStartTransactionResponse remoteStartTransaction(RemoteStartTransactionRequest request, String chargerIdentity) {
+        log.info("Remote Start Transaction with params : {}", request);
+
+        ChargerRecord charger = chargerRepository.getChargerFromChargerId(chargerIdentity);
+        ConnectorRecord connectorRecord = connectorRepository.getConnectorForChargerIdWithConnectorNumber(charger.getId(), request.getConnectorId());
+        Long connectorId = connectorRecord.getId();
+        TransactionRecord tr = transactionsRepository.getActiveTransactionOnConnectorId(connectorId);
+        if(!Objects.isNull(tr))
+            log.info("There is an ongoing transaction in this connector id {}", connectorId);
+        IdTagInfo info = ocppTagService.getIdTagInfo(request.getIdTag());
+        RemoteStartTransactionResponse response = new RemoteStartTransactionResponse();
+        if(AuthorizationStatus.ACCEPTED.equals(info)){
+             response.setStatus(RemoteStartStopStatus.ACCEPTED);
+             return  response;
+        }
+        else
+        response.setStatus(RemoteStartStopStatus.REJECTED);
+        return response;
+
     }
 
     @Override
-    public RemoteStopTransactionResponse remoteStop(RemoteStopTransactionRequest request, String chargerIdentity) {
-        return null;
+    public RemoteStopTransactionResponse remoteStopTransaction(RemoteStopTransactionRequest request, String chargerIdentity) {
+        log.info("Remote Stop Transaction with params : {}", request);
+
+        TransactionRecord tr  = transactionsRepository.getActiveTransctionForTxnId(request.getTransactionId());
+        if(!Objects.isNull(tr)){
+            transactionsRepository.stopChargingScreen(tr);
+            RemoteStopTransactionResponse response = new RemoteStopTransactionResponse();
+            response.setStatus(RemoteStartStopStatus.ACCEPTED);
+            return response;
+        }
+        RemoteStopTransactionResponse invalidResponse = new RemoteStopTransactionResponse();
+        invalidResponse.setStatus(RemoteStartStopStatus.REJECTED);
+        return  invalidResponse;
     }
 }

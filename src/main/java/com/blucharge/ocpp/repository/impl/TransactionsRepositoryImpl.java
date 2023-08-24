@@ -73,6 +73,24 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
                 .fetchOneInto(Long.class);
     }
 
+    @Override
+    public TransactionRecord getActiveTransactionOnConnectorId(Long connectorId) {
+        return ctx.selectFrom(transaction)
+                .where(transaction.CONNECTOR_ID.eq(connectorId))
+                .and(transaction.STATUS.eq(TransactionStatus.STARTED.name()))
+                .and(transaction.IS_ACTIVE.eq(true)).fetchOneInto(TransactionRecord.class);
+    }
+    @Override
+    public void stopChargingScreen(TransactionRecord transactionRecord){
+        ctx.update(transaction)
+                .set(transaction.STOP_REASON,"STOPPED")
+                .set(transaction.STOP_ON,DateTime.now())
+                .set(transaction.UPDATED_ON,DateTime.now())
+                .where(transaction.IS_ACTIVE.eq(true))
+                .and(transaction.ID.eq(transactionRecord.getId()))
+                .execute();
+    }
+}
 
 
 //    @Override
