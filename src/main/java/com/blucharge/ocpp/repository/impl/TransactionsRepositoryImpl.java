@@ -13,8 +13,7 @@ import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-
-
+import java.util.Objects;
 
 
 @Repository
@@ -90,6 +89,17 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
                 .and(transaction.ID.eq(transactionRecord.getId()))
                 .execute();
     }
+    @Override
+    public Boolean isTransactionRunningOnConenctorId(Long connectorPk) {
+        Integer count = ctx.selectFrom(transaction)
+                .where(transaction.CONNECTOR_ID.eq(connectorPk))
+                .and(transaction.STATUS.eq(TransactionStatus.STARTED.name())).and(transaction.IS_ACTIVE.eq(true))
+                .execute();
+        if(Objects.isNull(count))
+            return false;
+        return count == 1 ? true:false;
+    }
+
 }
 
 
@@ -106,4 +116,4 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
 //                .fetchAnyInto(TransactionRecord.class);
 //    }
 
-}
+
