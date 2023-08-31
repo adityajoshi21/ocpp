@@ -91,17 +91,15 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
     }
     @Override
     public Boolean isTransactionRunningOnConenctorId(Long connectorPk) {
-        Integer count = ctx.selectFrom(transaction)
+        int count = ctx.selectFrom(transaction)
                 .where(transaction.CONNECTOR_ID.eq(connectorPk))
                 .and(transaction.STATUS.eq(TransactionStatus.STARTED.name())).and(transaction.IS_ACTIVE.eq(true))
                 .execute();
-        if(Objects.isNull(count))
+        if(Objects.isNull(count) || count > 1)
             return false;
-        return count == 1 ? true:false;
+        return (count == 1);
     }
-
 }
-
 
 //    @Override
 //    public TransactionRecord getTransactionForParams(Long chargerId, String idTag, Integer connectorId, BigDecimal meterStartVal) {

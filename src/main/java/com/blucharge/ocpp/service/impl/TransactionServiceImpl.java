@@ -4,10 +4,10 @@ import com.blucharge.db.ocpp.tables.records.ChargerRecord;
 import com.blucharge.db.ocpp.tables.records.ConnectorRecord;
 import com.blucharge.db.ocpp.tables.records.OcppTagRecord;
 import com.blucharge.db.ocpp.tables.records.TransactionRecord;
-import com.blucharge.ocpp.dto.RemoteStartTransactionRequest;
-import com.blucharge.ocpp.dto.RemoteStartTransactionResponse;
-import com.blucharge.ocpp.dto.RemoteStopTransactionRequest;
-import com.blucharge.ocpp.dto.RemoteStopTransactionResponse;
+import com.blucharge.ocpp.dto.api.RemoteStartTransactionRequest;
+import com.blucharge.ocpp.dto.api.RemoteStartTransactionResponse;
+import com.blucharge.ocpp.dto.api.RemoteStopTransactionRequest;
+import com.blucharge.ocpp.dto.api.RemoteStopTransactionResponse;
 import com.blucharge.ocpp.dto.ws.*;
 import com.blucharge.ocpp.enums.AuthorizationStatus;
 import com.blucharge.ocpp.enums.ConnectorState;
@@ -113,7 +113,7 @@ public class TransactionServiceImpl implements TransactionService {
             //Set Connector State back to IDLE again
             connectorRepository.updateConnectorState(transactionId, connectorRecord.getId(), ConnectorState.IDLE);
 
-            //TODO move to repo and do not remove
+
             Long connectorPkQuery = transactionsRepository.findConnectorPkForTransactionId(parameters.getTransactionId());
             connectorRepository.updateConnectorStatus(connectorPkQuery, params.getStopTimestamp(), params.getStatusUpdate());
         }
@@ -144,14 +144,12 @@ public class TransactionServiceImpl implements TransactionService {
             log.info("There is an ongoing transaction in this connector id {}", connectorId);
         IdTagInfo info = ocppTagService.getIdTagInfo(request.getIdTag());
         RemoteStartTransactionResponse response = new RemoteStartTransactionResponse();
-        if(AuthorizationStatus.ACCEPTED.equals(info)){
+        if(AuthorizationStatus.ACCEPTED.name().equals(info.getStatus().toString())){
              response.setStatus(RemoteStartStopStatus.ACCEPTED);
              return  response;
         }
-        else
         response.setStatus(RemoteStartStopStatus.REJECTED);
         return response;
-
     }
 
     @Override

@@ -1,17 +1,13 @@
 package com.blucharge.ocpp.service.impl;
 
 import com.blucharge.ocpp.constants.ApplicationConstants;
-import com.blucharge.ocpp.dto.ChargerRequest;
-import com.blucharge.ocpp.dto.ConfigurationKey;
-import com.blucharge.ocpp.dto.GetConfigRequest;
-import com.blucharge.ocpp.dto.GetConfigResponse;
+import com.blucharge.ocpp.dto.*;
+import com.blucharge.ocpp.dto.api.*;
 import com.blucharge.ocpp.dto.ws.BootNotificationRequest;
 import com.blucharge.ocpp.dto.ws.BootNotificationResponse;
 import com.blucharge.ocpp.dto.ws.HeartbeatRequest;
 import com.blucharge.ocpp.dto.ws.HeartbeatResponse;
-import com.blucharge.ocpp.enums.OcppProtocol;
-import com.blucharge.ocpp.enums.OcppVersion;
-import com.blucharge.ocpp.enums.RegistrationStatus;
+import com.blucharge.ocpp.enums.*;
 import com.blucharge.ocpp.repository.ChargerRepository;
 import com.blucharge.ocpp.service.ChargerService;
 import com.google.common.util.concurrent.Striped;
@@ -21,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -103,20 +98,19 @@ public class ChargerServiceImpl implements ChargerService {
     public GetConfigResponse getConfiguration(GetConfigRequest getConfigRequest, String chargerIdentity) {
 
         Boolean doesChargerExist = isRegistered(chargerIdentity);
-        if(!doesChargerExist){
+        if(Boolean.FALSE.equals(doesChargerExist)){
             log.error("Charger {} doesn't exist for which we are seeking configurations", chargerIdentity);
         }
 
         List<String> keys = getConfigRequest.getKey();
         List<ConfigurationKey> recognizedKeys = new ArrayList<>();
         List<String> unknownKeys = new ArrayList<>();
-            if(!Objects.isNull(keys) || !keys.isEmpty()) {        // If list in request is null or missing return all configs
+            if(!Objects.isNull(keys)  || !keys.isEmpty()) {       //If list in request is null or empty return all configs
                 for(String key : keys){
-                    if(true) //check if key is recognised for CP or not
+                    if(true) //check if key is recognised for CP or not, todo : how to do this for a charger?
                     recognizedKeys.add(createConfigurationSetting(key));
                     else
                         unknownKeys.add(key);
-
                 }
                 return new GetConfigResponse(recognizedKeys, unknownKeys);
 
@@ -124,10 +118,33 @@ public class ChargerServiceImpl implements ChargerService {
             return new GetConfigResponse();
     }
 
+    @Override
+    public ChangeConfigResponse changeConfiguration(ChangeConfigRequest changeConfigRequest, String chargerIdentity) {
+        return null;
+    }
+
     private ConfigurationKey createConfigurationSetting(String key) {
         String value = "Test Value";
         Boolean readOnly = true;
         return  new ConfigurationKey(key,value,readOnly);
+    }
+
+    @Override
+    public TriggerMessageResponse triggerMessage(TriggerMessageRequest triggerMessageRequest, String chargerIdentity) {
+        TriggerMessageResponse triggerMessageResponse = new TriggerMessageResponse();
+        Boolean flag = MessageTrigger.checkForValidEnum(triggerMessageRequest.getRequestedMessage());
+        triggerMessageResponse.setStatus(Boolean.TRUE.equals(flag)?TriggerMessageStatus.ACCEPTED:TriggerMessageStatus.REJECTED);
+        if(Boolean.TRUE.equals(flag)){
+            MessageTrigger requestedMessage = triggerMessageRequest.getRequestedMessage();
+            Boolean isConnectorIdRequired = requestedMessage.getIsRequired();
+            if(Boolean.FALSE.equals(isConnectorIdRequired)) {
+                return triggerMessageResponse;
+            }
+            else if(isConnectorIdRequired && !Objects.isNull(triggerMessageRequest.getConnectorId())){
+                return  triggerMessageResponse;
+            }
+        }
+        return triggerMessageResponse;
     }
 }
 

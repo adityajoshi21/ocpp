@@ -2,11 +2,15 @@ package com.blucharge.ocpp.service.impl;
 
 import com.blucharge.db.ocpp.tables.records.ChargerRecord;
 import com.blucharge.db.ocpp.tables.records.ConnectorRecord;
+import com.blucharge.ocpp.dto.api.UnlockConnectorRequest;
+import com.blucharge.ocpp.dto.api.UnlockConnectorResponse;
 import com.blucharge.ocpp.dto.ws.StatusNotificationRequest;
 import com.blucharge.ocpp.dto.ws.StatusNotificationResponse;
 import com.blucharge.ocpp.enums.ConnectorState;
+import com.blucharge.ocpp.enums.UnlockStatus;
 import com.blucharge.ocpp.repository.ChargerRepository;
 import com.blucharge.ocpp.repository.ConnectorRepository;
+import com.blucharge.ocpp.repository.TransactionsRepository;
 import com.blucharge.ocpp.service.ConnectorService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -25,6 +29,8 @@ public class ConnectorServiceImpl implements ConnectorService {
     private ConnectorRepository connectorRepository;
     @Autowired
     private ChargerRepository chargerRepository;
+    @Autowired
+    private TransactionsRepository transactionsRepository;
 
     @Override
     public StatusNotificationResponse statusNotification(StatusNotificationRequest parameters, String chargerIdentity){
@@ -55,4 +61,30 @@ public class ConnectorServiceImpl implements ConnectorService {
         return new StatusNotificationResponse("Success");
     }
 
+
+    @Override
+    public UnlockConnectorResponse unlockConnector(UnlockConnectorRequest request, String chargerIdentity) {
+        //check if connector Exists?
+        ChargerRecord charger = chargerRepository.getChargerFromChargerId(chargerIdentity);
+        Long id = charger.getId();
+        ConnectorRecord connector = connectorRepository.getConnectorForChargerIdWithConnectorNumber(id, request.getConnectorId());
+        Integer incomingConnectorId = connector.getConnectorNumber();
+        if(Objects.isNull(incomingConnectorId)){
+            log.error("ConnectorId not found for requested connector on which unlock connector command is sent");
+        }
+        else {
+            //check if transaction is running on that connector?
+           Boolean flag = transactionsRepository.isTransactionRunningOnConenctorId(connector.getId());
+            UnlockConnectorResponse unlockConnectorResponse = new UnlockConnectorResponse();
+            if(flag){
+               log.error("Can't unlock connector as it has an active transaction");
+                unlockConnectorResponse.setStatus(UnlockStatus.UNLOCK_FAILED);
+               return unlockConnectorResponse;
+           }
+           else
+               unlockConnectorResponse.setStatus(UnlockStatus.UNLOCKED);
+            return unlockConnectorResponse;
+        }
+        return null;
+    }
 }

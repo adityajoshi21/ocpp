@@ -1,4 +1,4 @@
-package com.blucharge.ocpp.dto;
+package com.blucharge.ocpp.dto.api;
 
 import com.blucharge.ocpp.enums.RemoteStartStopStatus;
 import lombok.AllArgsConstructor;

@@ -21,26 +21,26 @@ public class OcppTagServiceImpl implements OcppTagService {
 
     @Override
     public IdTagInfo getIdTagInfo(String idTag) {
-        OcppTagRecord record = ocppTagRepository.getRecord(idTag);
+        OcppTagRecord ocppTagRecord = ocppTagRepository.getRecord(idTag);
         IdTagInfo idTagInfo = new IdTagInfo();
 
 
-        if (record == null) {
+        if (ocppTagRecord == null) {
             log.error("The user with idTag '{}' is INVALID (not present in DB).", idTag);
             idTagInfo.setStatus(AuthorizationStatus.INVALID);
             // unknownChargePointService.processNewUnidentified(idTag);
         } else {
 
             //When Authorisation status for user is blocked
-            if(record.getBlocked()) {
+            if(Boolean.TRUE.equals(ocppTagRecord.getBlocked())) {
                 log.error("The user with the idTag {} is blocked!", idTag);
                 idTagInfo.setStatus(AuthorizationStatus.BLOCKED);
             }
-            DateTime expiryDate = record.getExpiryOn();
+            DateTime expiryDate = ocppTagRecord.getExpiryOn();
             boolean isExpiryDateSet = expiryDate != null;
 
             //When Authorisation status for the user has expired
-            if (isExpiryDateSet && DateTime.now().isAfter(record.getExpiryOn())) {
+            if (isExpiryDateSet && DateTime.now().isAfter(ocppTagRecord.getExpiryOn())) {
                 log.error("The user with idTag '{}' is EXPIRED.", idTag);
                 idTagInfo.setStatus(AuthorizationStatus.EXPIRED);
             }
@@ -50,7 +50,7 @@ public class OcppTagServiceImpl implements OcppTagService {
                 //If Expiry Timestamp is set for user in the db, use it. Else update it to 1 hour from currentTime
                 DateTime expiry = isExpiryDateSet? expiryDate : DateTime.now().plusHours(1); //Move this later to application CONSTANTS
                 idTagInfo.setExpiryDate(expiry);
-                idTagInfo.setParentIdTag(record.getParentTag());
+                idTagInfo.setParentIdTag(ocppTagRecord.getParentTag());
             }
         }
         return idTagInfo;

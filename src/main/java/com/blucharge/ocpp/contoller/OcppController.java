@@ -1,6 +1,10 @@
 package com.blucharge.ocpp.contoller;
 
-import com.blucharge.ocpp.dto.*;
+import com.blucharge.ocpp.dto.api.RemoteStartTransactionRequest;
+import com.blucharge.ocpp.dto.api.RemoteStartTransactionResponse;
+import com.blucharge.ocpp.dto.api.RemoteStopTransactionRequest;
+import com.blucharge.ocpp.dto.api.RemoteStopTransactionResponse;
+import com.blucharge.ocpp.dto.api.*;
 import com.blucharge.ocpp.dto.ws.*;
 import com.blucharge.ocpp.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +78,21 @@ public class OcppController {
     @GetMapping(value = "/get-config")
     public GetConfigResponse handleGetConfig(@RequestBody GetConfigRequest request) {
         return chargerService.getConfiguration(request, TEST_CHARGER);
+    }
+
+    @GetMapping(value = "/change-config")
+    public ChangeConfigResponse handleChangeConfig(@RequestBody ChangeConfigRequest request) {
+        return chargerService.changeConfiguration(request, TEST_CHARGER);
+    }
+
+    @PostMapping(value = "/trigger-message")
+    public TriggerMessageResponse handleTriggerMessage(@RequestBody TriggerMessageRequest request){
+        return chargerService.triggerMessage(request, TEST_CHARGER);
+    }
+
+    @PostMapping(value = "/unlock-connector")
+    public UnlockConnectorResponse handleUnlockConnector(@RequestBody UnlockConnectorRequest unlockConnectorRequest){
+        return connectorService.unlockConnector(unlockConnectorRequest, TEST_CHARGER);
     }
 
 }

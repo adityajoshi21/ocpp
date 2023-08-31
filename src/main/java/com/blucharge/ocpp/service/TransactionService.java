@@ -1,9 +1,9 @@
 package com.blucharge.ocpp.service;
 
-import com.blucharge.ocpp.dto.RemoteStartTransactionRequest;
-import com.blucharge.ocpp.dto.RemoteStartTransactionResponse;
-import com.blucharge.ocpp.dto.RemoteStopTransactionRequest;
-import com.blucharge.ocpp.dto.RemoteStopTransactionResponse;
+import com.blucharge.ocpp.dto.api.RemoteStartTransactionRequest;
+import com.blucharge.ocpp.dto.api.RemoteStartTransactionResponse;
+import com.blucharge.ocpp.dto.api.RemoteStopTransactionRequest;
+import com.blucharge.ocpp.dto.api.RemoteStopTransactionResponse;
 import com.blucharge.ocpp.dto.ws.StartTransactionRequest;
 import com.blucharge.ocpp.dto.ws.StartTransactionResponse;
 import com.blucharge.ocpp.dto.ws.StopTransactionRequest;

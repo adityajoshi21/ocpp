@@ -15,8 +15,7 @@ public interface TransactionsRepository {
     Long findConnectorPkForTransactionId(Long transactionId);
     TransactionRecord getActiveTransactionOnConnectorId(Long connectorId);
     void stopChargingScreen(TransactionRecord txnRecord);
-
-    void stopChargingScreen(TransactionDetailsRecord detailsRecord);
+    Boolean isTransactionRunningOnConenctorId(Long connectorPk);
 
     //TransactionRecord getTransactionForParams(Long chargerId, String idTag, Integer connectorId, BigDecimal meterStartVal);
 }
