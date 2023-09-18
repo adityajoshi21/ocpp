@@ -3,7 +3,7 @@ package com.blucharge.ocpp.repository.impl;
 import com.blucharge.db.ocpp.tables.Transaction;
 import com.blucharge.db.ocpp.tables.records.TransactionRecord;
 import com.blucharge.ocpp.dto.ws.UpdateTransactionParams;
-import com.blucharge.ocpp.enums.TransactionStatus;
+import com.blucharge.ocpp.enums.TransactionStatusUpdate;
 import com.blucharge.ocpp.repository.ConnectorRepository;
 import com.blucharge.ocpp.repository.OcppTagRepository;
 import com.blucharge.ocpp.repository.TransactionsRepository;
@@ -42,7 +42,7 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
                 .set(transaction.STOP_ON, params.getStopTimestamp() == null ? DateTime.now() : params.getStopTimestamp())
                 .set(transaction.METER_STOP_VALUE, params.getStopMeterValue())
                 .set(transaction.STOP_REASON, params.getStopReason())
-                .set(transaction.STATUS, TransactionStatus.STOPPED.name())
+                .set(transaction.STATUS, TransactionStatusUpdate.AfterStop.name())
                 .where(transaction.ID.eq(params.getTransactionId()))
                 .execute();
     }
@@ -51,8 +51,9 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
     public TransactionRecord getActiveTransctionForTxnId(Long txnId) {
         return ctx.selectFrom(transaction)
                 .where(transaction.ID.eq(txnId)
-                        .and(transaction.STATUS.eq(TransactionStatus.STARTED.name()))
-                        .and(transaction.IS_ACTIVE.eq(true))).fetchOneInto(TransactionRecord.class);
+                        .and(transaction.STATUS.eq(TransactionStatusUpdate.AfterStart.name()))
+                        .and(transaction.IS_ACTIVE.eq(true)))
+                .fetchOneInto(TransactionRecord.class);
     }
 
     @Override
@@ -69,6 +70,7 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
         return ctx.select(transaction.CONNECTOR_ID)
                 .from(transaction)
                 .where((transaction.ID.equal(transactionId)))
+                .and(transaction.IS_ACTIVE.eq(true))
                 .fetchOneInto(Long.class);
     }
 
@@ -76,8 +78,9 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
     public TransactionRecord getActiveTransactionOnConnectorId(Long connectorId) {
         return ctx.selectFrom(transaction)
                 .where(transaction.CONNECTOR_ID.eq(connectorId))
-                .and(transaction.STATUS.eq(TransactionStatus.STARTED.name()))
-                .and(transaction.IS_ACTIVE.eq(true)).fetchOneInto(TransactionRecord.class);
+                .and(transaction.STATUS.eq(TransactionStatusUpdate.AfterStart.name()))
+                .and(transaction.IS_ACTIVE.eq(true))
+                .fetchOneInto(TransactionRecord.class);
     }
     @Override
     public void stopChargingScreen(TransactionRecord transactionRecord){
@@ -93,11 +96,12 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
     public Boolean isTransactionRunningOnConenctorId(Long connectorPk) {
         int count = ctx.selectFrom(transaction)
                 .where(transaction.CONNECTOR_ID.eq(connectorPk))
-                .and(transaction.STATUS.eq(TransactionStatus.STARTED.name())).and(transaction.IS_ACTIVE.eq(true))
+                .and(transaction.STATUS.eq(TransactionStatusUpdate.AfterStart.name()))
+                .and(transaction.IS_ACTIVE.eq(true))
                 .execute();
         if(Objects.isNull(count) || count > 1)
             return false;
-        return (count == 1);
+        return count==1 ;
     }
 }
 

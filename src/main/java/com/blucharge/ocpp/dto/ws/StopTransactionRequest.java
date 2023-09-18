@@ -15,11 +15,11 @@ import java.util.List;
 public class StopTransactionRequest {
 
         private String idTag;
-        @NotNull
+        @NotNull (message = "Meter stop value not found in request")
         private BigDecimal meterStopValue;
-        @NotNull
+        @NotNull (message = "Meter stop timestamp not found in request")
         private DateTime timestamp;
-        @NotNull
+        @NotNull (message = "Transaction Id is not found in request")
         private Long transactionId;
         private String connectorName;
         private String reason;

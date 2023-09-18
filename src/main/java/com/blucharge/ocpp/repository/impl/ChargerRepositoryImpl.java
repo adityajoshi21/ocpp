@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.concurrent.locks.Lock;
 
-
+import static com.blucharge.ocpp.constants.ApplicationConstants.OCPP_VERSION;
 
 
 @Repository
@@ -54,11 +54,11 @@ public class ChargerRepositoryImpl implements ChargerRepository {
     @Override
     public void updateBootNotificationForCharger(BootNotificationRequest request,  String chargerIdentity) {
         ctx.update(charger)
-                .set(charger.OCPP_VERSION, "OCPP1.6")
                 .set(charger.CHARGE_POINT_VENDOR, request.getChargePointVendor())
                 .set(charger.CHARGE_POINT_MODEL, request.getChargePointModel())
                 .set(charger.CHARGE_POINT_SERIAL_NUMBER, request.getChargePointSerialNumber())
                 .set(charger.CHARGE_BOX_SERIAL_NUMBER, request.getChargeBoxSerialNumber())
+                .set(charger.OCPP_VERSION, OCPP_VERSION)
                 .set(charger.FIRMWARE_VERSION, request.getFirmwareVersion())
                 .set(charger.ICCID, request.getIccid())
                 .set(charger.IMSI, request.getImsi())

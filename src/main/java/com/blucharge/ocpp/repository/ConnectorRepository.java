@@ -5,6 +5,7 @@ import com.blucharge.db.ocpp.tables.records.ConnectorRecord;
 import com.blucharge.ocpp.dto.ConnectorRequest;
 import com.blucharge.ocpp.dto.ws.StatusNotificationRequest;
 import com.blucharge.ocpp.enums.ConnectorState;
+import com.blucharge.ocpp.enums.ConnectorStatus;
 import com.blucharge.ocpp.enums.TransactionStatusUpdate;
 import org.joda.time.DateTime;
 
@@ -22,7 +23,7 @@ Integer getConnectorNoFromConnectorId(Long ConnectorId);
     Long addConnector(ConnectorRecord request);
 
     ConnectorRecord getConnectorFromConnectorNameAndChargerId(String connectorName, Long chargerId);
-    void updateConnectorStatus(Long connectorPk, DateTime timestamp, TransactionStatusUpdate statusUpdate);
+    void updateConnectorStatus(Long connectorPk, DateTime timestamp, ConnectorStatus statusUpdate);
 
 
 //    String getConnectorStateByConnectorPk(Long connectorId);

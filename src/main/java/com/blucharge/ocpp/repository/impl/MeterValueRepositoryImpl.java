@@ -108,7 +108,7 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
 
         // Step 1 : Fetching connector from transaction table
         Long  connectorId = ctx.select(transaction.CONNECTOR_ID).from(transaction)
-                .where(transaction.ID.equal(transactionId)).fetchOne().value1();
+                .where(transaction.ID.equal(transactionId)).fetchOneInto(Long.class);
 
         TransactionRecord transactionRecord =  ctx.selectFrom(transaction)
                 .where(transaction.ID.eq(transactionId))

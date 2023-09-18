@@ -59,7 +59,6 @@ public class OcppController {
         return transactionService.stopTransaction(request, TEST_CHARGER);
     }
 
-
     @PostMapping(value = "/meter-value")
     public MeterValueResponse handleMeterValue(@RequestBody MeterValueRequest request ) {
         return meterValueService.meterValue(request, TEST_CHARGER);
@@ -80,7 +79,7 @@ public class OcppController {
         return chargerService.getConfiguration(request, TEST_CHARGER);
     }
 
-    @GetMapping(value = "/change-config")
+    @PostMapping(value = "/change-config")
     public ChangeConfigResponse handleChangeConfig(@RequestBody ChangeConfigRequest request) {
         return chargerService.changeConfiguration(request, TEST_CHARGER);
     }
@@ -96,5 +95,4 @@ public class OcppController {
     }
 
 }
-
 

@@ -12,6 +12,7 @@ public class ApplicationConstants {
     public static final String USERNAME = "ocpp-backend-user";
     public static final String PASSWORD = "Disp@7chBluSm@rt";
     public static  final String TEST_CHARGER = "chargepoint0234";
+    public static final String OCPP_VERSION = "ocpp1.6";
     public static  final Integer HEARTBEAT_INTERVAL = 60;   //Heartbeat Interval set to 60sec
     public static final List<MessageTrigger> TRIGGER_MESSAGES = Arrays.asList(MessageTrigger.HEARTBEAT, MessageTrigger.BOOT_NOTIFICATION, MessageTrigger.STATUS_NOTIFICATION, MessageTrigger.METER_VALUES, MessageTrigger.DIAGNOSTICS_STATUS_NOTIFICATION, MessageTrigger.FIRMWARE_STATUS_NOTIFICATION);
 }

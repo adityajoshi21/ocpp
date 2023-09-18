@@ -5,6 +5,6 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class AuthorizeRequest {
-    @NotNull
+    @NotNull (message = "IdTag is missing in request")
     private String idTag;
 }

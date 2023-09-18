@@ -4,6 +4,7 @@ import com.blucharge.db.ocpp.tables.Connector;
 import com.blucharge.db.ocpp.tables.records.ConnectorRecord;
 import com.blucharge.ocpp.dto.ws.StatusNotificationRequest;
 import com.blucharge.ocpp.enums.ConnectorState;
+import com.blucharge.ocpp.enums.ConnectorStatus;
 import com.blucharge.ocpp.enums.TransactionStatusUpdate;
 import com.blucharge.ocpp.repository.ConnectorRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -91,11 +92,11 @@ public class ConnectorRepositoryImpl implements ConnectorRepository {
     public void updateConnectorStatus(
             Long connectorPk,
             DateTime timestamp,
-            TransactionStatusUpdate statusUpdate) {
+            ConnectorStatus statusUpdate) {
 
         ctx.update(connector)
                 .set(connector.STATUS_NOTIFICATION_ON, timestamp)
-                .set(connector.STATUS, statusUpdate.getStatus())
+                .set(connector.STATUS, statusUpdate.name())
                 .where(connector.ID.eq( connectorPk))
                 .execute();
     }

@@ -12,11 +12,12 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StartTransactionRequest {
-    @NotNull
+
+    @NotNull (message = "Connector ID not found in request")
     private Integer connectorId;
-    @NotNull
+    @NotNull (message = "IdTag not sent in Start Txn request")
     private String idTag;
-    @NotNull
+    @NotNull (message = "Start Meter value not found in request")
     private BigDecimal meterStartValue;
     private DateTime timestamp;
 

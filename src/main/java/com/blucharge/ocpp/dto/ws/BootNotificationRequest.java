@@ -6,9 +6,9 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class BootNotificationRequest {
-    @NotNull
+    @NotNull (message = "Charger vendor not found in request")
     private String chargePointVendor;
-    @NotNull
+    @NotNull (message = "Charger Model not found in request")
     private String chargePointModel;
     private String chargePointSerialNumber;
     private String chargeBoxSerialNumber;

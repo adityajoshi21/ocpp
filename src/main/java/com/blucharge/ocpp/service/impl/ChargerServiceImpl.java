@@ -40,10 +40,10 @@ public class ChargerServiceImpl implements ChargerService {
 //            throw new IllegalArgumentException("Unexpected OCPP version: " + protocol.getVersion() + "We only support 1.6");
 //        }
 
-        boolean isRegistered = isRegistered(chargerIdentity);         //check if charger exists in DB
+        Boolean isRegistered = isRegistered(chargerIdentity);         //check if charger exists in DB
         DateTime now = DateTime.now();
 
-        if (isRegistered) {
+        if (Boolean.TRUE.equals(isRegistered)) {
             log.info("The charger '{}' is registered and its boot notification is acknowledged.", chargerIdentity);
             chargerRepository.updateBootNotificationForCharger(parameters, chargerIdentity);
         } else {
@@ -52,7 +52,7 @@ public class ChargerServiceImpl implements ChargerService {
         }
 
         return new BootNotificationResponse()
-                .withStatus(isRegistered ? RegistrationStatus.ACCEPTED : RegistrationStatus.REJECTED)
+                .withStatus(Boolean.TRUE.equals(isRegistered) ? RegistrationStatus.ACCEPTED : RegistrationStatus.REJECTED)
                 .withCurrentTime(now)
                 .withInterval(HEARTBEAT_INTERVAL);
     }
@@ -105,9 +105,9 @@ public class ChargerServiceImpl implements ChargerService {
         List<String> keys = getConfigRequest.getKey();
         List<ConfigurationKey> recognizedKeys = new ArrayList<>();
         List<String> unknownKeys = new ArrayList<>();
-            if(!Objects.isNull(keys)  || !keys.isEmpty()) {       //If list in request is null or empty return all configs
+            if(!keys.isEmpty()) {     //If list in request is null or empty return all configs
                 for(String key : keys){
-                    if(true) //check if key is recognised for CP or not, todo : how to do this for a charger?
+                    if(true) //check if key is recognised for CP or not, todo : how to fetch this for a charger?
                     recognizedKeys.add(createConfigurationSetting(key));
                     else
                         unknownKeys.add(key);
@@ -115,11 +115,17 @@ public class ChargerServiceImpl implements ChargerService {
                 return new GetConfigResponse(recognizedKeys, unknownKeys);
 
             }
-            return new GetConfigResponse();
+            return new GetConfigResponse(recognizedKeys, unknownKeys);
     }
 
     @Override
     public ChangeConfigResponse changeConfiguration(ChangeConfigRequest changeConfigRequest, String chargerIdentity) {
+        // TODO: How to fetch all configs of a charger?
+        //Fetch list/map of all configs of a charger
+
+        //See if accessed config for the charger exists in the map, update if exists     {for which we use .containsKey} if boolean value is true put the value for the key,
+        // else return not supported
+
         return null;
     }
 
@@ -133,18 +139,18 @@ public class ChargerServiceImpl implements ChargerService {
     public TriggerMessageResponse triggerMessage(TriggerMessageRequest triggerMessageRequest, String chargerIdentity) {
         TriggerMessageResponse triggerMessageResponse = new TriggerMessageResponse();
         Boolean flag = MessageTrigger.checkForValidEnum(triggerMessageRequest.getRequestedMessage());
-        triggerMessageResponse.setStatus(Boolean.TRUE.equals(flag)?TriggerMessageStatus.ACCEPTED:TriggerMessageStatus.REJECTED);
+        triggerMessageResponse.setStatus(Boolean.TRUE.equals(flag) ? TriggerMessageStatus.ACCEPTED : TriggerMessageStatus.REJECTED);
         if(Boolean.TRUE.equals(flag)){
             MessageTrigger requestedMessage = triggerMessageRequest.getRequestedMessage();
-            Boolean isConnectorIdRequired = requestedMessage.getIsRequired();
+            Boolean isConnectorIdRequired = requestedMessage.isConnectorIdRequired();
             if(Boolean.FALSE.equals(isConnectorIdRequired)) {
                 return triggerMessageResponse;
             }
-            else if(isConnectorIdRequired && !Objects.isNull(triggerMessageRequest.getConnectorId())){
+                if(isConnectorIdRequired && !Objects.isNull(triggerMessageRequest.getConnectorId())){
                 return  triggerMessageResponse;
             }
         }
-        return triggerMessageResponse;
+        return null;
     }
 }
 

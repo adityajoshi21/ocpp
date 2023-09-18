@@ -7,11 +7,11 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class StatusNotificationRequest{
-    @NotNull
+    @NotNull (message = "Connector Id not found in request")
     private Integer connectorId;
-    @NotNull
+    @NotNull (message = "Status not found in Status Notification request")
     private String status;
-    @NotNull
+    @NotNull (message = "Error code not found in request")
     private String errorCode;
     private String errorInfo;
     private DateTime timestamp;

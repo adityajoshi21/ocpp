@@ -2,7 +2,6 @@ package com.blucharge.ocpp.repository;
 
 import com.blucharge.db.ocpp.tables.Transaction;
 import com.blucharge.db.ocpp.tables.records.TransactionRecord;
-import com.blucharge.ocpp.dto.ws.InsertTransactionParams;
 import com.blucharge.ocpp.dto.ws.UpdateTransactionParams;
 import org.joda.time.DateTime;
 

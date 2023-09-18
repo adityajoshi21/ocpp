@@ -36,14 +36,14 @@ public class ConnectorServiceImpl implements ConnectorService {
     public StatusNotificationResponse statusNotification(StatusNotificationRequest parameters, String chargerIdentity){
 
 
-        ChargerRecord charger =chargerRepository.getChargerFromChargerId(chargerIdentity);   //Exception handler needed if charger is null & charger doesnt exists in table
+        ChargerRecord charger =chargerRepository.getChargerFromChargerId(chargerIdentity);   //Exception handler needed if charger is null i.e. charger doesn't exist in table
 
         Integer noOfConnectors = charger.getNoOfConnectors();
 
         if(parameters.getConnectorId() == 0){       // if it is 0; update heartbeat in Charger Table and move on
             log.info("No of connectors for Charger Id {} , found to be 0 updating heartbeat", chargerIdentity);
             chargerRepository.updateChargerHeartbeat(chargerIdentity, DateTime.now());
-            return new StatusNotificationResponse("Success");
+            return new StatusNotificationResponse("");
         }
         ConnectorRecord connector = connectorRepository.getConnectorForChargerIdWithConnectorNumber(charger.getId(),parameters.getConnectorId());
 
@@ -52,7 +52,7 @@ public class ConnectorServiceImpl implements ConnectorService {
             ConnectorRecord connectorRecord = new ConnectorRecord();
             connectorRecord.setChargerId(charger.getId());
             connectorRecord.setConnectorNumber(parameters.getConnectorId());
-            connectorRecord.setState(ConnectorState.IDLE.name()); // do we need this
+            connectorRecord.setState(ConnectorState.IDLE.name());
             connectorRepository.addConnector(connectorRecord);
             chargerRepository.updateNumberOfConnectors(charger.getId(), noOfConnectors+1);
         }
@@ -68,6 +68,7 @@ public class ConnectorServiceImpl implements ConnectorService {
         ChargerRecord charger = chargerRepository.getChargerFromChargerId(chargerIdentity);
         Long id = charger.getId();
         ConnectorRecord connector = connectorRepository.getConnectorForChargerIdWithConnectorNumber(id, request.getConnectorId());
+
         Integer incomingConnectorId = connector.getConnectorNumber();
         if(Objects.isNull(incomingConnectorId)){
             log.error("ConnectorId not found for requested connector on which unlock connector command is sent");
