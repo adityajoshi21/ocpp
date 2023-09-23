@@ -30,13 +30,13 @@ public class OcppTagRepositoryImpl implements OcppTagRepository {
                 .fetchOneInto(OcppTagRecord.class);
     }
 
-//    @Override
-//    public OcppTagRecord getRecord(Long ocppTagPk) {
-//        return ctx.selectFrom(ocppTag)
-//                .where(ocppTag.ID.equal(ocppTagPk))
-//                .and(ocppTag.IS_ACTIVE.eq(true))
-//                .fetchOne();
-//    }
+    @Override
+    public OcppTagRecord getRecord(Long ocppTagPk) {
+        return ctx.selectFrom(ocppTag)
+                .where(ocppTag.ID.equal(ocppTagPk))
+                .and(ocppTag.IS_ACTIVE.eq(true))
+                .fetchOne();
+    }
 
 //    @Override
 //    public boolean insertIgnoreIdTag( StartTransactionRequest req) {

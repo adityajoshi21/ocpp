@@ -75,7 +75,7 @@ public class ConnectorServiceImpl implements ConnectorService {
         }
         else {
             //check if transaction is running on that connector?
-           Boolean flag = transactionsRepository.isTransactionRunningOnConenctorId(connector.getId());
+           Boolean flag = transactionsRepository.isTransactionRunningOnConnectorId(connector.getId());
             UnlockConnectorResponse unlockConnectorResponse = new UnlockConnectorResponse();
             if(flag){
                log.error("Can't unlock connector as it has an active transaction");

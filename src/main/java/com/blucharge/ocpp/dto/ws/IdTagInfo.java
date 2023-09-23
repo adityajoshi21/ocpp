@@ -10,7 +10,7 @@ import org.joda.time.DateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class IdTagInfo {
-    protected AuthorizationStatus status;
-    protected DateTime expiryDate;
-    protected String parentIdTag;
+    private AuthorizationStatus status;
+    private DateTime expiryDate;
+    private String parentIdTag;
 }

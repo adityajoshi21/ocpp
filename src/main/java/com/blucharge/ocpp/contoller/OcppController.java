@@ -9,7 +9,10 @@ import com.blucharge.ocpp.dto.ws.*;
 import com.blucharge.ocpp.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 import static com.blucharge.ocpp.constants.ApplicationConstants.TEST_CHARGER;
 
@@ -50,7 +53,7 @@ public class OcppController {
     }
 
     @PostMapping(value = "/start-transaction")
-    public StartTransactionResponse handleStartTxn(@RequestBody StartTransactionRequest request){
+    public StartTransactionResponse handleStartTxn(@Validated @RequestBody  StartTransactionRequest request){
         return transactionService.startTransaction(request, TEST_CHARGER);
     }
 

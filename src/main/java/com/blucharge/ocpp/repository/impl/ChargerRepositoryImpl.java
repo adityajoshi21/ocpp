@@ -56,6 +56,7 @@ public class ChargerRepositoryImpl implements ChargerRepository {
         ctx.update(charger)
                 .set(charger.CHARGE_POINT_VENDOR, request.getChargePointVendor())
                 .set(charger.CHARGE_POINT_MODEL, request.getChargePointModel())
+                .set(charger.END_POINT_URL, "")
                 .set(charger.CHARGE_POINT_SERIAL_NUMBER, request.getChargePointSerialNumber())
                 .set(charger.CHARGE_BOX_SERIAL_NUMBER, request.getChargeBoxSerialNumber())
                 .set(charger.OCPP_VERSION, OCPP_VERSION)

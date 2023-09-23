@@ -65,7 +65,7 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
     }
 
     @Override
-    public Long findConnectorPkForTransactionId(Long transactionId) {
+    public Long findConnectorIdForTransactionId(Long transactionId) {
 
         return ctx.select(transaction.CONNECTOR_ID)
                 .from(transaction)
@@ -92,8 +92,7 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
                 .and(transaction.ID.eq(transactionRecord.getId()))
                 .execute();
     }
-    @Override
-    public Boolean isTransactionRunningOnConenctorId(Long connectorPk) {
+    public Boolean isTransactionRunningOnConnectorId(Long connectorPk) {
         int count = ctx.selectFrom(transaction)
                 .where(transaction.CONNECTOR_ID.eq(connectorPk))
                 .and(transaction.STATUS.eq(TransactionStatusUpdate.AfterStart.name()))

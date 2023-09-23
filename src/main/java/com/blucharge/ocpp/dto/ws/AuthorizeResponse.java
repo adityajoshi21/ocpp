@@ -5,7 +5,6 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class AuthorizeResponse {
-    @NotNull
     private IdTagInfo idTagInfo;
 
     public AuthorizeResponse withIdTagInfo(IdTagInfo value) {

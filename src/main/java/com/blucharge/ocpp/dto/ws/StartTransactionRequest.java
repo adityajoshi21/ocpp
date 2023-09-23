@@ -1,10 +1,11 @@
 package com.blucharge.ocpp.dto.ws;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.joda.time.DateTime;
-
+import javax.validation.constraints.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 

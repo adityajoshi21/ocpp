@@ -12,6 +12,8 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 
 @Slf4j
 @Service
@@ -48,9 +50,9 @@ public class OcppTagServiceImpl implements OcppTagService {
                 log.info("The user with idTag '{}' is ACCEPTED!", idTag);
                 idTagInfo.setStatus(AuthorizationStatus.ACCEPTED);
                 //If Expiry Timestamp is set for user in the db, use it. Else update it to 1 hour from currentTime
-                DateTime expiry = isExpiryDateSet? expiryDate : DateTime.now().plusHours(1); //Move this later to application CONSTANTS
+                DateTime expiry = isExpiryDateSet? expiryDate : DateTime.now().plusHours(1) ; //Move this later to application CONSTANTS
                 idTagInfo.setExpiryDate(expiry);
-                idTagInfo.setParentIdTag(ocppTagRecord.getParentTag());
+                idTagInfo.setParentIdTag("0");
             }
         }
         return idTagInfo;
@@ -61,6 +63,12 @@ public class OcppTagServiceImpl implements OcppTagService {
     public AuthorizeResponse authorize(AuthorizeRequest parameters, String chargerIdentity) {
         String idTag = parameters.getIdTag();
         IdTagInfo idTagInfo = getIdTagInfo(idTag);
+        OcppTagRecord ocppTagRecord = ocppTagRepository.getRecord(parameters.getIdTag());
+        if(!Objects.isNull(ocppTagRecord)) {
+            ocppTagRecord.setExpiryOn(idTagInfo.getExpiryDate());
+            ocppTagRecord.setParentTag(idTagInfo.getParentIdTag());
+            ocppTagRecord.store();
+        }
 
         return new AuthorizeResponse().withIdTagInfo(idTagInfo);
     }
