@@ -28,7 +28,8 @@ public class MeterValueServiceImpl implements MeterValueService {
             if(Objects.nonNull(rec)){
                 meterValueRepository.insertMeterValues(chargerId, request.getMeterValue(), request.getConnectorId(), request.getTransactionId());
             }
+            return new MeterValueResponse("{}");
         }
-        return new MeterValueResponse();
+        return new MeterValueResponse("Meter Values were not set in the incoming request");
     }
 }

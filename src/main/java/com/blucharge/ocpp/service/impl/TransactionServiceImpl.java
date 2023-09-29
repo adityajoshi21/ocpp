@@ -1,9 +1,6 @@
 package com.blucharge.ocpp.service.impl;
 
-import com.blucharge.db.ocpp.tables.records.ChargerRecord;
-import com.blucharge.db.ocpp.tables.records.ConnectorRecord;
-import com.blucharge.db.ocpp.tables.records.OcppTagRecord;
-import com.blucharge.db.ocpp.tables.records.TransactionRecord;
+import com.blucharge.db.ocpp.tables.records.*;
 import com.blucharge.ocpp.dto.api.RemoteStartTransactionRequest;
 import com.blucharge.ocpp.dto.api.RemoteStartTransactionResponse;
 import com.blucharge.ocpp.dto.api.RemoteStopTransactionRequest;
@@ -17,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
@@ -39,32 +35,35 @@ public class TransactionServiceImpl implements TransactionService {
     private ConnectorRepository connectorRepository;
     @Autowired
     private MeterValueRepository meterValueRepository;
+    @Autowired
+    private TransactionHistoryRepository transactionHistoryRepository;
 
 
 
     @Override
-    public StartTransactionResponse startTransaction(@Valid StartTransactionRequest request, String chargerIdentity) {
+    public StartTransactionResponse startTransaction(StartTransactionRequest request, String chargerIdentity) {
 
         IdTagInfo idTagInfo = ocppTagService.getIdTagInfo(request.getIdTag());
         if (!AuthorizationStatus.ACCEPTED.equals(idTagInfo.getStatus())){
             return new StartTransactionResponse().withIdTagInfo(idTagInfo);         //User isn't authorised
         }
-        //also check for connector state / status
 
 
         ChargerRecord charger = chargerRepository.getChargerFromChargerId(chargerIdentity);
-        ConnectorRecord connectorRecord = connectorRepository.getConnectorForChargerIdWithConnectorNumber(charger.getId(), request.getConnectorId());
-
+        ConnectorRecord connectorRecord = connectorRepository.getConnectorForChargerIdWithConnectorNumber(charger.getId(), request.getConnectorId());  //fetch connector at which txn has started
         OcppTagRecord ocppTagRecord = ocppTagRepository.getRecord(request.getIdTag());
+
+        //check for connector state / status before changing its state
+
         if(connectorRecord.getState().toUpperCase().equals("IDLE")) {
             TransactionRecord transactionRecord = new TransactionRecord();
             transactionRecord.setIdTag(ocppTagRecord.getIdTag());
-            transactionRecord.setConnectorId(connectorRecord.getId());
-            transactionRecord.setConnectorName(connectorRecord.getName());
-            transactionRecord.setChargerId(charger.getId().toString());
+            transactionRecord.setConnectorId(Long.valueOf(connectorRecord.getConnectorNumber()));
+//            transactionRecord.setConnectorName(connectorRecord.getName());
+            transactionRecord.setChargerId(charger.getId());
             transactionRecord.setMeterStartValue(request.getMeterStartValue());
             transactionRecord.setStartOn(request.getTimestamp());
-            transactionRecord.setStatus(TransactionStatusUpdate.AfterStart.name());
+            transactionRecord.setStatus(TransactionStatusUpdate.AfterStart.toString());
             Long txnId = transactionsRepository.addTransaction(transactionRecord);
 
             log.info("Transaction accepted on Charger : {} with start value :{} and transaction Id : {}", chargerIdentity, request.getMeterStartValue(), txnId);
@@ -74,11 +73,15 @@ public class TransactionServiceImpl implements TransactionService {
             //Update Connector  status
             connectorRepository.updateConnectorStatus(connectorRecord.getId(), request.getTimestamp(), ConnectorStatus.CHARGING);
 
-        return  new StartTransactionResponse()
+            TransactionHistoryRecord transactionHistoryRecord = transactionHistoryRepository.doesTransactionExistsInTransactionHistory(txnId);
+            if(Objects.isNull(transactionHistoryRecord)) {
+                transactionHistoryRepository.addTransactionInTransactionHistory(txnId, request.getIdTag(),charger.getId(), request.getConnectorId(),request.getMeterStartValue(), request.getTimestamp().toString());
+            }
+            return  new StartTransactionResponse()
                 .withIdTagInfo(idTagInfo)
                 .withTransactionId(txnId);
         }
-        log.error("Couldnt start transaction as Connector wasn't idle");
+        log.error("Couldn't start transaction as there is an ongoing transaction on the connector");
         return new StartTransactionResponse().withIdTagInfo(idTagInfo).withTransactionId(0l);
     }
 

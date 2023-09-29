@@ -8,8 +8,7 @@ import java.util.List;
 
 @Data
 public class MeterValue {
-    protected DateTime timestamp;
-    @NotNull
-    protected List<SampledValue> sampledValue;
+    private DateTime timestamp;
+    private List<SampledValue> sampledValue;
 
 }

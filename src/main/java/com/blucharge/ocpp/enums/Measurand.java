@@ -33,20 +33,8 @@ public enum Measurand {
         this.value = value;
     }
 
-
     public String value() {
         return value;
     }
-
-    public static Measurand fromValue(String value) {
-        for (Measurand measurand : Measurand.values()) {
-            if (measurand.value.equals(value)) {
-                return measurand;
-            }
-        }
-        throw new IllegalArgumentException("Invalid Measurand value: " + value);
-    }
-
-
 
 }

@@ -9,13 +9,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SampledValue {
-    protected String value;
-    protected ReadingContext context;
-    protected ValueFormat format;
-    protected Measurand measurand;
-    protected Phase phase;
-    protected Location location;
-    protected String unit;
+    private String value;
+    private ReadingContext context;
+    private ValueFormat format;
+    private Measurand measurand;
+    private Phase phase;
+    private Location location;
+    private String unit;
 
     public boolean isSetContext() {
         return (this.context!= null);

@@ -43,7 +43,7 @@ public class ConnectorServiceImpl implements ConnectorService {
         if(parameters.getConnectorId() == 0){       // if it is 0; update heartbeat in Charger Table and move on
             log.info("No of connectors for Charger Id {} , found to be 0 updating heartbeat", chargerIdentity);
             chargerRepository.updateChargerHeartbeat(chargerIdentity, DateTime.now());
-            return new StatusNotificationResponse("");
+            return new StatusNotificationResponse("Connector ID was 0");
         }
         ConnectorRecord connector = connectorRepository.getConnectorForChargerIdWithConnectorNumber(charger.getId(),parameters.getConnectorId());
 
@@ -58,7 +58,7 @@ public class ConnectorServiceImpl implements ConnectorService {
         }
         connectorRepository.updateConnectorStatus(parameters, charger.getId());
 
-        return new StatusNotificationResponse("Success");
+        return new StatusNotificationResponse("{}");
     }
 
 

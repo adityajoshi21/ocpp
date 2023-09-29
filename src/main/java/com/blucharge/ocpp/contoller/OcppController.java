@@ -53,7 +53,7 @@ public class OcppController {
     }
 
     @PostMapping(value = "/start-transaction")
-    public StartTransactionResponse handleStartTxn(@Validated @RequestBody  StartTransactionRequest request){
+    public StartTransactionResponse handleStartTxn(@RequestBody  StartTransactionRequest request){
         return transactionService.startTransaction(request, TEST_CHARGER);
     }
 
