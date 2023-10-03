@@ -65,7 +65,7 @@ public class ChargerServiceImpl implements ChargerService {
     }
 
     @Override
-    public boolean isRegistered(String chargerName) {
+    public Boolean isRegistered(String chargerName) {
         Lock l = isRegisteredLocks.get(chargerName);
         l.lock();
 
@@ -78,7 +78,7 @@ public class ChargerServiceImpl implements ChargerService {
                 ChargerRequest request = new ChargerRequest();
                 request.setChargerName(chargerName);
                 request.setUuid("test");
-                Integer noOfConnectors = 0;       //Need to find out how to fetch this value
+                Integer noOfConnectors = 0;
                 request.setNoOfConnectors(noOfConnectors);
 
                 Long insertedChargerId = chargerRepository.addCharger(request);

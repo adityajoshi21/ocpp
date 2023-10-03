@@ -1,11 +1,14 @@
 package com.blucharge.ocpp.enums;
 
-public enum Measurand {
+import com.google.gson.annotations.SerializedName;
 
+public enum Measurand {
+@SerializedName("Current.Export")
     CURRENT_EXPORT("Current.Export"),
     CURRENT_IMPORT("Current.Import"),
     CURRENT_OFFERED("Current.Offered"),
     ENERGY_ACTIVE_EXPORT_REGISTER("Energy.Active.Export.Register"),
+    @SerializedName("Energy.Active.Import.Register")
     ENERGY_ACTIVE_IMPORT_REGISTER("Energy.Active.Import.Register"),
     ENERGY_REACTIVE_EXPORT_REGISTER("Energy.Reactive.Export.Register"),
     ENERGY_REACTIVE_IMPORT_REGISTER("Energy.Reactive.Import.Register"),
@@ -30,11 +33,12 @@ public enum Measurand {
     private final String value;
 
     Measurand(String value) {
+
         this.value = value;
     }
 
     public String value() {
-        return value;
+        return this.name();
     }
 
 }

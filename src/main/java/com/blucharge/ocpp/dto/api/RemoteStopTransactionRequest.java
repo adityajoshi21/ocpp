@@ -10,7 +10,6 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RemoteStopTransactionRequest {
-    @NotNull (message = "Transaction ID cant be left empty")
     private Long transactionId;
 
 }

@@ -42,16 +42,17 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
                 .set(transaction.STOP_ON, params.getStopTimestamp() == null ? DateTime.now() : params.getStopTimestamp())
                 .set(transaction.METER_STOP_VALUE, params.getStopMeterValue())
                 .set(transaction.STOP_REASON, params.getStopReason())
-                .set(transaction.STATUS, TransactionStatusUpdate.AfterStop.name())
+                .set(transaction.STATE, TransactionStatusUpdate.AfterStop.name())
                 .where(transaction.ID.eq(params.getTransactionId()))
                 .execute();
     }
 
     @Override
-    public TransactionRecord getActiveTransctionForTxnId(Long txnId) {
+    public TransactionRecord getActiveTransactionOnConnectorNoForTxnId(Long txnId, Integer connectorNo) {
         return ctx.selectFrom(transaction)
                 .where(transaction.ID.eq(txnId)
-                        .and(transaction.STATUS.eq(TransactionStatusUpdate.AfterStart.name()))
+                        .and(transaction.CONNECTOR_NUMBER.eq(connectorNo))
+                        .and(transaction.STATE.eq(TransactionStatusUpdate.AfterStart.name()))
                         .and(transaction.IS_ACTIVE.eq(true)))
                 .fetchOneInto(TransactionRecord.class);
     }
@@ -65,42 +66,33 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
     }
 
     @Override
-    public Long findConnectorIdForTransactionId(Long transactionId) {
+    public Integer findConnectorNoForTransactionId(Long transactionId) {
 
-        return ctx.select(transaction.CONNECTOR_ID)
+        return ctx.select(transaction.CONNECTOR_NUMBER)
                 .from(transaction)
                 .where((transaction.ID.equal(transactionId)))
                 .and(transaction.IS_ACTIVE.eq(true))
-                .fetchOneInto(Long.class);
+                .fetchOneInto(Integer.class);
     }
 
     @Override
-    public TransactionRecord getActiveTransactionOnConnectorId(Long connectorId) {
+    public TransactionRecord getActiveTransactionOnConnectorId(Integer connectorId, Long chargerId) {
         return ctx.selectFrom(transaction)
-                .where(transaction.CONNECTOR_ID.eq(connectorId))
-                .and(transaction.STATUS.eq(TransactionStatusUpdate.AfterStart.name()))
+                .where(transaction.CONNECTOR_NUMBER.eq(connectorId))
+                .and(transaction.CHARGER_ID.eq(chargerId))
+                .and(transaction.STATE.eq(TransactionStatusUpdate.AfterStart.name()))
                 .and(transaction.IS_ACTIVE.eq(true))
                 .fetchOneInto(TransactionRecord.class);
     }
     @Override
-    public void stopChargingScreen(TransactionRecord transactionRecord){
+    public void stopChargingInitiatedFromRemoteStart(TransactionRecord transactionRecord){
         ctx.update(transaction)
-                .set(transaction.STOP_REASON,"STOPPED")
+                .set(transaction.STOP_REASON,"STOPPED FROM REMOTE STOP")
                 .set(transaction.STOP_ON,DateTime.now())
                 .set(transaction.UPDATED_ON,DateTime.now())
                 .where(transaction.IS_ACTIVE.eq(true))
                 .and(transaction.ID.eq(transactionRecord.getId()))
                 .execute();
-    }
-    public Boolean isTransactionRunningOnConnectorId(Long connectorPk) {
-        int count = ctx.selectFrom(transaction)
-                .where(transaction.CONNECTOR_ID.eq(connectorPk))
-                .and(transaction.STATUS.eq(TransactionStatusUpdate.AfterStart.name()))
-                .and(transaction.IS_ACTIVE.eq(true))
-                .execute();
-        if(Objects.isNull(count) || count > 1)
-            return false;
-        return count==1 ;
     }
 }
 

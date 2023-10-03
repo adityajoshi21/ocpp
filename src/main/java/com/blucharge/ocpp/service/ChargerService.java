@@ -9,7 +9,7 @@ import com.blucharge.ocpp.dto.ws.HeartbeatResponse;
 public interface ChargerService {
     BootNotificationResponse bootNotification(BootNotificationRequest bootNotificationRequest, String chargerIdentity);
     HeartbeatResponse heartbeat(HeartbeatRequest heartbeatRequest, String chargerIdentity);
-    boolean isRegistered(String chargerId);
+    Boolean isRegistered(String chargerId);
     GetConfigResponse getConfiguration (GetConfigRequest getConfigRequest, String chargerIdentity);
     ChangeConfigResponse changeConfiguration(ChangeConfigRequest changeConfigRequest, String chargerIdentity);
     TriggerMessageResponse triggerMessage(TriggerMessageRequest triggerMessageRequest, String chargerIdentity);

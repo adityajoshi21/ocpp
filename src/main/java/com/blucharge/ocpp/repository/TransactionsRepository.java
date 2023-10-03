@@ -5,12 +5,11 @@ import com.blucharge.ocpp.dto.ws.UpdateTransactionParams;
 
 public interface TransactionsRepository {
     void updateTransaction(UpdateTransactionParams params);
-    TransactionRecord getActiveTransctionForTxnId(Long transactionId);
+    TransactionRecord getActiveTransactionOnConnectorNoForTxnId(Long transactionId,Integer connectorNo);
     Long addTransaction(TransactionRecord record);
-    Long findConnectorIdForTransactionId(Long transactionId);
-    TransactionRecord getActiveTransactionOnConnectorId(Long connectorId);
-    void stopChargingScreen(TransactionRecord txnRecord);
-    Boolean isTransactionRunningOnConnectorId(Long connectorPk);
+    Integer findConnectorNoForTransactionId(Long transactionId);
+    TransactionRecord getActiveTransactionOnConnectorId(Integer connectorId, Long chargerId);
+    void stopChargingInitiatedFromRemoteStart(TransactionRecord txnRecord);
 
     //TransactionRecord getTransactionForParams(Long chargerId, String idTag, Integer connectorId, BigDecimal meterStartVal);
 }

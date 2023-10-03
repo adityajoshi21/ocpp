@@ -7,8 +7,7 @@ import java.util.List;
 
 @Data
 public class MeterValueRequest{
-    @NotNull
-    private Long connectorId;
+    private Integer connectorId;
     private Long transactionId;
     private List<MeterValue> meterValue;
 

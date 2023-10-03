@@ -15,10 +15,10 @@ public enum Phase {
     private final String value;
 
     public String value() {
-        return value;
+        return this.name();
     }
 
-    Phase(String val) {
-        value = val;
+    Phase(String value) {
+        this.value = value;
     }
 }

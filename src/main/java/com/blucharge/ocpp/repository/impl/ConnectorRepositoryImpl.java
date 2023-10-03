@@ -5,7 +5,6 @@ import com.blucharge.db.ocpp.tables.records.ConnectorRecord;
 import com.blucharge.ocpp.dto.ws.StatusNotificationRequest;
 import com.blucharge.ocpp.enums.ConnectorState;
 import com.blucharge.ocpp.enums.ConnectorStatus;
-import com.blucharge.ocpp.enums.TransactionStatusUpdate;
 import com.blucharge.ocpp.repository.ConnectorRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -27,7 +26,7 @@ public class ConnectorRepositoryImpl implements ConnectorRepository {
 
     private static final Connector connector = Connector.CONNECTOR;
     @Override
-    public Long getConnectorPkForChargeBoxAndConnector(Long chargerId, Integer connectorNumber) {
+    public Long getConnectorPkForChargeBoxAndConnectorNumber(Long chargerId, Integer connectorNumber) {
         return ctx.selectFrom(connector)
                 .where(connector.CHARGER_ID.eq(chargerId))
                 .and(connector.CONNECTOR_NUMBER.eq(connectorNumber))
@@ -75,17 +74,14 @@ public class ConnectorRepositoryImpl implements ConnectorRepository {
         return connectorRecord.getId();
     }
 
-
-
     @Override
-    public Integer getConnectorNoFromConnectorId(Long connectorId) {
-        return   ctx.select(connector.CONNECTOR_NUMBER)
-                .from(connector)
-                .where(connector.ID.eq(connectorId))
-                .and(connector.IS_ACTIVE.eq(true))
-                .fetchOneInto(Integer.class);
+    public ConnectorRecord getConnectorRecordFromConnectorId(Long connectorId, Long chargerId) {
+        return ctx.selectFrom(connector)
+                .where(connector.ID.eq(connectorId).
+                        and(connector.CHARGER_ID.eq(chargerId))
+                        .and(connector.IS_ACTIVE.eq(true)))
+                .fetchOneInto(ConnectorRecord.class);
     }
-
 
 
     @Override
@@ -99,14 +95,6 @@ public class ConnectorRepositoryImpl implements ConnectorRepository {
                 .set(connector.STATUS, statusUpdate.name())
                 .where(connector.ID.eq( connectorPk))
                 .execute();
-    }
-    @Override
-    public ConnectorRecord getConnectorFromConnectorNameAndChargerId(String connectorName, Long chargerId) {
-        return ctx.selectFrom(connector)
-                .where(connector.NAME.eq(connectorName).
-                        and(connector.CHARGER_ID.eq(chargerId))
-                        .and(connector.IS_ACTIVE.eq(true)))
-                .fetchOneInto(ConnectorRecord.class);
     }
 
 //    @Override

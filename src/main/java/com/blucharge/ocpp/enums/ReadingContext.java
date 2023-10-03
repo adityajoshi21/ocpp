@@ -12,11 +12,11 @@ public enum ReadingContext {
 
     private final String value;
     public String value() {
-        return value;
+        return this.value;
     }
 
-    ReadingContext(String v) {
-        this.value = v;
+    ReadingContext(String value) {
+        this.value = value;
     }
 
 }

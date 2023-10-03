@@ -34,7 +34,7 @@ public class ChargerRepositoryImpl implements ChargerRepository {
     }
 
 
-    public boolean isRegisteredInternal(String chargerId) {
+    public Boolean isRegisteredInternal(String chargerId) {
         Integer count = ctx.selectCount()
                 .from(charger)
                 .where(charger.CHARGER_NAME.eq(chargerId))

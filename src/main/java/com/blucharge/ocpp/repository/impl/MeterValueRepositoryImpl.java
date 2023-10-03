@@ -2,7 +2,6 @@ package com.blucharge.ocpp.repository.impl;
 
 import com.blucharge.db.ocpp.tables.ConnectorMeterValue;
 import com.blucharge.db.ocpp.tables.Transaction;
-import com.blucharge.db.ocpp.tables.records.ChargerRecord;
 import com.blucharge.db.ocpp.tables.records.ConnectorMeterValueRecord;
 import com.blucharge.db.ocpp.tables.records.TransactionRecord;
 import com.blucharge.ocpp.dto.ws.MeterValue;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static com.blucharge.db.ocpp.tables.Transaction.TRANSACTION;
 
@@ -38,24 +36,11 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
     @Autowired
     private ChargerRepository chargerRepository;
     @Override
-    public void insertMeterValues(String chargerIdentity, List<MeterValue> meterValues, Long connectorId, Long transactionId) {
-
-        log.info("Saving meter values for Transaction ID : {}", transactionId);
-        Boolean update = false;
-        if(Objects.isNull(transactionId)){
-            log.info("Transaction ID was returned NULL for ChargerId : {}", chargerIdentity);
-            return;
-        }
-        if(transactionId == 0){
-            log.info("Meter Value are being taken from the chargeBox, Txn Id found 0 for ChargerId; {}", chargerIdentity);
-            return;
-        }
+    public void insertMeterValues(Long chargerId, List<MeterValue> meterValues, Integer connectorId, Long transactionId) {
 
         TransactionRecord transactionRecord= ctx.selectFrom(TRANSACTION).where(TRANSACTION.ID.eq(transactionId)).and(TRANSACTION.IS_ACTIVE.eq(true)).orderBy(TRANSACTION.ID.desc()).fetchOneInto(TransactionRecord.class);
 
-        ChargerRecord charger = chargerRepository.getChargerFromChargerId(chargerIdentity);
-        Integer connectorNo = connectorRepository.getConnectorNoFromConnectorId(connectorId);
-        Long connectorPk = connectorRepository.getConnectorPkForChargeBoxAndConnector(charger.getId(), connectorNo);
+        Boolean update = false;
 
         BigDecimal startUnit =null, startSoc=null, endSoc=null;
 
@@ -63,7 +48,7 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
         for(MeterValue value : meterValues){
             startSoc = value.getSampledValue().stream().filter( x -> "SoC".equalsIgnoreCase(x.getMeasurand().value()) && x.getValue()!= null && x.getContext()!=null && "Transaction.Begin".equalsIgnoreCase(x.getContext().value())).map(p -> new BigDecimal(p.getValue())).max(BigDecimal::compareTo).orElse(startSoc);
             endSoc = value.getSampledValue().stream().filter( x -> "SoC".equalsIgnoreCase(x.getMeasurand().value()) && x.getValue()!= null && x.getContext()!=null && ! "Transaction.Begin".equalsIgnoreCase(x.getContext().value())).map(p -> new BigDecimal(p.getValue())).max(BigDecimal::compareTo).orElse(endSoc);
-            startUnit = value.getSampledValue().stream().filter( x -> "Energy.Active.Import.Register".equalsIgnoreCase(x.getMeasurand().value()) && x.getValue()!=null).map(p -> new BigDecimal(p.getValue())).max(BigDecimal::compareTo).orElse(startUnit);
+            startUnit = value.getSampledValue().stream().filter( x -> "Energy.Active.Import.Register".equalsIgnoreCase(x.getMeasurand().name()) && x.getValue()!=null).map(p -> new BigDecimal(p.getValue())).max(BigDecimal::compareTo).orElse(startUnit);
         }
         if (transactionRecord!=null && transactionRecord.getStartSoc() == null && startSoc != null) {                       //For Setting Start SoC
             log.info("Setting start Soc : {} for transaction Id : {}",startSoc, transactionId);
@@ -89,24 +74,24 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
         }
         if (update) {
             log.info("Update Details for transaction ID : {} ", transactionRecord.getId());
-            batchInsertMeterValues(ctx, meterValues, connectorPk,transactionId);
+            batchInsertMeterValues(ctx, meterValues, chargerId, connectorId,transactionId);
         }
 
     }
 
 
     @Override
-    public void updateMeterValues(String chargeBoxIdentity, List<MeterValue> meterValues, Long transactionId) {             //used while stopping an ongoing transaction
+    public void updateMeterValues(Long chargerId, List<MeterValue> meterValues, Long transactionId) {             //used while stopping an ongoing transaction
 
         // Step 1 : Fetching connector on which meter value is to be updated in transaction table
-        Long  connectorId = ctx.select(transaction.CONNECTOR_ID).from(transaction)
-                .where(transaction.ID.equal(transactionId)).fetchOneInto(Long.class);
+        Integer  connectorId = ctx.select(transaction.CONNECTOR_NUMBER).from(transaction)
+                .where(transaction.ID.equal(transactionId)).fetchOneInto(Integer.class);
 
         //Step 2 : Fetching transaction for which meter value is to be updated
         TransactionRecord transactionRecord =  ctx.selectFrom(transaction)
                 .where(transaction.ID.eq(transactionId))
                 .and(transaction.IS_ACTIVE.eq(true))
-                .and(transaction.CONNECTOR_ID.eq(connectorId))
+                .and(transaction.CONNECTOR_NUMBER.eq(connectorId))
                 .orderBy(transaction.ID.desc())
                 .fetchOneInto(TransactionRecord.class);
 
@@ -135,17 +120,18 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
             transactionRecord.update();
 
         }
-        batchInsertMeterValues(ctx, meterValues, connectorId, transactionId);
+        batchInsertMeterValues(ctx, meterValues, chargerId, connectorId, transactionId);
     }
 
     @Override
-    public void batchInsertMeterValues(DSLContext ctx, List<MeterValue> list, Long connectorPk, Long transactionId) {
+    public void batchInsertMeterValues(DSLContext ctx, List<MeterValue> list, Long chargerId, Integer connectorNo, Long transactionId) {
         List<ConnectorMeterValueRecord> batch = new ArrayList<>();
         for(MeterValue meterValue : list){
             List<SampledValue> sampledValues = meterValue.getSampledValue();
             for(SampledValue sampledValue : sampledValues) {
                 ConnectorMeterValueRecord connectorMeterValueRecord = ctx.newRecord(connectorMeterValue);
-                connectorMeterValueRecord.setConnectorId(connectorPk);
+                connectorMeterValueRecord.setChargerId(chargerId);
+                connectorMeterValueRecord.setConnectorNumber(connectorNo);
                 connectorMeterValueRecord.setTransactionId(transactionId);
                 connectorMeterValueRecord.setValue(sampledValue.getValue());
                 connectorMeterValueRecord.setSampledValueOn(meterValue.getTimestamp());

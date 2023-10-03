@@ -1,7 +1,7 @@
 package com.blucharge.ocpp.repository.impl;
 
-import com.blucharge.db.ocpp.tables.TransactionHistory;
-import com.blucharge.db.ocpp.tables.records.TransactionHistoryRecord;
+import com.blucharge.db.ocpp.tables.TransactionSummary;
+import com.blucharge.db.ocpp.tables.records.TransactionSummaryRecord;
 import com.blucharge.ocpp.repository.TransactionHistoryRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -20,27 +20,27 @@ public class TransactionHistoryRepositoryImpl implements TransactionHistoryRepos
     public  TransactionHistoryRepositoryImpl(DSLContext dslContext) {
         this.dslContext = dslContext;
     }
-    private static final TransactionHistory transactionHistory = TransactionHistory.TRANSACTION_HISTORY;
+    private static final TransactionSummary transactionHistory = TransactionSummary.TRANSACTION_SUMMARY;
     @Override
-    public TransactionHistoryRecord doesTransactionExistsInTransactionHistory(Long TransactionId) {
-        TransactionHistoryRecord transactionHistoryRecord = dslContext.select()
+    public TransactionSummaryRecord doesTransactionExistsInTransactionHistory(Long TransactionId) {
+        TransactionSummaryRecord transactionHistoryRecord = dslContext.select()
                 .from(transactionHistory)
                 .where(transactionHistory.TRANSACTION_ID.eq(TransactionId))
-                .fetchOneInto(TransactionHistoryRecord.class);
+                .fetchOneInto(TransactionSummaryRecord.class);
         return  transactionHistoryRecord;
     }
 
     @Override
     public void addTransactionInTransactionHistory(Long TransactionId, String idTag, Long chargerId, Integer connectorNo, BigDecimal startValue, String startOn) {
-        TransactionHistoryRecord transactionHistoryRecord = dslContext.newRecord(transactionHistory);
-        transactionHistoryRecord.setTransactionId(TransactionId);
-        transactionHistoryRecord.setIdTag(idTag);
-        transactionHistoryRecord.setChargerId(chargerId);
-        transactionHistoryRecord.setConnectorNumber(connectorNo);
-        transactionHistoryRecord.setStartValue(startValue);
-        transactionHistoryRecord.setStartTime(startOn);
-        transactionHistoryRecord.setIsActive(true);
-        transactionHistoryRecord.store();
+        TransactionSummaryRecord transactionSummaryRecord = dslContext.newRecord(transactionHistory);
+        transactionSummaryRecord.setTransactionId(TransactionId);
+        transactionSummaryRecord.setIdTag(idTag);
+        transactionSummaryRecord.setChargerId(chargerId);
+        transactionSummaryRecord.setConnectorNumber(connectorNo);
+        transactionSummaryRecord.setMeterStartValue(startValue);
+        transactionSummaryRecord.setStopOn(DateTime.parse(startOn));
+        transactionSummaryRecord.setIsActive(true);
+        transactionSummaryRecord.store();
     }
 
 }
