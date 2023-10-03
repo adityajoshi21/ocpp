@@ -15,7 +15,7 @@ public enum Phase {
     private final String value;
 
     public String value() {
-        return this.name();
+        return this.value;
     }
 
     Phase(String value) {

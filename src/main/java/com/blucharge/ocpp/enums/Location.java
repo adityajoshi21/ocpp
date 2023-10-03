@@ -9,7 +9,7 @@ public enum Location {
 
     private final String value;
     public String value() {
-        return this.name();
+        return this.value;
     }
 
     Location(String value) {
