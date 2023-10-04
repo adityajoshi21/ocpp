@@ -1,5 +1,7 @@
 package com.blucharge.ocpp.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public enum ReadingContext {
     INTERRUPTION_BEGIN("Interruption.Begin"),
     INTERRUPTION_END("Interruption.End"),
@@ -17,6 +19,15 @@ public enum ReadingContext {
 
     ReadingContext(String value) {
         this.value = value;
+    }
+
+    @JsonCreator
+    public static ReadingContext fromValue (String value) {
+        for(ReadingContext readingContext : ReadingContext.values())
+            if(readingContext.value.equalsIgnoreCase(value))
+                return readingContext;
+        throw new IllegalArgumentException("Invalid Reading Context value: " + value);
+
     }
 
 }

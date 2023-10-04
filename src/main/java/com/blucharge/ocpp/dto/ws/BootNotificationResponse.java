@@ -9,11 +9,8 @@ import javax.validation.constraints.NotNull;
 @Data
 public class BootNotificationResponse
 {
-        @NotNull
         private String status;
-        @NotNull
         private DateTime currentTime;
-        @NotNull
         private Integer interval;
 
         public BootNotificationResponse withStatus(RegistrationStatus value) {

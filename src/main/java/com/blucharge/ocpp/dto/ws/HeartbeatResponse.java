@@ -7,7 +7,6 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class HeartbeatResponse {
-    @NotNull
     private DateTime currentTime;
 
 

@@ -3,7 +3,7 @@ package com.blucharge.ocpp.repository.impl;
 import com.blucharge.db.ocpp.tables.Transaction;
 import com.blucharge.db.ocpp.tables.records.TransactionRecord;
 import com.blucharge.ocpp.dto.ws.UpdateTransactionParams;
-import com.blucharge.ocpp.enums.TransactionStatusUpdate;
+import com.blucharge.ocpp.enums.TransactionStateUpdate;
 import com.blucharge.ocpp.repository.ConnectorRepository;
 import com.blucharge.ocpp.repository.OcppTagRepository;
 import com.blucharge.ocpp.repository.TransactionsRepository;
@@ -12,8 +12,6 @@ import org.joda.time.DateTime;
 import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
-import java.util.Objects;
 
 
 @Repository
@@ -42,7 +40,7 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
                 .set(transaction.STOP_ON, params.getStopTimestamp() == null ? DateTime.now() : params.getStopTimestamp())
                 .set(transaction.METER_STOP_VALUE, params.getStopMeterValue())
                 .set(transaction.STOP_REASON, params.getStopReason())
-                .set(transaction.STATE, TransactionStatusUpdate.AfterStop.name())
+                .set(transaction.STATE, TransactionStateUpdate.AfterStop.name())
                 .where(transaction.ID.eq(params.getTransactionId()))
                 .execute();
     }
@@ -52,7 +50,7 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
         return ctx.selectFrom(transaction)
                 .where(transaction.ID.eq(txnId)
                         .and(transaction.CONNECTOR_NUMBER.eq(connectorNo))
-                        .and(transaction.STATE.eq(TransactionStatusUpdate.AfterStart.name()))
+                        .and(transaction.STATE.eq(TransactionStateUpdate.AfterStart.name()))
                         .and(transaction.IS_ACTIVE.eq(true)))
                 .fetchOneInto(TransactionRecord.class);
     }
@@ -80,10 +78,21 @@ public class TransactionsRepositoryImpl implements TransactionsRepository {
         return ctx.selectFrom(transaction)
                 .where(transaction.CONNECTOR_NUMBER.eq(connectorId))
                 .and(transaction.CHARGER_ID.eq(chargerId))
-                .and(transaction.STATE.eq(TransactionStatusUpdate.AfterStart.name()))
+                .and(transaction.STATE.eq(TransactionStateUpdate.AfterStart.name()))
                 .and(transaction.IS_ACTIVE.eq(true))
                 .fetchOneInto(TransactionRecord.class);
     }
+
+    @Override
+    public TransactionRecord getInactiveTransactionOnConnectorId(Long transactionId ,Integer connectorId) {
+        return ctx.selectFrom(transaction)
+                .where(transaction.ID.eq(transactionId))
+                .and(transaction.CONNECTOR_NUMBER.eq(connectorId))
+                .and(transaction.STATE.eq(TransactionStateUpdate.AfterStop.name()))
+                .and(transaction.IS_ACTIVE.eq(true))
+                .fetchOneInto(TransactionRecord.class);
+    }
+
     @Override
     public void stopChargingInitiatedFromRemoteStart(TransactionRecord transactionRecord){
         ctx.update(transaction)

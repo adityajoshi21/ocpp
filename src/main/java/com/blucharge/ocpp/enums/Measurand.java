@@ -1,5 +1,5 @@
 package com.blucharge.ocpp.enums;
-
+import com.fasterxml.jackson.annotation.JsonCreator;
 
 public enum Measurand {
     CURRENT_EXPORT("Current.Export"),
@@ -28,14 +28,23 @@ public enum Measurand {
 
 
     private final String value;
-
-    Measurand(String value) {
-
-        this.value = value;
-    }
-
     public String value() {
-        return this.value();
+        return this.value;
     }
+    Measurand(String value) {
+        this.value = value; }
+
+
+    @JsonCreator
+    public static Measurand fromValue(String value) {
+        for (Measurand measurand : Measurand.values()) {
+            if (measurand.value.equalsIgnoreCase(value)) {
+                return measurand;
+            }
+        }
+        throw new IllegalArgumentException("Invalid Measurand value: " + value);
+    }
+
+
 
 }

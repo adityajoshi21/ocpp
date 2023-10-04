@@ -11,6 +11,7 @@ import com.blucharge.ocpp.repository.*;
 import com.blucharge.ocpp.service.OcppTagService;
 import com.blucharge.ocpp.service.TransactionService;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,9 +37,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private MeterValueRepository meterValueRepository;
     @Autowired
-    private TransactionHistoryRepository transactionHistoryRepository;
-
-
+    private TransactionSummaryRepository transactionSummaryRepository;
 
     @Override
     public StartTransactionResponse startTransaction(StartTransactionRequest request, String chargerIdentity) {
@@ -52,8 +51,9 @@ public class TransactionServiceImpl implements TransactionService {
         ChargerRecord charger = chargerRepository.getChargerFromChargerId(chargerIdentity);
         ConnectorRecord connectorRecord = connectorRepository.getConnectorForChargerIdWithConnectorNumber(charger.getId(), request.getConnectorId());  //fetch connector at which txn has started
         OcppTagRecord ocppTagRecord = ocppTagRepository.getRecord(request.getIdTag());      //get user who started txn
+            //check if connector exists in DB
 
-        if(connectorRecord.getState().toUpperCase().equals("IDLE")) {       //check for connector state  before changing its state
+        if(!Objects.isNull(connectorRecord) && connectorRecord.getState().toUpperCase().equals("IDLE")) {       //check for connector state  before changing its state
             TransactionRecord transactionRecord = new TransactionRecord();
             transactionRecord.setIdTag(ocppTagRecord.getIdTag());
             transactionRecord.setConnectorNumber(request.getConnectorId());
@@ -61,7 +61,7 @@ public class TransactionServiceImpl implements TransactionService {
             transactionRecord.setChargerId(charger.getId());
             transactionRecord.setMeterStartValue(request.getMeterStartValue());
             transactionRecord.setStartOn(request.getTimestamp());
-            transactionRecord.setState(TransactionStatusUpdate.AfterStart.toString());
+            transactionRecord.setState(TransactionStateUpdate.AfterStart.toString());
             Long txnId = transactionsRepository.addTransaction(transactionRecord);
 
             log.info("Transaction accepted on Charger : {} with start value : {} and transaction Id : {}", chargerIdentity, request.getMeterStartValue(), txnId);
@@ -71,9 +71,9 @@ public class TransactionServiceImpl implements TransactionService {
             //Update Connector  status
             connectorRepository.updateConnectorStatus(connectorRecord.getId(), request.getTimestamp(), ConnectorStatus.CHARGING);
 
-            TransactionSummaryRecord transactionSummaryRecord = transactionHistoryRepository.doesTransactionExistsInTransactionHistory(txnId);
+            TransactionSummaryRecord transactionSummaryRecord = transactionSummaryRepository.doesTransactionExistsInTransactionHistory(txnId);
             if(Objects.isNull(transactionSummaryRecord)) {
-                transactionHistoryRepository.addTransactionInTransactionHistory(txnId, request.getIdTag(),charger.getId(), request.getConnectorId(),request.getMeterStartValue(), request.getTimestamp().toString());
+                transactionSummaryRepository.addTransactionInTransactionSummary(txnId, request.getIdTag(),charger.getId(), request.getConnectorId());
             }
             return  new StartTransactionResponse()
                 .withIdTagInfo(idTagInfo)
@@ -88,12 +88,12 @@ public class TransactionServiceImpl implements TransactionService {
 
         Long transactionId = parameters.getTransactionId();
         String stopReason = parameters.getReason();
+        Boolean update = false;
         ChargerRecord charger = chargerRepository.getChargerFromChargerId(chargerId);
         Long txnId = parameters.getTransactionId();
-        //find connector id for transaction id from txn table
         Integer connectorNo = transactionsRepository.findConnectorNoForTransactionId(txnId);
         ConnectorRecord connectorRecord = connectorRepository.getConnectorForChargerIdWithConnectorNumber(charger.getId(),connectorNo);
-        if (connectorRecord.getState().toUpperCase().equals("CHARGING")) {
+        if (!Objects.isNull(connectorRecord) && connectorRecord.getState().toUpperCase().equals("CHARGING")) {
             TransactionRecord tr = transactionsRepository.getActiveTransactionOnConnectorNoForTxnId(transactionId, connectorNo);
             if (!Objects.isNull(tr)) {
                 log.info("Transaction found : {}", tr);
@@ -123,6 +123,7 @@ public class TransactionServiceImpl implements TransactionService {
                 Integer connectorNumber = transactionsRepository.findConnectorNoForTransactionId(parameters.getTransactionId());
                 ConnectorRecord record = connectorRepository.getConnectorForChargerIdWithConnectorNumber(charger.getId(), connectorNumber);
                 connectorRepository.updateConnectorStatus(record.getId(), params.getStopTimestamp(), ConnectorStatus.AVAILABLE);
+                update = true;
             }
 
             // Updating meter value for ongoing transaction
@@ -130,8 +131,16 @@ public class TransactionServiceImpl implements TransactionService {
                 meterValueRepository.updateMeterValues(charger.getId(), parameters.getTransactionData(), transactionId);
             }
 
+            // Updating transaction in transaction history table
+            if(update){
+                TransactionRecord transactionRecord = transactionsRepository.getInactiveTransactionOnConnectorId(transactionId, connectorNo);
+                BigDecimal unitsConsumed = transactionRecord.getMeterStopValue().subtract(transactionRecord.getMeterStartValue());
+                Duration duration = new Duration(transactionRecord.getStartOn(), transactionRecord.getStopOn());
+                BigDecimal socGain = transactionRecord.getEndSoc().subtract(transactionRecord.getStartSoc());
+                transactionSummaryRepository.updateTransactionInTransactionSummary(parameters.getTransactionId(), unitsConsumed, duration, socGain, transactionRecord.getStopReason());
+            }
             // Get the authorization info of the user
-            if (parameters.isSetIdTag()) {
+            if(parameters.isSetIdTag()) {
                 IdTagInfo idTagInfo = ocppTagService.getIdTagInfo(parameters.getIdTag());
                 return new StopTransactionResponse().withIdTagInfo(idTagInfo);
             } else {
@@ -146,34 +155,46 @@ public class TransactionServiceImpl implements TransactionService {
     public RemoteStartTransactionResponse remoteStartTransaction(RemoteStartTransactionRequest request, String chargerIdentity) {
 
         log.info("Remote Start Transaction with params : {}", request);
-        ChargerRecord chargerRecord = chargerRepository.getChargerFromChargerId(chargerIdentity);
-        Integer connectorNo = request.getConnectorId();
-        ConnectorRecord connectorRecord = connectorRepository.getConnectorForChargerIdWithConnectorNumber(chargerRecord.getId(), connectorNo);
-        if(!Objects.isNull(connectorRecord)){
-            IdTagInfo info = ocppTagService.getIdTagInfo(request.getIdTag());
+        if (!Objects.isNull(request.getConnectorId())) {
+            Integer connectorNo = request.getConnectorId();
+            ChargerRecord chargerRecord = chargerRepository.getChargerFromChargerId(chargerIdentity);
 
-            if(!AuthorizationStatus.ACCEPTED.name().equals((info.getStatus()).toString())) {
-                RemoteStartTransactionResponse response = new RemoteStartTransactionResponse();
-                response.setStatus(RemoteStartStopStatus.REJECTED);
-                return  response;
-            }
 
-            TransactionRecord tr = transactionsRepository.getActiveTransactionOnConnectorId(request.getConnectorId(), chargerRecord.getId());
-            if(!Objects.isNull(tr)) {
-            log.info("There is an ongoing transaction in this connector id {}", request.getConnectorId());
-            RemoteStartTransactionResponse response = new RemoteStartTransactionResponse();
-            response.setStatus(RemoteStartStopStatus.REJECTED);
-            return response;
-            }
+            ConnectorRecord connectorRecord = connectorRepository.getConnectorForChargerIdWithConnectorNumber(chargerRecord.getId(), connectorNo);
 
-            else{
-                RemoteStartTransactionResponse response = new RemoteStartTransactionResponse();
-                response.setStatus(RemoteStartStopStatus.ACCEPTED);
-                return  response;
+            if (!Objects.isNull(connectorRecord)) {
+                IdTagInfo info = ocppTagService.getIdTagInfo(request.getIdTag());
+
+                if (!AuthorizationStatus.ACCEPTED.name().equals((info.getStatus()).toString())) {
+                    RemoteStartTransactionResponse response = new RemoteStartTransactionResponse();
+                    response.setStatus(RemoteStartStopStatus.REJECTED);
+                    return response;
+                }
+
+                TransactionRecord tr = transactionsRepository.getActiveTransactionOnConnectorId(request.getConnectorId(), chargerRecord.getId());
+                if (!Objects.isNull(tr)) {
+                    log.info("There is an ongoing transaction in this connector id {}", request.getConnectorId());
+                    RemoteStartTransactionResponse response = new RemoteStartTransactionResponse();
+                    response.setStatus(RemoteStartStopStatus.REJECTED);
+                    return response;
+                } else {
+                    RemoteStartTransactionResponse response = new RemoteStartTransactionResponse();
+                    response.setStatus(RemoteStartStopStatus.ACCEPTED);
+                    return response;
+                }
             }
+            log.info("Connector not found on which txn is to be started");
+            return null;
         }
-        log.info("Connector not found on which txn is to be started");
-        return null;
+        log.info("Connector Id wasn't sent in request");
+        /*ToDo: find first available connector for charger Id and start remote txn on it.
+        1. fetch charger record
+        2. fetch connector record with help of connectorId, charger Id
+        3. check state if the connector state is idle?
+        4. if any connector such record is found send ACCEPTED
+        else REJECTED!
+        */
+            return null;
     }
 
     @Override
@@ -185,7 +206,7 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionRecord tr  = transactionsRepository.getActiveTransactionOnConnectorNoForTxnId(request.getTransactionId(), connectorNo);
 
         if(!Objects.isNull(tr)){
-            transactionsRepository.stopChargingInitiatedFromRemoteStart(tr);
+//            transactionsRepository.stopChargingInitiatedFromRemoteStart(tr);
             RemoteStopTransactionResponse response = new RemoteStopTransactionResponse();
             response.setStatus(RemoteStartStopStatus.ACCEPTED);
             return response;

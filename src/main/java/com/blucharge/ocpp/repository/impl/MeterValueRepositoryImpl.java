@@ -47,7 +47,7 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
         log.info(" Transaction Id : {} Meter Value list {}", transactionId,meterValues);
         for(MeterValue value : meterValues){
             startSoc = value.getSampledValue().stream().filter( x -> "SoC".equalsIgnoreCase(x.getMeasurand().value()) && x.getValue()!= null && x.getContext()!=null && "Transaction.Begin".equalsIgnoreCase(x.getContext().value())).map(p -> new BigDecimal(p.getValue())).max(BigDecimal::compareTo).orElse(startSoc);
-            endSoc = value.getSampledValue().stream().filter( x -> "SoC".equalsIgnoreCase(x.getMeasurand().value()) && x.getValue()!= null && x.getContext()!=null && ! "Transaction.Begin".equalsIgnoreCase(x.getContext().value())).map(p -> new BigDecimal(p.getValue())).max(BigDecimal::compareTo).orElse(endSoc);
+            endSoc = value.getSampledValue().stream().filter( x -> "SoC".equalsIgnoreCase(x.getMeasurand().value()) && x.getValue()!= null && x.getContext()!=null && !"Transaction.Begin".equalsIgnoreCase(x.getContext().value())).map(p -> new BigDecimal(p.getValue())).max(BigDecimal::compareTo).orElse(endSoc);
             startUnit = value.getSampledValue().stream().filter( x -> "Energy.Active.Import.Register".equalsIgnoreCase(x.getMeasurand().name()) && x.getValue()!=null).map(p -> new BigDecimal(p.getValue())).max(BigDecimal::compareTo).orElse(startUnit);
         }
         if (transactionRecord!=null && transactionRecord.getStartSoc() == null && startSoc != null) {                       //For Setting Start SoC

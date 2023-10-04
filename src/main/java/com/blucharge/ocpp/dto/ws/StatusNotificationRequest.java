@@ -7,11 +7,8 @@ import org.joda.time.DateTime;
 
 @Data
 public class StatusNotificationRequest{
-    @NotNull (message = "Connector Id not found in request")
     private Integer connectorId;
-    @NotNull (message = "Status not found in Status Notification request")
     private String status;
-    @NotNull (message = "Error code not found in request")
     private String errorCode;
     private String errorInfo;
     private DateTime timestamp;

@@ -1,6 +1,6 @@
 package com.blucharge.ocpp.dto.ws;
 
-import com.blucharge.ocpp.enums.TransactionStatusUpdate;
+import com.blucharge.ocpp.enums.TransactionStateUpdate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,5 +20,5 @@ public class UpdateTransactionParams {
     private final String stopReason;
     private List<MeterValue> transactionData;
 
-    private  final TransactionStatusUpdate statusUpdate = TransactionStatusUpdate.AfterStop;
+    private  final TransactionStateUpdate statusUpdate = TransactionStateUpdate.AfterStop;
 }

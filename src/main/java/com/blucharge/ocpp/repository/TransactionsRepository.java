@@ -9,6 +9,9 @@ public interface TransactionsRepository {
     Long addTransaction(TransactionRecord record);
     Integer findConnectorNoForTransactionId(Long transactionId);
     TransactionRecord getActiveTransactionOnConnectorId(Integer connectorId, Long chargerId);
+
+    TransactionRecord getInactiveTransactionOnConnectorId(Long txnId, Integer connectorId);
+
     void stopChargingInitiatedFromRemoteStart(TransactionRecord txnRecord);
 
     //TransactionRecord getTransactionForParams(Long chargerId, String idTag, Integer connectorId, BigDecimal meterStartVal);

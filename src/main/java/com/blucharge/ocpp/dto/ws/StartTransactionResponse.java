@@ -10,7 +10,6 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StartTransactionResponse{
-    @NotNull
     private Long transactionId;
     private IdTagInfo idTagInfo;
     public StartTransactionResponse withTransactionId(Long value) {
