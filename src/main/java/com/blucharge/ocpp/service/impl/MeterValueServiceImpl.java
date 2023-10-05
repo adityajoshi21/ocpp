@@ -44,6 +44,7 @@ public class MeterValueServiceImpl implements MeterValueService {
                 }
             }
         }
+        log.info("Meter values weren't set in the incoming meter value request on Transaction ID {} ", request.getTransactionId());
         return null;
     }
 }

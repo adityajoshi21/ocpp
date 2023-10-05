@@ -18,11 +18,4 @@ public interface ConnectorRepository {
     void updateConnectorStatus(Long connectorNo, DateTime timestamp, ConnectorStatus statusUpdate);
     ConnectorRecord getConnectorRecordFromConnectorId(Long connectorId, Long chargerId);
 
-
-//    String getConnectorStateByConnectorPk(Long connectorId);
-//    Long getConnectorPkFromConnector(Long chargerId, Long connectorId);
-//void insertIgnoreConnector(Long chargerId, Long connectorId);
-//    List<ConnectorRecord> getAllConnectorsForChargerId(Long chargerId);
-//    void insertConnector(ConnectorRequest connectorRequest);
-
 }

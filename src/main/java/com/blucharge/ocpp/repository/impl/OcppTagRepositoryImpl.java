@@ -2,10 +2,8 @@ package com.blucharge.ocpp.repository.impl;
 
 import com.blucharge.db.ocpp.tables.OcppTag;
 import com.blucharge.db.ocpp.tables.records.OcppTagRecord;
-import com.blucharge.ocpp.dto.ws.StartTransactionRequest;
 import com.blucharge.ocpp.repository.OcppTagRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -37,19 +35,5 @@ public class OcppTagRepositoryImpl implements OcppTagRepository {
                 .and(ocppTag.IS_ACTIVE.eq(true))
                 .fetchOne();
     }
-
-//    @Override
-//    public boolean insertIgnoreIdTag( StartTransactionRequest req) {
-//        String notes = "This is an unknown IdTag used in a transaction, that started at : "
-//                + req.getTimestamp() + ". It was reported on :" + DateTime.now()+ ".";
-//
-//        int count = ctx.insertInto(ocppTag)
-//                .set(ocppTag.ID_TAG, req.getIdTag())
-//                .set(ocppTag.NOTES, notes)
-//                .set(ocppTag.BLOCKED, true)
-//                .onDuplicateKeyIgnore()
-//                .execute();
-//        return count == 1;
-//    }
 
 }

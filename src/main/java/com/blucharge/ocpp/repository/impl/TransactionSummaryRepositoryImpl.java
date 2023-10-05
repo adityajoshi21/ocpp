@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Objects;
 
 @Slf4j
@@ -44,12 +45,12 @@ public class TransactionSummaryRepositoryImpl implements TransactionSummaryRepos
 
 
     @Override
-    public void updateTransactionInTransactionSummary(Long transactionId, BigDecimal unitsConsumed, Duration duration, BigDecimal socGain, String stopReason) {
+    public void updateTransactionInTransactionSummary(Long transactionId, BigDecimal unitsConsumed, Long duration, BigDecimal socGain, String stopReason) {
         TransactionSummaryRecord transactionSummaryRecord = dslContext.selectFrom(transactionHistory).where(transactionHistory.TRANSACTION_ID.eq(transactionId)).and(transactionHistory.IS_ACTIVE.eq(true)).fetchOneInto(TransactionSummaryRecord.class);
         if(!Objects.isNull(transactionSummaryRecord)){
             transactionSummaryRecord.setUnitsConsumed(unitsConsumed);
+            transactionSummaryRecord.setRunningTime(duration);
             transactionSummaryRecord.setSocGained(socGain);
-//            transactionSummaryRecord.setRunningTime();
             transactionSummaryRecord.setStopReason(stopReason);
             transactionSummaryRecord.update();
         }

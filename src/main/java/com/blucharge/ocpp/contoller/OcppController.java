@@ -9,10 +9,7 @@ import com.blucharge.ocpp.dto.ws.*;
 import com.blucharge.ocpp.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 
 import static com.blucharge.ocpp.constants.ApplicationConstants.TEST_CHARGER;
 

@@ -11,7 +11,6 @@ import com.blucharge.ocpp.repository.*;
 import com.blucharge.ocpp.service.OcppTagService;
 import com.blucharge.ocpp.service.TransactionService;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -57,7 +56,6 @@ public class TransactionServiceImpl implements TransactionService {
             TransactionRecord transactionRecord = new TransactionRecord();
             transactionRecord.setIdTag(ocppTagRecord.getIdTag());
             transactionRecord.setConnectorNumber(request.getConnectorId());
-//            transactionRecord.setConnectorName(connectorRecord.getName());
             transactionRecord.setChargerId(charger.getId());
             transactionRecord.setMeterStartValue(request.getMeterStartValue());
             transactionRecord.setStartOn(request.getTimestamp());
@@ -134,8 +132,11 @@ public class TransactionServiceImpl implements TransactionService {
             // Updating transaction in transaction history table
             if(update){
                 TransactionRecord transactionRecord = transactionsRepository.getInactiveTransactionOnConnectorId(transactionId, connectorNo);
+                Long startOn = transactionRecord.getStartOn().getMillis();
+                Long stopOn = transactionRecord.getStopOn().getMillis();
+
                 BigDecimal unitsConsumed = transactionRecord.getMeterStopValue().subtract(transactionRecord.getMeterStartValue());
-                Duration duration = new Duration(transactionRecord.getStartOn(), transactionRecord.getStopOn());
+                Long duration = stopOn - startOn;
                 BigDecimal socGain = transactionRecord.getEndSoc().subtract(transactionRecord.getStartSoc());
                 transactionSummaryRepository.updateTransactionInTransactionSummary(parameters.getTransactionId(), unitsConsumed, duration, socGain, transactionRecord.getStopReason());
             }
