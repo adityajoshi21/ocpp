@@ -93,4 +93,13 @@ public class ChargerRepositoryImpl implements ChargerRepository {
                 .set(charger.NO_OF_CONNECTORS, currentCount)
                 .where(charger.ID.eq(chargerId)).and(charger.IS_ACTIVE.eq(true)).execute();
     }
+
+    @Override
+    public Integer findNoOfConnectorsForCharger(Long chargerId) {
+        return ctx.select(charger.NO_OF_CONNECTORS)
+                .from(charger)
+                .where(charger.ID.eq(chargerId))
+                .and(charger.IS_ACTIVE.eq(true))
+                .fetchOneInto(Integer.class);
+    }
 }

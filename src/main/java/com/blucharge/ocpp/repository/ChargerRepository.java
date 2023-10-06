@@ -13,5 +13,6 @@ public interface ChargerRepository {
     void updateChargerHeartbeat(String chargeBoxIdentity, DateTime ts);
     ChargerRecord getChargerFromChargerId(String chargerIdentity);
    void updateNumberOfConnectors (Long chargerId, Integer currentCount);
+   Integer findNoOfConnectorsForCharger(Long chargerId);
 
 }

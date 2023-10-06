@@ -65,10 +65,10 @@ public class ConnectorServiceImpl implements ConnectorService {
         //check if connector Exists?
         ChargerRecord charger = chargerRepository.getChargerFromChargerId(chargerIdentity);
         Long id = charger.getId();
-        ConnectorRecord connector = connectorRepository.getConnectorForChargerIdWithConnectorNumber(id, request.getConnectorId());
+        ConnectorRecord connectorRecord = connectorRepository.getConnectorForChargerIdWithConnectorNumber(id, request.getConnectorId());
 
-        if(Objects.isNull(connector)){
-            log.error("ConnectorId not found for requested connector on which unlock connector command is sent");
+        if(Objects.isNull(connectorRecord)){
+            log.error("ConnectorI not found on which unlock connector command is sent");
             UnlockConnectorResponse response = new UnlockConnectorResponse();
             response.setStatus(UnlockStatus.UNLOCK_FAILED);
             return  response;

@@ -188,14 +188,24 @@ public class TransactionServiceImpl implements TransactionService {
             return null;
         }
         log.info("Connector Id wasn't sent in request");
-        /*ToDo: find first available connector for charger Id and start remote txn on it.
-        1. fetch charger record
-        2. fetch connector record with help of connectorId, charger Id
-        3. check state if the connector state is idle?
-        4. if any connector such record is found send ACCEPTED
-        else REJECTED!
-        */
-            return null;
+
+        ChargerRecord chargerRecord = chargerRepository.getChargerFromChargerId(chargerIdentity);
+        Integer connectorNo = chargerRepository.findNoOfConnectorsForCharger(chargerRecord.getId());
+
+
+        for (int i = 1; i <= connectorNo; i++) {
+            ConnectorRecord connectorRecord = connectorRepository.getConnectorForChargerIdWithConnectorNumber(chargerRecord.getId(), i);
+            IdTagInfo info = ocppTagService.getIdTagInfo(request.getIdTag());
+            if (connectorRecord.getState().equalsIgnoreCase("Idle") && AuthorizationStatus.ACCEPTED.name().equals((info.getStatus()).toString())) {
+                RemoteStartTransactionResponse response = new RemoteStartTransactionResponse();
+                response.setStatus(RemoteStartStopStatus.ACCEPTED);
+                return response;
+            }
+        }
+          RemoteStartTransactionResponse remoteStartTransactionResponse = new RemoteStartTransactionResponse();
+          remoteStartTransactionResponse.setStatus(RemoteStartStopStatus.REJECTED);
+          return remoteStartTransactionResponse;
+
     }
 
     @Override
