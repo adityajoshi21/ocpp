@@ -52,7 +52,7 @@ public class TransactionServiceImpl implements TransactionService {
         OcppTagRecord ocppTagRecord = ocppTagRepository.getRecord(request.getIdTag());      //get user who started txn
             //check if connector exists in DB
 
-        if(!Objects.isNull(connectorRecord) && connectorRecord.getState().toUpperCase().equals("IDLE")) {       //check for connector state  before changing its state
+        if(!Objects.isNull(connectorRecord) && (connectorRecord.getState().toUpperCase().equals("IDLE") || connectorRecord.getState().toUpperCase().equals("WAITING_FOR_CHARGER_RESPONSE"))) {       //check for connector state  before changing its state
             TransactionRecord transactionRecord = new TransactionRecord();
             transactionRecord.setIdTag(ocppTagRecord.getIdTag());
             transactionRecord.setConnectorNumber(request.getConnectorId());
@@ -91,7 +91,7 @@ public class TransactionServiceImpl implements TransactionService {
         Long txnId = parameters.getTransactionId();
         Integer connectorNo = transactionsRepository.findConnectorNoForTransactionId(txnId);
         ConnectorRecord connectorRecord = connectorRepository.getConnectorForChargerIdWithConnectorNumber(charger.getId(),connectorNo);
-        if (!Objects.isNull(connectorRecord) && connectorRecord.getState().toUpperCase().equals("CHARGING")) {
+        if (!Objects.isNull(connectorRecord) && (connectorRecord.getState().toUpperCase().equals("CHARGING") || connectorRecord.getStatus().toUpperCase().equals("FINISHING"))) {
             TransactionRecord tr = transactionsRepository.getActiveTransactionOnConnectorNoForTxnId(transactionId, connectorNo);
             if (!Objects.isNull(tr)) {
                 log.info("Transaction found : {}", tr);
@@ -134,11 +134,14 @@ public class TransactionServiceImpl implements TransactionService {
                 TransactionRecord transactionRecord = transactionsRepository.getInactiveTransactionOnConnectorId(transactionId, connectorNo);
                 Long startOn = transactionRecord.getStartOn().getMillis();
                 Long stopOn = transactionRecord.getStopOn().getMillis();
-
+                if(!Objects.isNull(transactionRecord.getEndSoc()) && !Objects.isNull(transactionRecord.getStartSoc())){
+                BigDecimal socGain = transactionRecord.getEndSoc().subtract(transactionRecord.getStartSoc());
                 BigDecimal unitsConsumed = transactionRecord.getMeterStopValue().subtract(transactionRecord.getMeterStartValue());
                 Long duration = stopOn - startOn;
-                BigDecimal socGain = transactionRecord.getEndSoc().subtract(transactionRecord.getStartSoc());
                 transactionSummaryRepository.updateTransactionInTransactionSummary(parameters.getTransactionId(), unitsConsumed, duration, socGain, transactionRecord.getStopReason());
+                }
+                else
+                    log.info("Meter values not set!");
             }
             // Get the authorization info of the user
             if(parameters.isSetIdTag()) {
@@ -181,6 +184,7 @@ public class TransactionServiceImpl implements TransactionService {
                 } else {
                     RemoteStartTransactionResponse response = new RemoteStartTransactionResponse();
                     response.setStatus(RemoteStartStopStatus.ACCEPTED);
+                    log.info("Remote Txn started on Charger Id : {}, on Connector No {}", connectorRecord.getChargerId(), connectorNo);
                     //ToDo: move to repository
 
                     connectorRecord.setStatus(ConnectorStatus.PREPARING.name());
@@ -207,6 +211,7 @@ public class TransactionServiceImpl implements TransactionService {
                 connectorRecord.setStatus(ConnectorStatus.PREPARING.name());
                 connectorRecord.setState(ConnectorState.WAITING_FOR_CHARGER_RESPONSE.name());
                 connectorRecord.update();
+                log.info("Remote Txn started on Charger Id : {}, on Connector No {}", connectorRecord.getChargerId(), connectorNo);
                 return response;
             }
         }
