@@ -12,6 +12,7 @@ import com.blucharge.ocpp.repository.ChargerRepository;
 import com.blucharge.ocpp.service.ChargerService;
 import com.google.common.util.concurrent.Striped;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 
 import static com.blucharge.ocpp.constants.ApplicationConstants.HEARTBEAT_INTERVAL;
@@ -77,7 +79,8 @@ public class ChargerServiceImpl implements ChargerService {
             try {
                 ChargerRequest request = new ChargerRequest();
                 request.setChargerName(chargerName);
-                request.setUuid("test");
+                String uuid = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 14);
+                request.setUuid(uuid);
                 Integer noOfConnectors = 0;
                 request.setNoOfConnectors(noOfConnectors);
 

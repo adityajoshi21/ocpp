@@ -27,7 +27,7 @@ public class OcppTagServiceImpl implements OcppTagService {
         IdTagInfo idTagInfo = new IdTagInfo();
 
 
-        if (ocppTagRecord == null) {
+        if (Objects.isNull(ocppTagRecord)) {
             log.error("The user with idTag '{}' is INVALID (not present in DB).", idTag);
             idTagInfo.setStatus(AuthorizationStatus.INVALID);
             // unknownChargePointService.processNewUnidentified(idTag);

@@ -30,7 +30,7 @@ public class MeterValueServiceImpl implements MeterValueService {
 
     @Override
     public MeterValueResponse meterValue(MeterValueRequest request, String chargerId) {
-        ChargerRecord chargerRecord = chargerRepository.getChargerFromChargerId(chargerId);
+        ChargerRecord chargerRecord = chargerRepository.getChargerFromChargerId(chargerId).get(0);
         if(request.isSetMeterValue()) {
             Long transactionId = request.getTransactionId();
 
@@ -39,7 +39,7 @@ public class MeterValueServiceImpl implements MeterValueService {
                 if (!Objects.isNull(txnRecord)) {
                     log.info("Saving meter values for Transaction ID : {}", request.getTransactionId());
 
-                    ChargerRecord charger = chargerRepository.getChargerFromChargerId(chargerId);
+                    ChargerRecord charger = chargerRepository.getChargerFromChargerId(chargerId).get(0);
                     meterValueRepository.insertMeterValues(chargerRecord.getId(), request.getMeterValue(), request.getConnectorId(), request.getTransactionId());
                 }
             }

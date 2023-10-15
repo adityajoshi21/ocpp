@@ -1,9 +1,5 @@
 package com.blucharge.ocpp.config;
 
-
-//import com.zaxxer.hikari.HikariConfig;
-//import com.zaxxer.hikari.HikariDataSource;
-
 import com.blucharge.ocpp.dto.Credentials;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -57,8 +53,5 @@ public class SecretsManager {
         return  new Gson().fromJson(secret,Credentials.class);
 
     }
-
-
-
 
 }

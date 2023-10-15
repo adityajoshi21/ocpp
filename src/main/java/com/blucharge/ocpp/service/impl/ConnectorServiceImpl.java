@@ -36,7 +36,8 @@ public class ConnectorServiceImpl implements ConnectorService {
     @Override
     public StatusNotificationResponse statusNotification(StatusNotificationRequest parameters, String chargerIdentity){
 
-        ChargerRecord chargerRecord =chargerRepository.getChargerFromChargerId(chargerIdentity);   //Exception handler needed if charger record is null i.e. charger doesn't exist in table
+        ChargerRecord chargerRecord = chargerRepository.getChargerFromChargerId(chargerIdentity).get(0);   //Exception handler needed if charger record is null i.e. charger doesn't exist in table
+        if(!Objects.isNull(chargerRecord)){
         Integer noOfConnectors = chargerRecord.getNoOfConnectors();
         if(parameters.getConnectorId() == 0){       // if it is 0; update heartbeat in Charger Table and move on
             log.info("No of connectors for Charger Id {} , found to be 0 updating heartbeat", chargerIdentity);
@@ -55,16 +56,20 @@ public class ConnectorServiceImpl implements ConnectorService {
             chargerRepository.updateNumberOfConnectors(chargerRecord.getId(), noOfConnectors+1);
         }
         connectorRepository.updateConnectorStatus(parameters, chargerRecord.getId());
+        }
 
         return new StatusNotificationResponse("{}");
+
     }
 
 
     @Override
     public UnlockConnectorResponse unlockConnector(UnlockConnectorRequest request, String chargerIdentity) {
         //check if connector Exists?
-        ChargerRecord charger = chargerRepository.getChargerFromChargerId(chargerIdentity);
-        Long id = charger.getId();
+        ChargerRecord charger = chargerRepository.getChargerFromChargerId(chargerIdentity).get(0);
+        Long id = null;
+        if(!Objects.isNull(charger)){
+        id = charger.getId();}
         ConnectorRecord connectorRecord = connectorRepository.getConnectorForChargerIdWithConnectorNumber(id, request.getConnectorId());
 
         if(Objects.isNull(connectorRecord)){

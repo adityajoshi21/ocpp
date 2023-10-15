@@ -13,6 +13,7 @@ import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 
 import static com.blucharge.ocpp.constants.ApplicationConstants.OCPP_VERSION;
@@ -80,11 +81,11 @@ public class ChargerRepositoryImpl implements ChargerRepository {
     }
 
     @Override
-    public ChargerRecord getChargerFromChargerId(String chargerIdentity) {
+    public List <ChargerRecord> getChargerFromChargerId(String chargerIdentity) {
         return ctx.selectFrom(charger)
                 .where(charger.CHARGER_NAME.equal(chargerIdentity))
                 .and(charger.IS_ACTIVE.eq(true))
-                .fetchOneInto(ChargerRecord.class);
+                .fetchInto(ChargerRecord.class);
     }
 
     @Override

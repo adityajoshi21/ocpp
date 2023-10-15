@@ -5,6 +5,7 @@ package com.blucharge.ocpp.enums;
 public enum ConnectorStatus {
     AVAILABLE("Available"),
     CHARGING("Charging"),
+    PREPARING ("Preparing"),
     SUSPENDED_EV("SuspendedEV"),
     SUSPENDED_EVSE("SuspendedEVSE"),
     FINISHING("Finishing"),
