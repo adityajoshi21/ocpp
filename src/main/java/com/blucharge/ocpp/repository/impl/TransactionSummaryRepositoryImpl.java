@@ -53,8 +53,8 @@ public class TransactionSummaryRepositoryImpl implements TransactionSummaryRepos
             transactionSummaryRecord.setSocGained(socGain);
             transactionSummaryRecord.setStopReason(stopReason);
             transactionSummaryRecord.update();
+            log.info("Updating Transaction with Transaction ID {} in Txn Summary", transactionId);
         }
-        log.info("Transaction with Transaction ID {} not found in Txn Summary", transactionId);
     }
 
 }

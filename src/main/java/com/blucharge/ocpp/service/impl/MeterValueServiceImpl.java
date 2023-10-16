@@ -33,18 +33,27 @@ public class MeterValueServiceImpl implements MeterValueService {
         ChargerRecord chargerRecord = chargerRepository.getChargerFromChargerId(chargerId).get(0);
         if(request.isSetMeterValue()) {
             Long transactionId = request.getTransactionId();
-
-            if(!Objects.isNull(transactionId)) {
-                TransactionRecord txnRecord = transactionsRepository.getActiveTransactionOnConnectorNoForTxnId(transactionId, request.getConnectorId());
+            Integer connectorId = request.getConnectorId();
+            if(! Objects.isNull(transactionId) && ! Objects.isNull(connectorId)) {
+                TransactionRecord txnRecord = transactionsRepository.getActiveTransactionOnConnectorNoForTxnId(transactionId, connectorId);
                 if (!Objects.isNull(txnRecord)) {
                     log.info("Saving meter values for Transaction ID : {}", request.getTransactionId());
 
-                    ChargerRecord charger = chargerRepository.getChargerFromChargerId(chargerId).get(0);
                     meterValueRepository.insertMeterValues(chargerRecord.getId(), request.getMeterValue(), request.getConnectorId(), request.getTransactionId());
                 }
             }
+            else if (!Objects.isNull(connectorId)){
+                TransactionRecord transactionRecord = transactionsRepository.getActiveTransactionOnConnectorId(connectorId, chargerRecord.getId());
+                if (!Objects.isNull(transactionRecord)) {
+                    log.info("Saving meter values for Connector ID : {}, Charger Id : {}", request.getConnectorId(), chargerRecord.getId());
+                    meterValueRepository.insertMeterValues(chargerRecord.getId(), request.getMeterValue(), request.getConnectorId(), transactionRecord.getId());
+                }
+            }
+            return new MeterValueResponse("{}");
         }
-        log.info("Meter values weren't set in the incoming meter value request on Transaction ID {} ", request.getTransactionId());
-        return null;
+        else{
+            log.info("Meter value not sent");
+            return  new MeterValueResponse("Meter value were not sent in the request");
+        }
     }
 }

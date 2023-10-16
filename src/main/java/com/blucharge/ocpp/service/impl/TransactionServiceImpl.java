@@ -211,7 +211,7 @@ public class TransactionServiceImpl implements TransactionService {
                 connectorRecord.setStatus(ConnectorStatus.PREPARING.name());
                 connectorRecord.setState(ConnectorState.WAITING_FOR_CHARGER_RESPONSE.name());
                 connectorRecord.update();
-                log.info("Remote Txn started on Charger Id : {}, on Connector No {}", connectorRecord.getChargerId(), connectorNo);
+                log.info("Remote Txn started on Charger Id : {}, on Connector No {}", connectorRecord.getChargerId(), i);
                 return response;
             }
         }

@@ -135,6 +135,7 @@ public class MeterValueRepositoryImpl implements MeterValueRepository {
                 connectorMeterValueRecord.setTransactionId(transactionId);
                 connectorMeterValueRecord.setValue(sampledValue.getValue());
                 connectorMeterValueRecord.setSampledValueOn(meterValue.getTimestamp());
+                connectorMeterValueRecord.setIsActive(Boolean.TRUE);
 
                 //Following are optional fields, so we put a conditional check if the values are set
                 if (sampledValue.isSetContext()) {
