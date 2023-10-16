@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Objects;
 
@@ -34,11 +35,18 @@ public class ConnectorServiceImpl implements ConnectorService {
     private TransactionsRepository transactionsRepository;
 
     @Override
-    public StatusNotificationResponse statusNotification(StatusNotificationRequest parameters, String chargerIdentity){
+    public StatusNotificationResponse statusNotification( StatusNotificationRequest parameters, String chargerIdentity){
 
         ChargerRecord chargerRecord = chargerRepository.getChargerFromChargerId(chargerIdentity).get(0);   //Exception handler needed if charger record is null i.e. charger doesn't exist in table
         if(!Objects.isNull(chargerRecord)){
         Integer noOfConnectors = chargerRecord.getNoOfConnectors();
+            if(Objects.isNull(parameters.getConnectorId()))
+                log.error("Connector Id not sent in request {}", parameters);
+
+             if(Objects.isNull(parameters.getStatus()))
+                log.error("Connector Id not sent in request {}", parameters);
+
+
         if(parameters.getConnectorId() == 0){       // if it is 0; update heartbeat in Charger Table and move on
             log.info("No of connectors for Charger Id {} , found to be 0 updating heartbeat", chargerIdentity);
             chargerRepository.updateChargerHeartbeat(chargerIdentity, DateTime.now());
@@ -54,10 +62,11 @@ public class ConnectorServiceImpl implements ConnectorService {
             record.setState(ConnectorState.IDLE.name());
             connectorRepository.addConnector(record);
             chargerRepository.updateNumberOfConnectors(chargerRecord.getId(), noOfConnectors+1);
+            log.info("Status notification received for Connector No : {}, charger ID {}", parameters.getConnectorId(), chargerRecord.getId());
         }
+        log.info("Updating Status Notification for Connector No : {}, charger ID {} ", parameters.getConnectorId(),chargerRecord.getId());
         connectorRepository.updateConnectorStatus(parameters, chargerRecord.getId());
         }
-
         return new StatusNotificationResponse("{}");
 
     }
