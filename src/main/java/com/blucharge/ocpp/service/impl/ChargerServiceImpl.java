@@ -1,18 +1,17 @@
 package com.blucharge.ocpp.service.impl;
 
-import com.blucharge.ocpp.constants.ApplicationConstants;
-import com.blucharge.ocpp.dto.*;
+import com.blucharge.db.ocpp.tables.records.ChargerRecord;
+import com.blucharge.db.ocpp.tables.records.ConnectorRecord;
 import com.blucharge.ocpp.dto.api.*;
-import com.blucharge.ocpp.dto.ws.BootNotificationRequest;
-import com.blucharge.ocpp.dto.ws.BootNotificationResponse;
-import com.blucharge.ocpp.dto.ws.HeartbeatRequest;
-import com.blucharge.ocpp.dto.ws.HeartbeatResponse;
+import com.blucharge.ocpp.dto.boot_notification.BootNotificationRequest;
+import com.blucharge.ocpp.dto.boot_notification.BootNotificationResponse;
+import com.blucharge.ocpp.dto.heartbeat.HeartbeatRequest;
+import com.blucharge.ocpp.dto.heartbeat.HeartbeatResponse;
 import com.blucharge.ocpp.enums.*;
 import com.blucharge.ocpp.repository.ChargerRepository;
+import com.blucharge.ocpp.repository.ConnectorRepository;
 import com.blucharge.ocpp.service.ChargerService;
-import com.google.common.util.concurrent.Striped;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,88 +20,58 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.locks.Lock;
 
-import static com.blucharge.ocpp.constants.ApplicationConstants.HEARTBEAT_INTERVAL;
+import static com.blucharge.ocpp.constants.StringConstant.HEART_BEAT_INTERVAL;
 
 
 @Slf4j
 @Service
 public class ChargerServiceImpl implements ChargerService {
-
     @Autowired
     private ChargerRepository chargerRepository;
 
-    private final Striped<Lock> isRegisteredLocks = Striped.lock(16);
-
+    @Autowired
+    private ConnectorRepository connectorRepository;
     @Override
-    public BootNotificationResponse bootNotification(BootNotificationRequest parameters,  String chargerIdentity) {
-//        if (protocol.getVersion() != OcppVersion.V_16) {
-//            throw new IllegalArgumentException("Unexpected OCPP version: " + protocol.getVersion() + "We only support 1.6");
-//        }
-
-        Boolean isRegistered = isRegistered(chargerIdentity);         //check if charger exists in DB
-        DateTime now = DateTime.now();
+    public BootNotificationResponse insertBootNotification(BootNotificationRequest parameters, String chargerName) {
+        Boolean isRegistered = isChargerRegistered(chargerName);
 
         if (Boolean.TRUE.equals(isRegistered)) {
-            log.info("The charger '{}' is registered and its boot notification is acknowledged.", chargerIdentity);
-            chargerRepository.updateBootNotificationForCharger(parameters, chargerIdentity);
+            chargerRepository.updateBootNotificationForCharger(parameters, chargerName);
         } else {
-            log.error("The charger '{}' is NOT registered and its boot is NOT acknowledged.", ApplicationConstants.TEST_CHARGER);
-            //chargePointHelperService.rememberNewUnknowns(chargerIdentity);       //To clarify in review
+            log.info("The charger is not registered with blucharge"+ chargerName);
         }
 
-        return new BootNotificationResponse()
-                .withStatus(Boolean.TRUE.equals(isRegistered) ? RegistrationStatus.ACCEPTED : RegistrationStatus.REJECTED)
-                .withCurrentTime(now)
-                .withInterval(HEARTBEAT_INTERVAL);
+        return new BootNotificationResponse(
+                Boolean.TRUE.equals(isRegistered) ? RegistrationStatus.ACCEPTED : RegistrationStatus.REJECTED,
+                DateTime.now(),
+                HEART_BEAT_INTERVAL
+        );
     }
 
     @Override
-    public HeartbeatResponse heartbeat(HeartbeatRequest request, String chargerIdentity) {
-        DateTime now = DateTime.now();
-        chargerRepository.updateChargerHeartbeat(chargerIdentity, now);
-        return new HeartbeatResponse().withCurrentTime(now);
-    }
-
-    @Override
-    public Boolean isRegistered(String chargerName) {
-        Lock l = isRegisteredLocks.get(chargerName);
-        l.lock();
-
-        try {
-            if (chargerRepository.isRegisteredInternal(chargerName)) {
-                return true;
-            }
-
-            try {
-                ChargerRequest request = new ChargerRequest();
-                request.setChargerName(chargerName);
-                String uuid = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 14);
-                request.setUuid(uuid);
-                Integer noOfConnectors = 0;
-                request.setNoOfConnectors(noOfConnectors);
-
-                Long insertedChargerId = chargerRepository.addCharger(request);
-
-                log.warn("Auto-registered unknown charger '{}' with chargerId '{}'", chargerName, insertedChargerId);
-                return true;
-            } catch (Exception e) {
-                log.error("Failed to auto-register unknown charger '" + chargerName + "'", e);
-                return false;
-            }
-        } finally {
-            l.unlock();
+    public HeartbeatResponse insertHeartbeat(HeartbeatRequest request, String chargerName) {
+        ChargerRecord chargerRecord = chargerRepository.getChargerRecordFromName(chargerName);
+        chargerRepository.updateChargerHeartBeat(chargerRecord.getId(), DateTime.now());
+        List<ConnectorRecord> connectorRecords = connectorRepository.getConnectorRecordForChargerId(chargerRecord.getId());
+        for(ConnectorRecord connectorRecord:connectorRecords){
+            connectorRepository.updateConnectorHeartBeat(connectorRecord.getId(),DateTime.now());
         }
+        return new HeartbeatResponse(DateTime.now());
     }
 
     @Override
-    public GetConfigResponse getConfiguration(GetConfigRequest getConfigRequest, String chargerIdentity) {
+    public Boolean isChargerRegistered(String chargerName) {
+        ChargerRecord chargerRecord = chargerRepository.getChargerRecordFromName(chargerName);
+        return !Objects.isNull(chargerRecord);
+    }
 
-        Boolean doesChargerExist = isRegistered(chargerIdentity);
+    @Override
+    public GetConfigResponse getConfiguration(GetConfigRequest getConfigRequest, String chargerName) {
+
+        Boolean doesChargerExist = isChargerRegistered(chargerName);
         if(Boolean.FALSE.equals(doesChargerExist)){
-            log.error("Charger {} doesn't exist for which we are seeking configurations", chargerIdentity);
+            log.error("Charger {} doesn't exist for which we are seeking configurations", chargerName);
         }
 
         List<String> keys = getConfigRequest.getKey();
@@ -122,7 +91,7 @@ public class ChargerServiceImpl implements ChargerService {
     }
 
     @Override
-    public ChangeConfigResponse changeConfiguration(ChangeConfigRequest changeConfigRequest, String chargerIdentity) {
+    public ChangeConfigResponse changeConfiguration(ChangeConfigRequest changeConfigRequest, String chargerName) {
         // TODO: How to fetch all configs of a charger?
         //Fetch list/map of all configs of a charger
 
@@ -139,7 +108,7 @@ public class ChargerServiceImpl implements ChargerService {
     }
 
     @Override
-    public TriggerMessageResponse triggerMessage(TriggerMessageRequest triggerMessageRequest, String chargerIdentity) {
+    public TriggerMessageResponse triggerMessage(TriggerMessageRequest triggerMessageRequest, String chargerName) {
         TriggerMessageResponse triggerMessageResponse = new TriggerMessageResponse();
         Boolean flag = MessageTrigger.checkForValidEnum(triggerMessageRequest.getRequestedMessage());
         triggerMessageResponse.setStatus(Boolean.TRUE.equals(flag) ? TriggerMessageStatus.ACCEPTED : TriggerMessageStatus.REJECTED);

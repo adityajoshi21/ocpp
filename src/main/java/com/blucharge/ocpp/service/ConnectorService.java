@@ -2,10 +2,10 @@ package com.blucharge.ocpp.service;
 
 import com.blucharge.ocpp.dto.api.UnlockConnectorRequest;
 import com.blucharge.ocpp.dto.api.UnlockConnectorResponse;
-import com.blucharge.ocpp.dto.ws.StatusNotificationRequest;
-import com.blucharge.ocpp.dto.ws.StatusNotificationResponse;
+import com.blucharge.ocpp.dto.status_notification.StatusNotificationRequest;
+import com.blucharge.ocpp.dto.status_notification.StatusNotificationResponse;
 
 public interface ConnectorService {
-    StatusNotificationResponse statusNotification(StatusNotificationRequest request, String chargerIdentity);
-    UnlockConnectorResponse unlockConnector(UnlockConnectorRequest request, String chargerIdentity);
+    StatusNotificationResponse insertStatusNotification(StatusNotificationRequest request, String chargerName);
+    UnlockConnectorResponse unlockConnector(UnlockConnectorRequest request, String chargerName);
 }

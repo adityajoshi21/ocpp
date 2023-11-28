@@ -1,10 +1,9 @@
 package com.blucharge.ocpp.service;
 
-import com.blucharge.ocpp.dto.ws.AuthorizeRequest;
-import com.blucharge.ocpp.dto.ws.AuthorizeResponse;
+import com.blucharge.ocpp.dto.authorize.AuthorizeRequest;
+import com.blucharge.ocpp.dto.authorize.AuthorizeResponse;
 import com.blucharge.ocpp.dto.ws.IdTagInfo;
 
 public interface OcppTagService {
-     IdTagInfo getIdTagInfo(String idTag);
-    AuthorizeResponse authorize(AuthorizeRequest parameters, String chargerIdentity);
+    AuthorizeResponse checkUserAuth(AuthorizeRequest parameters, String chargerName);
 }

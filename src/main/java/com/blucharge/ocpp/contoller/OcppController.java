@@ -5,13 +5,23 @@ import com.blucharge.ocpp.dto.api.RemoteStartTransactionResponse;
 import com.blucharge.ocpp.dto.api.RemoteStopTransactionRequest;
 import com.blucharge.ocpp.dto.api.RemoteStopTransactionResponse;
 import com.blucharge.ocpp.dto.api.*;
+import com.blucharge.ocpp.dto.authorize.AuthorizeRequest;
+import com.blucharge.ocpp.dto.authorize.AuthorizeResponse;
+import com.blucharge.ocpp.dto.boot_notification.BootNotificationRequest;
+import com.blucharge.ocpp.dto.boot_notification.BootNotificationResponse;
+import com.blucharge.ocpp.dto.heartbeat.HeartbeatRequest;
+import com.blucharge.ocpp.dto.heartbeat.HeartbeatResponse;
+import com.blucharge.ocpp.dto.start_transaction.StartTransactionRequest;
+import com.blucharge.ocpp.dto.start_transaction.StartTransactionResponse;
+import com.blucharge.ocpp.dto.status_notification.StatusNotificationRequest;
+import com.blucharge.ocpp.dto.status_notification.StatusNotificationResponse;
 import com.blucharge.ocpp.dto.ws.*;
 import com.blucharge.ocpp.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import static com.blucharge.ocpp.constants.ApplicationConstants.TEST_CHARGER;
+import static com.blucharge.ocpp.constants.StringConstant.TEST_CHARGER;
 
 @Slf4j
 @RestController
@@ -31,26 +41,28 @@ public class OcppController {
 
     @PostMapping(value = "/boot-notification")
     public BootNotificationResponse handleBootNotification(@RequestBody BootNotificationRequest request) {
-        return chargerService.bootNotification(request,  TEST_CHARGER);
+        // todo add kafka logic to onboard charger
+        return chargerService.insertBootNotification(request,  TEST_CHARGER);
     }
 
     @PostMapping(value = "/status-notification")
-    public StatusNotificationResponse handleStatus(@RequestBody StatusNotificationRequest request){
-        return connectorService.statusNotification(request, TEST_CHARGER );
+    public StatusNotificationResponse handleStatusNotification(@RequestBody StatusNotificationRequest request){
+        // todo add kafka logic to onboard connector
+        return connectorService.insertStatusNotification(request, TEST_CHARGER );
     }
 
     @PostMapping(value = "/heartbeat")
     public HeartbeatResponse handleHeartbeat(@RequestBody HeartbeatRequest request) {
-        return chargerService.heartbeat(request, TEST_CHARGER);
+        return chargerService.insertHeartbeat(request, TEST_CHARGER);
     }
 
     @PostMapping(value = "/authorise")
-    public AuthorizeResponse handleAuthorise(@RequestBody AuthorizeRequest request) {
-          return ocppTagService.authorize(request, TEST_CHARGER);
+    public AuthorizeResponse checkUserAuth(@RequestBody AuthorizeRequest request) {
+          return ocppTagService.checkUserAuth(request, TEST_CHARGER);
     }
 
     @PostMapping(value = "/start-transaction")
-    public StartTransactionResponse handleStartTxn(@RequestBody  StartTransactionRequest request){
+    public StartTransactionResponse handleStartTxn(@RequestBody StartTransactionRequest request){
         return transactionService.startTransaction(request, TEST_CHARGER);
     }
 

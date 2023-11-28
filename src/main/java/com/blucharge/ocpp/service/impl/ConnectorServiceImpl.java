@@ -5,9 +5,9 @@ import com.blucharge.db.ocpp.tables.records.ConnectorRecord;
 import com.blucharge.db.ocpp.tables.records.TransactionRecord;
 import com.blucharge.ocpp.dto.api.UnlockConnectorRequest;
 import com.blucharge.ocpp.dto.api.UnlockConnectorResponse;
-import com.blucharge.ocpp.dto.ws.StatusNotificationRequest;
-import com.blucharge.ocpp.dto.ws.StatusNotificationResponse;
-import com.blucharge.ocpp.enums.ConnectorState;
+import com.blucharge.ocpp.dto.status_notification.StatusNotificationRequest;
+import com.blucharge.ocpp.dto.status_notification.StatusNotificationResponse;
+import com.blucharge.ocpp.enums.RegistrationStatus;
 import com.blucharge.ocpp.enums.UnlockStatus;
 import com.blucharge.ocpp.repository.ChargerRepository;
 import com.blucharge.ocpp.repository.ConnectorRepository;
@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.Objects;
 
@@ -35,51 +34,33 @@ public class ConnectorServiceImpl implements ConnectorService {
     private TransactionsRepository transactionsRepository;
 
     @Override
-    public StatusNotificationResponse statusNotification( StatusNotificationRequest parameters, String chargerIdentity){
-
-        ChargerRecord chargerRecord = chargerRepository.getChargerFromChargerId(chargerIdentity).get(0);   //Exception handler needed if charger record is null i.e. charger doesn't exist in table
-        if(!Objects.isNull(chargerRecord)){
-        Integer noOfConnectors = chargerRecord.getNoOfConnectors();
-            if(Objects.isNull(parameters.getConnectorId()))
-                log.error("Connector Id not sent in request {}", parameters);
-
-             if(Objects.isNull(parameters.getStatus()))
-                log.error("Connector Id not sent in request {}", parameters);
-
-
-        if(parameters.getConnectorId() == 0){       // if it is 0; update heartbeat in Charger Table and move on
-            log.info("No of connectors for Charger Id {} , found to be 0 updating heartbeat", chargerIdentity);
-            chargerRepository.updateChargerHeartbeat(chargerIdentity, DateTime.now());
-            return new StatusNotificationResponse("Connector ID was 0");
+    public StatusNotificationResponse insertStatusNotification(StatusNotificationRequest parameters, String chargerName){
+        ChargerRecord chargerRecord = chargerRepository.getChargerRecordFromName(chargerName);
+        if(Objects.isNull(chargerRecord)) {
+            return new StatusNotificationResponse(RegistrationStatus.REJECTED.name());
         }
-        ConnectorRecord connectorRecord = connectorRepository.getConnectorForChargerIdWithConnectorNumber(chargerRecord.getId(),parameters.getConnectorId());
-
-        if(Objects.isNull(connectorRecord))   //Connector doesn't exist in Connector Table
-        {
-            ConnectorRecord record = new ConnectorRecord();
-            record.setChargerId(chargerRecord.getId());
-            record.setConnectorNumber(parameters.getConnectorId());
-            record.setState(ConnectorState.IDLE.name());
-            connectorRepository.addConnector(record);
-            chargerRepository.updateNumberOfConnectors(chargerRecord.getId(), noOfConnectors+1);
-            log.info("Status notification received for Connector No : {}, charger ID {}", parameters.getConnectorId(), chargerRecord.getId());
+        if(parameters.getConnectorId() == 0){
+            chargerRepository.updateChargerHeartBeat(chargerName, DateTime.now());
+            return new StatusNotificationResponse(RegistrationStatus.ACCEPTED.name());
         }
-        log.info("Updating Status Notification for Connector No : {}, charger ID {} ", parameters.getConnectorId(),chargerRecord.getId());
+        ConnectorRecord connectorRecord = connectorRepository.getConnectorRecordForChargerIdAndConnectorNumber(chargerRecord.getId(),parameters.getConnectorId());
+        if(Objects.isNull(connectorRecord)) {
+            return new StatusNotificationResponse(RegistrationStatus.REJECTED.name());
+        }
         connectorRepository.updateConnectorStatus(parameters, chargerRecord.getId());
-        }
-        return new StatusNotificationResponse("{}");
-
+        // todo add kafka event for connector status
+        return new StatusNotificationResponse(RegistrationStatus.ACCEPTED.name());
     }
 
 
     @Override
-    public UnlockConnectorResponse unlockConnector(UnlockConnectorRequest request, String chargerIdentity) {
+    public UnlockConnectorResponse unlockConnector(UnlockConnectorRequest request, String chargerName) {
         //check if connector Exists?
-        ChargerRecord charger = chargerRepository.getChargerFromChargerId(chargerIdentity).get(0);
+        ChargerRecord charger = chargerRepository.getChargerFromChargerId(chargerName).get(0);
         Long id = null;
         if(!Objects.isNull(charger)){
         id = charger.getId();}
-        ConnectorRecord connectorRecord = connectorRepository.getConnectorForChargerIdWithConnectorNumber(id, request.getConnectorId());
+        ConnectorRecord connectorRecord = connectorRepository.getConnectorRecordForChargerIdAndConnectorNumber(id, request.getConnectorId());
 
         if(Objects.isNull(connectorRecord)){
             log.error("ConnectorI not found on which unlock connector command is sent");

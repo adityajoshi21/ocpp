@@ -21,19 +21,10 @@ public class OcppTagRepositoryImpl implements OcppTagRepository {
     private static final OcppTag ocppTag = OcppTag.OCPP_TAG;
 
     @Override
-    public OcppTagRecord getRecord(String idTag) {
+    public OcppTagRecord getOcppTagRecordForIdTag(String idTag) {
         return ctx.selectFrom(ocppTag)
                 .where(ocppTag.ID_TAG.equal(idTag))
                 .and(ocppTag.IS_ACTIVE.equal(true))
                 .fetchOneInto(OcppTagRecord.class);
     }
-
-    @Override
-    public OcppTagRecord getRecord(Long ocppTagPk) {
-        return ctx.selectFrom(ocppTag)
-                .where(ocppTag.ID.equal(ocppTagPk))
-                .and(ocppTag.IS_ACTIVE.eq(true))
-                .fetchOne();
-    }
-
 }

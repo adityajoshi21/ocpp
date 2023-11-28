@@ -1,5 +1,6 @@
 package com.blucharge.ocpp.dto.ws;
 
+import com.blucharge.ocpp.dto.IdToken;
 import com.blucharge.ocpp.enums.AuthorizationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +11,7 @@ import org.joda.time.DateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class IdTagInfo {
-    private AuthorizationStatus status;
     private DateTime expiryDate;
-    private String parentIdTag;
+    private IdToken parentIdTag;
+    private AuthorizationStatus status;
 }

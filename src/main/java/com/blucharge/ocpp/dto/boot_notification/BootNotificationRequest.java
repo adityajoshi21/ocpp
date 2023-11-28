@@ -1,11 +1,15 @@
-package com.blucharge.ocpp.dto.ws;
+package com.blucharge.ocpp.dto.boot_notification;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class BootNotificationRequest {
     private String chargePointVendor;
     private String chargePointModel;

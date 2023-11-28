@@ -2,19 +2,14 @@ package com.blucharge.ocpp.repository;
 
 import com.blucharge.db.ocpp.tables.records.ChargerRecord;
 import com.blucharge.ocpp.dto.ChargerRequest;
-import com.blucharge.ocpp.dto.ws.BootNotificationRequest;
-import com.blucharge.ocpp.enums.OcppProtocol;
+import com.blucharge.ocpp.dto.boot_notification.BootNotificationRequest;
 import org.joda.time.DateTime;
-
-import java.util.List;
 
 public interface ChargerRepository {
     Long addCharger(ChargerRequest request);
-    Boolean isRegisteredInternal(String chargerId);
-    void updateBootNotificationForCharger(BootNotificationRequest parameters,  String chargerIdentity);
-    void updateChargerHeartbeat(String chargeBoxIdentity, DateTime ts);
-    List<ChargerRecord> getChargerFromChargerId(String chargerIdentity);
+    void updateBootNotificationForCharger(BootNotificationRequest parameters,  String chargerName);
+    void updateChargerHeartBeat(Long chargerId, DateTime dateTime);
    void updateNumberOfConnectors (Long chargerId, Integer currentCount);
    Integer findNoOfConnectorsForCharger(Long chargerId);
-
+    ChargerRecord getChargerRecordFromName(String chargerName);
 }

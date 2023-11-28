@@ -2,7 +2,7 @@ package com.blucharge.ocpp.repository.impl;
 
 import com.blucharge.db.ocpp.tables.Connector;
 import com.blucharge.db.ocpp.tables.records.ConnectorRecord;
-import com.blucharge.ocpp.dto.ws.StatusNotificationRequest;
+import com.blucharge.ocpp.dto.status_notification.StatusNotificationRequest;
 import com.blucharge.ocpp.enums.ConnectorState;
 import com.blucharge.ocpp.enums.ConnectorStatus;
 import com.blucharge.ocpp.repository.ConnectorRepository;
@@ -12,6 +12,7 @@ import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 
 
 @Slf4j
@@ -25,25 +26,19 @@ public class ConnectorRepositoryImpl implements ConnectorRepository {
     }
 
     private static final Connector connector = Connector.CONNECTOR;
-    @Override
-    public Long getConnectorPkForChargeBoxAndConnectorNumber(Long chargerId, Integer connectorNumber) {
-        return ctx.selectFrom(connector)
-                .where(connector.CHARGER_ID.eq(chargerId))
-                .and(connector.CONNECTOR_NUMBER.eq(connectorNumber))
-                .fetchAny(connector.ID);
-    }
 
     @Override
     public void updateConnectorStatus(StatusNotificationRequest params, Long chargerId) {
-
-        ctx.update(connector).set(connector.STATUS_NOTIFICATION_ON, params.getTimestamp())
-                .set(connector.STATUS, params.getStatus())
-                .set(connector.ERROR_CODE, params.getErrorCode())
-                .set(connector.ERROR_INFO, params.getErrorInfo())
+        ctx.update(connector)
+                .set(connector.STATUS_NOTIFICATION_ON, params.getTimestamp())
+                .set(connector.STATUS, params.getStatus().name())
+                .set(connector.ERROR_CODE, params.getErrorCode().name())
+                .set(connector.ERROR_INFO, params.getInfo())
                 .set(connector.VENDOR_ERROR_CODE, params.getVendorErrorCode())
-                .where(connector.CONNECTOR_NUMBER.eq(params.getConnectorId())).and(connector.CHARGER_ID.eq(chargerId))
+                .where(connector.CONNECTOR_NUMBER.eq(params.getConnectorId()))
+                .and(connector.CHARGER_ID.eq(chargerId))
+                .and(connector.IS_ACTIVE.eq(true))
                 .execute();
-        log.debug("Stored a new connector status for chargerId: {}/ connector: {}.", chargerId, params.getConnectorId());
     }
 
 
@@ -57,7 +52,7 @@ public class ConnectorRepositoryImpl implements ConnectorRepository {
     }
 
     @Override
-    public ConnectorRecord getConnectorForChargerIdWithConnectorNumber(Long chargerId, Integer connectorNumber) {
+    public ConnectorRecord getConnectorRecordForChargerIdAndConnectorNumber(Long chargerId, Integer connectorNumber) {
         return ctx.selectFrom(connector)
                 .where(connector.CONNECTOR_NUMBER.eq(connectorNumber))
                 .and(connector.CHARGER_ID.eq(chargerId))
@@ -66,21 +61,29 @@ public class ConnectorRepositoryImpl implements ConnectorRepository {
     }
 
     @Override
-    public Long addConnector(ConnectorRecord request) {        //To Do : If needs to be moved to service?
-
-        ConnectorRecord connectorRecord = ctx.newRecord(connector, request);
-        connectorRecord.setIsActive(true);
-        connectorRecord.store();
-        return connectorRecord.getId();
+    public ConnectorRecord getConnectorRecordFromConnectorId(Long connectorId, Long chargerId) {
+        return ctx.selectFrom(connector)
+                .where(connector.ID.eq(connectorId).and(connector.CHARGER_ID.eq(chargerId))
+                        .and(connector.IS_ACTIVE.eq(true)))
+                .fetchOneInto(ConnectorRecord.class);
     }
 
     @Override
-    public ConnectorRecord getConnectorRecordFromConnectorId(Long connectorId, Long chargerId) {
+    public List<ConnectorRecord> getConnectorRecordForChargerId(Long chargerId) {
         return ctx.selectFrom(connector)
-                .where(connector.ID.eq(connectorId).
-                        and(connector.CHARGER_ID.eq(chargerId))
-                        .and(connector.IS_ACTIVE.eq(true)))
-                .fetchOneInto(ConnectorRecord.class);
+                .where(connector.CHARGER_ID.eq(chargerId))
+                .and(connector.IS_ACTIVE.eq(true))
+                .fetchInto(ConnectorRecord.class);
+    }
+
+    @Override
+    public void updateConnectorHeartBeat(Long connectorId, DateTime dateTime) {
+        ctx.update(connector)
+                .set(connector.LAST_HEARTBEAT_ON, dateTime)
+                .set(connector.UPDATED_ON, dateTime)
+                .where(connector.ID.eq(connectorId))
+                .and(connector.IS_ACTIVE.eq(true))
+                .execute();
     }
 
 
