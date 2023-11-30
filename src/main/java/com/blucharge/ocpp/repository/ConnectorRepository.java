@@ -8,7 +8,7 @@ import org.joda.time.DateTime;
 import java.util.List;
 
 public interface ConnectorRepository {
-    void updateConnectorStatus(StatusNotificationRequest statusNotificationRequest, Long chargerId);
+    void updateConnectorStatus(StatusNotificationRequest statusNotificationRequest, Long connectorId);
 
     ConnectorRecord getConnectorRecordForChargerIdAndConnectorNumber(Long chargerId, Integer connectorNumber);
 

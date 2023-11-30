@@ -32,13 +32,14 @@ public class ChargingTransactionHistoryRepoImpl implements ChargingTransactionHi
     }
 
     @Override
-    public void updateTransactionForStopTransaction(Integer transactionId, Integer meterStopValue, DateTime stopTime, Reason reason, Long startTime, Integer meterStartValue) {
+    public void updateTransactionForStopTransaction(Integer transactionId, Integer meterStopValue, DateTime stopTime, Reason reason, Long startTime, Integer meterStartValue, Integer endSoc) {
         ctx.update(chargingTransactionHistory)
                 .set(chargingTransactionHistory.METER_STOP_VALUE, meterStopValue)
                 .set(chargingTransactionHistory.STOP_TIME, stopTime.getMillis())
                 .set(chargingTransactionHistory.STOP_REASON, reason.name())
                 .set(chargingTransactionHistory.RUNNING_TIME, stopTime.getMillis() - startTime)
-                .set(chargingTransactionHistory.UNIT_CONSUMED, (double) (meterStopValue - meterStartValue / 1000) + (0.0 + Double.valueOf("0." + ((meterStopValue - meterStartValue) % 1000))))
+                .set(chargingTransactionHistory.UNIT_CONSUMED, (double) (meterStopValue - meterStartValue / 1000) + Double.parseDouble("0." + ((meterStopValue - meterStartValue) % 1000)))
+                .set(chargingTransactionHistory.END_SOC, endSoc)
                 .where(chargingTransactionHistory.ID.eq(transactionId.longValue()))
                 .and(chargingTransactionHistory.IS_ACTIVE.eq(true))
                 .execute();
@@ -50,6 +51,23 @@ public class ChargingTransactionHistoryRepoImpl implements ChargingTransactionHi
                 .where(chargingTransactionHistory.IS_ACTIVE.eq(true))
                 .and(chargingTransactionHistory.UUID.eq(txnId))
                 .fetchOneInto(ChargingTransactionHistoryRecord.class);
+    }
+
+    @Override
+    public ChargingTransactionHistoryRecord getChargingTxnHistoryRecordForId(long txnId) {
+        return ctx.selectFrom(chargingTransactionHistory)
+                .where(chargingTransactionHistory.IS_ACTIVE.eq(true))
+                .and(chargingTransactionHistory.ID.eq(txnId))
+                .fetchOneInto(ChargingTransactionHistoryRecord.class);
+    }
+
+    @Override
+    public void updateTransactionForStartSoc(Long txnId, String socMeasurand) {
+        ctx.update(chargingTransactionHistory)
+                .set(chargingTransactionHistory.START_SOC, Integer.valueOf(socMeasurand))
+                .where(chargingTransactionHistory.ID.eq(txnId))
+                .and(chargingTransactionHistory.IS_ACTIVE.eq(true))
+                .execute();
     }
 }
 

@@ -25,15 +25,14 @@ public class ConnectorRepositoryImpl implements ConnectorRepository {
     }
 
     @Override
-    public void updateConnectorStatus(StatusNotificationRequest params, Long chargerId) {
+    public void updateConnectorStatus(StatusNotificationRequest params, Long connectorId) {
         ctx.update(connector)
                 .set(connector.STATUS_NOTIFICATION_ON, params.getTimestamp())
                 .set(connector.STATUS, params.getStatus().name())
                 .set(connector.ERROR_CODE, params.getErrorCode().name())
                 .set(connector.ERROR_INFO, params.getInfo())
                 .set(connector.VENDOR_ERROR_CODE, params.getVendorErrorCode())
-                .where(connector.CONNECTOR_NUMBER.eq(params.getConnectorId()))
-                .and(connector.CHARGER_ID.eq(chargerId))
+                .where(connector.ID.eq(connectorId))
                 .and(connector.IS_ACTIVE.eq(true))
                 .execute();
     }

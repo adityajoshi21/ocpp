@@ -1,6 +1,6 @@
 package com.blucharge.ocpp.constants;
 
-import com.blucharge.ocpp.ConstantUtil;
+import com.blucharge.ocpp.util.ConstantUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

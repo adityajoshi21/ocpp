@@ -1,4 +1,4 @@
-package com.blucharge.ocpp;
+package com.blucharge.ocpp.util;
 
 
 import com.blucharge.core.enums.PropertyTypes;

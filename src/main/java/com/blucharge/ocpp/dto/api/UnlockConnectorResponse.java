@@ -11,6 +11,5 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UnlockConnectorResponse {
-    @NotNull(message = "Status missing for connector unlock response")
     private UnlockStatus status;
 }
