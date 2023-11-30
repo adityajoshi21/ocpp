@@ -2,12 +2,12 @@ package com.blucharge.ocpp.service.impl;
 
 import com.blucharge.db.ocpp.tables.records.ChargerRecord;
 import com.blucharge.db.ocpp.tables.records.OcppTagRecord;
+import com.blucharge.ocpp.dto.IdTagInfo;
 import com.blucharge.ocpp.dto.IdToken;
 import com.blucharge.ocpp.dto.authorize.AuthorizeRequest;
 import com.blucharge.ocpp.dto.authorize.AuthorizeResponse;
-import com.blucharge.ocpp.dto.ws.IdTagInfo;
 import com.blucharge.ocpp.enums.AuthorizationStatus;
-import com.blucharge.ocpp.repository.ChargerRepository;
+import com.blucharge.ocpp.repository.ChargerRepo;
 import com.blucharge.ocpp.repository.OcppTagRepository;
 import com.blucharge.ocpp.service.OcppTagService;
 import lombok.extern.slf4j.Slf4j;
@@ -24,12 +24,12 @@ public class OcppTagServiceImpl implements OcppTagService {
     @Autowired
     private OcppTagRepository ocppTagRepository;
     @Autowired
-    private ChargerRepository chargerRepository;
+    private ChargerRepo chargerRepo;
 
     @Override
     public AuthorizeResponse checkUserAuth(AuthorizeRequest parameters, String chargerName) {
         OcppTagRecord ocppTagRecord = ocppTagRepository.getOcppTagRecordForIdTag(parameters.getIdTag().getIdToken());
-        if(Objects.isNull(ocppTagRecord)){
+        if (Objects.isNull(ocppTagRecord)) {
             return new AuthorizeResponse(
                     new IdTagInfo(
                             DateTime.now(),
@@ -38,7 +38,7 @@ public class OcppTagServiceImpl implements OcppTagService {
                     )
             );
         }
-        if ("BLOCKED".equals(ocppTagRecord.getState())){
+        if ("BLOCKED".equals(ocppTagRecord.getState())) {
             return new AuthorizeResponse(
                     new IdTagInfo(
                             DateTime.now(),
@@ -47,7 +47,7 @@ public class OcppTagServiceImpl implements OcppTagService {
                     )
             );
         }
-        if(Objects.nonNull(ocppTagRecord.getExpiryOn()) && ocppTagRecord.getExpiryOn().getMillis() < DateTime.now().getMillis()){
+        if (Objects.nonNull(ocppTagRecord.getExpiryOn()) && ocppTagRecord.getExpiryOn().getMillis() < DateTime.now().getMillis()) {
             return new AuthorizeResponse(
                     new IdTagInfo(
                             DateTime.now(),
@@ -56,9 +56,9 @@ public class OcppTagServiceImpl implements OcppTagService {
                     )
             );
         }
-        if("OTP".equals(ocppTagRecord.getTagMappingType()) || "RFID".equals(ocppTagRecord.getTagMappingType())){
-            ChargerRecord chargerRecord = chargerRepository.getChargerRecordFromName(chargerName);
-            if(!ocppTagRecord.getChargerId().equals(chargerRecord.getId())){
+        if ("OTP".equals(ocppTagRecord.getTagMappingType()) || "RFID".equals(ocppTagRecord.getTagMappingType())) {
+            ChargerRecord chargerRecord = chargerRepo.getChargerRecordFromName(chargerName);
+            if (!ocppTagRecord.getChargerId().equals(chargerRecord.getId())) {
                 return new AuthorizeResponse(
                         new IdTagInfo(
                                 DateTime.now(),

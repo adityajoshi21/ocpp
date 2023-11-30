@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 @Slf4j
 @Repository
 public class OcppTagRepositoryImpl implements OcppTagRepository {
+    private static final OcppTag ocppTag = OcppTag.OCPP_TAG;
     @Autowired
     private final DSLContext ctx;
 
@@ -18,12 +19,18 @@ public class OcppTagRepositoryImpl implements OcppTagRepository {
         this.ctx = ctx;
     }
 
-    private static final OcppTag ocppTag = OcppTag.OCPP_TAG;
-
     @Override
     public OcppTagRecord getOcppTagRecordForIdTag(String idTag) {
         return ctx.selectFrom(ocppTag)
                 .where(ocppTag.ID_TAG.equal(idTag))
+                .and(ocppTag.IS_ACTIVE.equal(true))
+                .fetchOneInto(OcppTagRecord.class);
+    }
+
+    @Override
+    public OcppTagRecord getOcppTagForCustomer(String customerId) {
+        return ctx.selectFrom(ocppTag)
+                .where(ocppTag.UUID.equal(customerId))
                 .and(ocppTag.IS_ACTIVE.equal(true))
                 .fetchOneInto(OcppTagRecord.class);
     }

@@ -10,6 +10,6 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UnlockConnectorRequest {
-    @NotNull ( message = "Connector ID not sent in request")
-   private Integer connectorId;
+    @NotNull(message = "Connector ID not sent in request")
+    private Integer connectorId;
 }

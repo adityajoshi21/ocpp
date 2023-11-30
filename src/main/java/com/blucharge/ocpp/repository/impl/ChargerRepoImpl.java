@@ -2,39 +2,27 @@ package com.blucharge.ocpp.repository.impl;
 
 import com.blucharge.db.ocpp.tables.Charger;
 import com.blucharge.db.ocpp.tables.records.ChargerRecord;
-import com.blucharge.ocpp.dto.ChargerRequest;
 import com.blucharge.ocpp.dto.boot_notification.BootNotificationRequest;
-import com.blucharge.ocpp.repository.ChargerRepository;
+import com.blucharge.ocpp.repository.ChargerRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
 @Slf4j
-public class ChargerRepositoryImpl implements ChargerRepository {
+public class ChargerRepoImpl implements ChargerRepo {
     private static final Charger charger = Charger.CHARGER;
     @Autowired
     private final DSLContext ctx;
 
-    public ChargerRepositoryImpl(DSLContext ctx) {
+    public ChargerRepoImpl(DSLContext ctx) {
         this.ctx = ctx;
     }
 
-
     @Override
-    public Long addCharger(ChargerRequest chargerRequest) {
-        ChargerRecord record = ctx.newRecord(charger, chargerRequest);
-        record.setIsActive(true);
-        record.store();
-        return record.getId();
-    }
-
-    @Override
-    public void updateBootNotificationForCharger(BootNotificationRequest request,  String chargerName) {
+    public void updateBootNotificationForCharger(BootNotificationRequest request, String chargerName) {
         ctx.update(charger)
                 .set(charger.CHARGE_POINT_VENDOR, request.getChargePointVendor())
                 .set(charger.CHARGE_POINT_MODEL, request.getChargePointModel())
@@ -57,32 +45,8 @@ public class ChargerRepositoryImpl implements ChargerRepository {
                 .set(charger.LAST_HEARTBEAT_ON, dateTime)
                 .set(charger.UPDATED_ON, dateTime)
                 .where(charger.ID.equal(chargerId)
-                .and(charger.IS_ACTIVE.eq(true)))
+                        .and(charger.IS_ACTIVE.eq(true)))
                 .execute();
-    }
-
-    @Override
-    public List<ChargerRecord> getChargerFromChargerId(String chargerName) {
-        return ctx.selectFrom(charger)
-                .where(charger.CHARGER_NAME.equal(chargerName))
-                .and(charger.IS_ACTIVE.eq(true))
-                .fetchInto(ChargerRecord.class);
-    }
-
-    @Override
-    public void updateNumberOfConnectors(Long chargerId, Integer currentCount) {
-        ctx.update(charger)
-                .set(charger.NO_OF_CONNECTORS, currentCount)
-                .where(charger.ID.eq(chargerId)).and(charger.IS_ACTIVE.eq(true)).execute();
-    }
-
-    @Override
-    public Integer findNoOfConnectorsForCharger(Long chargerId) {
-        return ctx.select(charger.NO_OF_CONNECTORS)
-                .from(charger)
-                .where(charger.ID.eq(chargerId))
-                .and(charger.IS_ACTIVE.eq(true))
-                .fetchOneInto(Integer.class);
     }
 
     @Override
@@ -90,6 +54,14 @@ public class ChargerRepositoryImpl implements ChargerRepository {
         return ctx.selectFrom(charger)
                 .where(charger.IS_ACTIVE.eq(true))
                 .and(charger.NAME.eq(chargerName))
+                .fetchOneInto(ChargerRecord.class);
+    }
+
+    @Override
+    public ChargerRecord getChargerRecordForId(Long chargerId) {
+        return ctx.selectFrom(charger)
+                .where(charger.IS_ACTIVE.eq(true))
+                .and(charger.ID.eq(chargerId))
                 .fetchOneInto(ChargerRecord.class);
     }
 }

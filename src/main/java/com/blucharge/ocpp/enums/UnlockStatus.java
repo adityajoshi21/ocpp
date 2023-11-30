@@ -7,7 +7,7 @@ public enum UnlockStatus {
 
     private final String value;
 
-    private UnlockStatus(String value) {
+    UnlockStatus(String value) {
         this.value = value;
     }
 }

@@ -1,13 +1,13 @@
-package com.blucharge.ocpp.dto.api;
+package com.blucharge.ocpp.dto.remote_start;
 
 import com.blucharge.ocpp.enums.RemoteStartStopStatus;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class RemoteStartTransactionResponse {
     private RemoteStartStopStatus status;
 }

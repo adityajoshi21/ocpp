@@ -3,8 +3,6 @@ package com.blucharge.ocpp.repository.impl;
 import com.blucharge.db.ocpp.tables.Connector;
 import com.blucharge.db.ocpp.tables.records.ConnectorRecord;
 import com.blucharge.ocpp.dto.status_notification.StatusNotificationRequest;
-import com.blucharge.ocpp.enums.ConnectorState;
-import com.blucharge.ocpp.enums.ConnectorStatus;
 import com.blucharge.ocpp.repository.ConnectorRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -18,14 +16,13 @@ import java.util.List;
 @Slf4j
 @Repository
 public class ConnectorRepositoryImpl implements ConnectorRepository {
+    private static final Connector connector = Connector.CONNECTOR;
     @Autowired
     private final DSLContext ctx;
 
     public ConnectorRepositoryImpl(DSLContext ctx) {
         this.ctx = ctx;
     }
-
-    private static final Connector connector = Connector.CONNECTOR;
 
     @Override
     public void updateConnectorStatus(StatusNotificationRequest params, Long chargerId) {
@@ -41,16 +38,6 @@ public class ConnectorRepositoryImpl implements ConnectorRepository {
                 .execute();
     }
 
-
-    @Override
-    public void updateConnectorState(Long transactionId, Long connectorPk, ConnectorState state) {
-        ctx.update(connector)
-                .set(connector.STATE, state.name())
-                .where(connector.ID.eq(connectorPk))
-                .and(connector.IS_ACTIVE.eq(true))
-                .execute();
-    }
-
     @Override
     public ConnectorRecord getConnectorRecordForChargerIdAndConnectorNumber(Long chargerId, Integer connectorNumber) {
         return ctx.selectFrom(connector)
@@ -60,13 +47,6 @@ public class ConnectorRepositoryImpl implements ConnectorRepository {
                 .fetchOneInto(ConnectorRecord.class);
     }
 
-    @Override
-    public ConnectorRecord getConnectorRecordFromConnectorId(Long connectorId, Long chargerId) {
-        return ctx.selectFrom(connector)
-                .where(connector.ID.eq(connectorId).and(connector.CHARGER_ID.eq(chargerId))
-                        .and(connector.IS_ACTIVE.eq(true)))
-                .fetchOneInto(ConnectorRecord.class);
-    }
 
     @Override
     public List<ConnectorRecord> getConnectorRecordForChargerId(Long chargerId) {
@@ -86,18 +66,11 @@ public class ConnectorRepositoryImpl implements ConnectorRepository {
                 .execute();
     }
 
-
     @Override
-    public void updateConnectorStatus(
-            Long connectorPk,
-            DateTime timestamp,
-            ConnectorStatus statusUpdate) {
-
-        ctx.update(connector)
-                .set(connector.STATUS_NOTIFICATION_ON, timestamp)
-                .set(connector.STATUS, statusUpdate.name())
-                .where(connector.ID.eq( connectorPk))
-                .execute();
+    public ConnectorRecord getConnectorFromUuid(String connectorId) {
+        return ctx.selectFrom(connector)
+                .where(connector.UUID.eq(connectorId))
+                .and(connector.IS_ACTIVE.eq(true))
+                .fetchOneInto(ConnectorRecord.class);
     }
-
 }

@@ -6,7 +6,7 @@ public enum RegistrationStatus {
     REJECTED("Rejected");
     private final String value;
 
-    private RegistrationStatus(String value) {
+    RegistrationStatus(String value) {
         this.value = value;
     }
 

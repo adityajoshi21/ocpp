@@ -6,7 +6,7 @@ public enum RemoteStartStopStatus {
 
     private final String value;
 
-    private RemoteStartStopStatus(String value) {
+    RemoteStartStopStatus(String value) {
         this.value = value;
     }
 }

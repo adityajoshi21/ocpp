@@ -1,6 +1,6 @@
 package com.blucharge.ocpp.repository.impl;
 
-import com.blucharge.db.altilium.tables.records.ApplicationPropertiesRecord;
+import com.blucharge.db.ocpp.tables.records.ApplicationPropertiesRecord;
 import com.blucharge.ocpp.repository.ApplicationPropertiesRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
@@ -13,7 +13,7 @@ import java.util.Map;
 @Slf4j
 @Repository
 public class ApplicationPropertiesRepoImpl implements ApplicationPropertiesRepo {
-    private static final com.blucharge.db.altilium.tables.ApplicationProperties applicationProperties = com.blucharge.db.altilium.tables.ApplicationProperties.APPLICATION_PROPERTIES;
+    private static final com.blucharge.db.ocpp.tables.ApplicationProperties applicationProperties = com.blucharge.db.ocpp.tables.ApplicationProperties.APPLICATION_PROPERTIES;
     @Autowired
     private DSLContext ctx;
 

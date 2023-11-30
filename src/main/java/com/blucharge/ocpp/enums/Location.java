@@ -10,20 +10,21 @@ public enum Location {
     OUTLET("Outlet");
 
     private final String value;
-    public String value() {
-        return this.value;
-    }
 
     Location(String value) {
         this.value = value;
     }
 
     @JsonCreator
-    public static Location location (String value) {
-        for(Location location : Location.values())
-            if(location.value.equalsIgnoreCase(value))
+    public static Location location(String value) {
+        for (Location location : Location.values())
+            if (location.value.equalsIgnoreCase(value))
                 return location;
         throw new IllegalArgumentException("Invalid Location value: " + value);
 
+    }
+
+    public String value() {
+        return this.value;
     }
 }

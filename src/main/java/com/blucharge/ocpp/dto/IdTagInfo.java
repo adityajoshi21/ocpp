@@ -1,6 +1,5 @@
-package com.blucharge.ocpp.dto.ws;
+package com.blucharge.ocpp.dto;
 
-import com.blucharge.ocpp.dto.IdToken;
 import com.blucharge.ocpp.enums.AuthorizationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;

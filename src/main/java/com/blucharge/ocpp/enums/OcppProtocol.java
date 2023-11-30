@@ -12,10 +12,6 @@ public enum OcppProtocol {
     private final OcppVersion version;
     private final OcppTransport transport;
 
-    public String getCompositeValue() {
-        return version.getValue() + transport.getValue();
-    }
-
     public static OcppProtocol fromCompositeValue(String v) {
 
         if (org.apache.commons.lang3.StringUtils.isBlank(v)) {
@@ -34,12 +30,16 @@ public enum OcppProtocol {
         OcppVersion ov = OcppVersion.fromValue(version);
         OcppTransport ot = OcppTransport.fromValue(transport);
 
-        for (OcppProtocol c: OcppProtocol.values()) {
+        for (OcppProtocol c : OcppProtocol.values()) {
             if (c.getVersion() == ov && c.getTransport() == ot) {
                 return c;
             }
         }
         throw new IllegalArgumentException(v);
+    }
+
+    public String getCompositeValue() {
+        return version.getValue() + transport.getValue();
     }
 }
 

@@ -1,9 +1,6 @@
 package com.blucharge.ocpp.dto.boot_notification;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-
-import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter

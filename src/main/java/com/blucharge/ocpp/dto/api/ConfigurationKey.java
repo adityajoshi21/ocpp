@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ConfigurationKey {
-    private  String key;
-    private  String value;
-    private  Boolean readonly;
+    private String key;
+    private String value;
+    private Boolean readonly;
 }

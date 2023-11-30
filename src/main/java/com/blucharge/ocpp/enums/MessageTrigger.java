@@ -10,21 +10,23 @@ public enum MessageTrigger {
     METER_VALUES("MeterValues", true),
     STATUS_NOTIFICATION("StatusNotification", true);
 
-
-
     private final String value;
     private final Boolean isConnectorIdRequired;
-    MessageTrigger(String value,Boolean flag) {
+
+    MessageTrigger(String value, Boolean flag) {
         this.value = value;
         this.isConnectorIdRequired = flag;
+    }
+
+    public static Boolean checkForValidEnum(MessageTrigger messageTrigger) {
+        return ApplicationConstants.TRIGGER_MESSAGE.contains(messageTrigger);
     }
 
     public String getValue() {
         return value;
     }
-    public Boolean isConnectorIdRequired(){return isConnectorIdRequired;}
 
-    public static Boolean checkForValidEnum(MessageTrigger messageTrigger){
-        return ApplicationConstants.TRIGGER_MESSAGES.contains(messageTrigger);
+    public Boolean isConnectorIdRequired() {
+        return isConnectorIdRequired;
     }
 }

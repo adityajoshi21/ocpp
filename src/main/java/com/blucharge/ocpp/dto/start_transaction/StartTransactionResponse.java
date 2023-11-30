@@ -1,7 +1,6 @@
 package com.blucharge.ocpp.dto.start_transaction;
 
-import com.blucharge.ocpp.dto.ws.IdTagInfo;
-import io.swagger.v3.oas.models.security.SecurityScheme;
+import com.blucharge.ocpp.dto.IdTagInfo;
 import lombok.*;
 
 @Getter
@@ -9,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class StartTransactionResponse{
+public class StartTransactionResponse {
     private Integer transactionId;
     private IdTagInfo idTagInfo;
 }

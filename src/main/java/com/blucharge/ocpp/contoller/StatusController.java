@@ -14,6 +14,6 @@ public class StatusController {
     @RequestMapping(value = "/status", method = RequestMethod.GET)
     @ResponseStatus(value = HttpStatus.OK)
     public ResponseDto<String> status() {
-        return new ResponseDto<>("I'm Alive!",200,"SUCCESS",null);
+        return new ResponseDto<>("I'm Alive!", 200, "SUCCESS", null);
     }
 }

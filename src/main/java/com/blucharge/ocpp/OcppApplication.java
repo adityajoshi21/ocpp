@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class OcppApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(OcppApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(OcppApplication.class, args);
+    }
 
 }

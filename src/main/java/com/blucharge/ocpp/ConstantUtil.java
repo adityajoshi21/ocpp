@@ -2,22 +2,25 @@ package com.blucharge.ocpp;
 
 
 import com.blucharge.core.enums.PropertyTypes;
-import com.blucharge.db.altilium.tables.records.ApplicationPropertiesRecord;
+import com.blucharge.db.ocpp.tables.records.ApplicationPropertiesRecord;
 import com.blucharge.ocpp.repository.ApplicationPropertiesRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 public class ConstantUtil {
     @Autowired
     private ApplicationPropertiesRepo applicationPropertiesRepo;
+
     public void configurationOfConstantsFromDataBase(Object app) throws IllegalAccessException {
         Map<String, ApplicationPropertiesRecord> configMap = applicationPropertiesRepo.getPropertyMap();
         if (configMap == null) return;

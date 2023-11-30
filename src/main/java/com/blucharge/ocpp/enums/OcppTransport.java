@@ -15,7 +15,7 @@ public enum OcppTransport {
     private final String value;
 
     public static OcppTransport fromValue(String v) {      //S or J
-        for (OcppTransport c: OcppTransport.values()) {
+        for (OcppTransport c : OcppTransport.values()) {
             if (c.getValue().equals(v)) {
                 return c;
             }

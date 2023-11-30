@@ -8,6 +8,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class StatusNotificationResponse{
+public class StatusNotificationResponse {
     private String msg;
 }

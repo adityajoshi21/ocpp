@@ -1,5 +1,6 @@
 package com.blucharge.ocpp.dto.ws;
 
+import com.blucharge.ocpp.dto.meter_value.MeterValue;
 import com.blucharge.ocpp.enums.TransactionStateUpdate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,12 +14,11 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class UpdateTransactionParams {
-    private Long chargerId;
     private final Long transactionId;
     private final DateTime stopTimestamp;
     private final BigDecimal stopMeterValue;
     private final String stopReason;
+    private final TransactionStateUpdate statusUpdate = TransactionStateUpdate.AfterStop;
+    private Long chargerId;
     private List<MeterValue> transactionData;
-
-    private  final TransactionStateUpdate statusUpdate = TransactionStateUpdate.AfterStop;
 }

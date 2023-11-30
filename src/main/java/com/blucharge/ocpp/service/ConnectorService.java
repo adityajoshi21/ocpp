@@ -7,5 +7,6 @@ import com.blucharge.ocpp.dto.status_notification.StatusNotificationResponse;
 
 public interface ConnectorService {
     StatusNotificationResponse insertStatusNotification(StatusNotificationRequest request, String chargerName);
+
     UnlockConnectorResponse unlockConnector(UnlockConnectorRequest request, String chargerName);
 }

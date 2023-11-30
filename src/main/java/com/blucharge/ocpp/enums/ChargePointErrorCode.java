@@ -17,6 +17,7 @@ public enum ChargePointErrorCode {
     RESET_FAILURE,
     UNDER_VOLTAGE,
     WEAK_SIGNAL,
-    EXT_URGENT_BTN_DOWN};
+    EXT_URGENT_BTN_DOWN
+}
 
 

@@ -1,4 +1,5 @@
 package com.blucharge.ocpp.enums;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 public enum Measurand {
@@ -28,12 +29,10 @@ public enum Measurand {
 
 
     private final String value;
-    public String value() {
-        return this.value;
-    }
-    Measurand(String value) {
-        this.value = value; }
 
+    Measurand(String value) {
+        this.value = value;
+    }
 
     @JsonCreator
     public static Measurand fromValue(String value) {
@@ -45,6 +44,9 @@ public enum Measurand {
         throw new IllegalArgumentException("Invalid Measurand value: " + value);
     }
 
+    public String value() {
+        return this.value;
+    }
 
 
 }

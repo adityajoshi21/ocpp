@@ -8,9 +8,14 @@ import com.blucharge.ocpp.dto.heartbeat.HeartbeatResponse;
 
 public interface ChargerService {
     BootNotificationResponse insertBootNotification(BootNotificationRequest bootNotificationRequest, String chargerName);
+
     HeartbeatResponse insertHeartbeat(HeartbeatRequest heartbeatRequest, String chargerName);
+
     Boolean isChargerRegistered(String chargerId);
-    GetConfigResponse getConfiguration (GetConfigRequest getConfigRequest, String chargerName);
+
+    GetConfigResponse getConfiguration(GetConfigRequest getConfigRequest, String chargerName);
+
     ChangeConfigResponse changeConfiguration(ChangeConfigRequest changeConfigRequest, String chargerName);
+
     TriggerMessageResponse triggerMessage(TriggerMessageRequest triggerMessageRequest, String chargerName);
 }

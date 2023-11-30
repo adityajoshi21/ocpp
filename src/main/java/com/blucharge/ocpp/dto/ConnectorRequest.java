@@ -11,8 +11,8 @@ public class ConnectorRequest {
     private Integer connectorNumber;
     private Long chargerId;
     private String displayName;
-    private  String evseId;
-    private  String connectorType;
+    private String evseId;
+    private String connectorType;
     private String status;
     private Long statusNotificationOn;
     private String state;

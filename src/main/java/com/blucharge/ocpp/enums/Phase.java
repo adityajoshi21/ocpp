@@ -16,20 +16,20 @@ public enum Phase {
 
     private final String value;
 
-    public String value() {
-        return this.value;
-    }
-
     Phase(String value) {
         this.value = value;
     }
 
     @JsonCreator
-    public static Phase fromValue (String value) {
-        for(Phase phase : Phase.values())
-            if(phase.value.equalsIgnoreCase(value))
+    public static Phase fromValue(String value) {
+        for (Phase phase : Phase.values())
+            if (phase.value.equalsIgnoreCase(value))
                 return phase;
         throw new IllegalArgumentException("Invalid Phase value: " + value);
 
+    }
+
+    public String value() {
+        return this.value;
     }
 }

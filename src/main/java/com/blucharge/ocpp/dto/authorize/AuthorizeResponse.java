@@ -1,5 +1,6 @@
 package com.blucharge.ocpp.dto.authorize;
-import com.blucharge.ocpp.dto.ws.IdTagInfo;
+
+import com.blucharge.ocpp.dto.IdTagInfo;
 import lombok.*;
 
 @Getter

@@ -15,9 +15,4 @@ public class TriggerMessageRequest {
     private MessageTrigger requestedMessage;
     private Integer connectorId;
 
-    public TriggerMessageRequest withRequestedMessage(MessageTrigger value) {
-        setRequestedMessage(value);
-        return this;
-    }
-
 }
