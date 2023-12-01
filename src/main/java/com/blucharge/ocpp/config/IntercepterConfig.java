@@ -20,14 +20,4 @@ public class IntercepterConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new ApplicationSourceInterceptor());
     }
-
-    @Configuration
-    @EnableScheduling
-    public class MyConfig {
-
-        @Bean(destroyMethod = "shutdown")
-        public ScheduledExecutorService scheduledExecutorService() {
-            return Executors.newScheduledThreadPool(5); // Example: Create a pool with 5 threads
-        }
-    }
 }
