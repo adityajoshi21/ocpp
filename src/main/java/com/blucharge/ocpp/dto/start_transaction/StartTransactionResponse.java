@@ -9,6 +9,6 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class StartTransactionResponse {
-    private Integer transactionId;
     private IdTagInfo idTagInfo;
+    private Integer transactionId;
 }

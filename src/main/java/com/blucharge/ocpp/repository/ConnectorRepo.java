@@ -7,7 +7,7 @@ import org.joda.time.DateTime;
 
 import java.util.List;
 
-public interface ConnectorRepository {
+public interface ConnectorRepo {
     void updateConnectorStatus(StatusNotificationRequest statusNotificationRequest, Long connectorId);
 
     ConnectorRecord getConnectorRecordForChargerIdAndConnectorNumber(Long chargerId, Integer connectorNumber);
@@ -16,5 +16,5 @@ public interface ConnectorRepository {
 
     void updateConnectorHeartBeat(Long connectorId, DateTime dateTime);
 
-    ConnectorRecord getConnectorFromUuid(String connectorId);
+    ConnectorRecord getConnectorRecordFromUuid(String connectorId);
 }

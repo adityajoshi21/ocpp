@@ -1,12 +1,13 @@
 package com.blucharge.ocpp.dto.meter_value;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @ToString
 public class MeterValuesResponse {
-    private String msg;
 }

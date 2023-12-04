@@ -3,7 +3,7 @@ package com.blucharge.ocpp.repository.impl;
 import com.blucharge.db.ocpp.tables.Connector;
 import com.blucharge.db.ocpp.tables.records.ConnectorRecord;
 import com.blucharge.ocpp.dto.status_notification.StatusNotificationRequest;
-import com.blucharge.ocpp.repository.ConnectorRepository;
+import com.blucharge.ocpp.repository.ConnectorRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.jooq.DSLContext;
@@ -15,12 +15,12 @@ import java.util.List;
 
 @Slf4j
 @Repository
-public class ConnectorRepositoryImpl implements ConnectorRepository {
+public class ConnectorRepoImpl implements ConnectorRepo {
     private static final Connector connector = Connector.CONNECTOR;
     @Autowired
     private final DSLContext ctx;
 
-    public ConnectorRepositoryImpl(DSLContext ctx) {
+    public ConnectorRepoImpl(DSLContext ctx) {
         this.ctx = ctx;
     }
 
@@ -40,7 +40,7 @@ public class ConnectorRepositoryImpl implements ConnectorRepository {
     @Override
     public ConnectorRecord getConnectorRecordForChargerIdAndConnectorNumber(Long chargerId, Integer connectorNumber) {
         return ctx.selectFrom(connector)
-                .where(connector.CONNECTOR_NUMBER.eq(connectorNumber))
+                .where(connector.NUMBER.eq(connectorNumber))
                 .and(connector.CHARGER_ID.eq(chargerId))
                 .and(connector.IS_ACTIVE.eq(true))
                 .fetchOneInto(ConnectorRecord.class);
@@ -66,7 +66,7 @@ public class ConnectorRepositoryImpl implements ConnectorRepository {
     }
 
     @Override
-    public ConnectorRecord getConnectorFromUuid(String connectorId) {
+    public ConnectorRecord getConnectorRecordFromUuid(String connectorId) {
         return ctx.selectFrom(connector)
                 .where(connector.UUID.eq(connectorId))
                 .and(connector.IS_ACTIVE.eq(true))

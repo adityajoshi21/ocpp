@@ -40,7 +40,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private ChargerRepo chargerRepo;
     @Autowired
-    private ConnectorRepository connectorRepository;
+    private ConnectorRepo connectorRepo;
     @Autowired
     private OcppTagRepository ocppTagRepository;
     @Autowired
@@ -63,16 +63,16 @@ public class TransactionServiceImpl implements TransactionService {
 
         if (!AuthorizationStatus.ACCEPTED.equals(idTagInfo.getStatus())) {
             return new StartTransactionResponse(
-                    null,
-                    idTagInfo
+                    idTagInfo,
+                    null
             );
         }
 
         ChargerRecord chargerRecord = chargerRepo.getChargerRecordFromName(chargerName);
-        ConnectorRecord connectorRecord = connectorRepository.getConnectorRecordForChargerIdAndConnectorNumber(chargerRecord.getId(), request.getConnectorId());
+        ConnectorRecord connectorRecord = connectorRepo.getConnectorRecordForChargerIdAndConnectorNumber(chargerRecord.getId(), request.getConnectorId());
         OcppTagRecord ocppTagRecord = ocppTagRepository.getOcppTagRecordForIdTag(request.getIdTag().getIdToken());
         ChargingTransactionHistoryRecord chargingTransactionHistoryRecord = new ChargingTransactionHistoryRecord();
-        chargingTransactionHistoryRecord.setUuid("CTN_"+ RandomUuidString.generateUuid());
+        chargingTransactionHistoryRecord.setUuid("CTN_" + RandomUuidString.generateUuid());
         chargingTransactionHistoryRecord.setOcppTagId(ocppTagRecord.getId());
         chargingTransactionHistoryRecord.setChargerId(chargerRecord.getId());
         chargingTransactionHistoryRecord.setConnectorId(connectorRecord.getId());
@@ -102,20 +102,17 @@ public class TransactionServiceImpl implements TransactionService {
         eventDto.setOrganisationId(RequestContext.getOrganizationId());
         eventDto.setCreatedBy("OCPP");
         eventDto.setEventData(new StartTransactionEventDto(
-                    chargingTransactionHistoryRecord1.getUuid(),
-                    connectorRecord.getUuid(),
-                    chargingTransactionHistoryRecord1.getStartSoc(),
-                    chargingTransactionHistoryRecord1.getStartTime(),
-                    ocppTagRecord.getUuid(),
-                    null
+                        chargingTransactionHistoryRecord1.getUuid(),
+                        chargingTransactionHistoryRecord1.getStartSoc(),
+                        chargingTransactionHistoryRecord1.getStartTime()
                 )
         );
         eventRepo.createRecord(eventDto);
         kafkaConfiguration.kafkaTemplate().send(eventDto.getTopic(), new Gson().toJson(eventDto));
 
         return new StartTransactionResponse(
-                chargingTransactionHistoryRecord1.getId().intValue(),
-                idTagInfo
+                idTagInfo,
+                chargingTransactionHistoryRecord1.getId().intValue()
         );
     }
 
@@ -133,7 +130,7 @@ public class TransactionServiceImpl implements TransactionService {
         LiveTransactionRecord liveTransactionRecord = liveTransactionRepo.getLiveTransactionRecordForTxnId(parameters.getTransactionId());
         chargingTransactionHistoryRepo.updateTransactionForStopTransaction(
                 parameters.getTransactionId(),
-                parameters.getMeterStopValue(),
+                parameters.getMeterStop(),
                 parameters.getTimestamp(),
                 parameters.getReason(),
                 liveTransactionRecord.getStartTime(),
@@ -150,11 +147,10 @@ public class TransactionServiceImpl implements TransactionService {
         eventDto.setOrganisationId(RequestContext.getOrganizationId());
         eventDto.setCreatedBy("OCPP");
         eventDto.setEventData(new StopTransactionEventDto(
-                    liveTransactionRecord.getUuid(),
-                    parameters.getReason().name(),
-                    liveTransactionRecord.getCurrentSoc(),
-                (double) (parameters.getMeterStopValue() - liveTransactionRecord.getMeterStartValue()/ 1000) + Double.parseDouble("0." + ((parameters.getMeterStopValue() - liveTransactionRecord.getMeterStartValue()) % 1000)),
-                null
+                        liveTransactionRecord.getUuid(),
+                        parameters.getReason().name(),
+                        liveTransactionRecord.getCurrentSoc(),
+                        (double) (parameters.getMeterStop() - liveTransactionRecord.getMeterStartValue() / 1000) + Double.parseDouble("0." + ((parameters.getMeterStop() - liveTransactionRecord.getMeterStartValue()) % 1000))
                 )
         );
         eventRepo.createRecord(eventDto);
@@ -178,10 +174,10 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public void handleRemoteStartCommand(RemoteStartCommandDto remoteStartCommandDto) {
         OcppTagRecord ocppTagRecord = ocppTagRepository.getOcppTagForCustomer(remoteStartCommandDto.getCustomerId());
-        ConnectorRecord connectorRecord = connectorRepository.getConnectorFromUuid(remoteStartCommandDto.getConnectorId());
+        ConnectorRecord connectorRecord = connectorRepo.getConnectorRecordFromUuid(remoteStartCommandDto.getConnectorId());
         ChargerRecord chargerRecord = chargerRepo.getChargerRecordForId(connectorRecord.getChargerId());
         RemoteStartTransactionRequest remoteStartTransactionRequest = new RemoteStartTransactionRequest();
-        remoteStartTransactionRequest.setConnectorId(connectorRecord.getConnectorNumber());
+        remoteStartTransactionRequest.setConnectorId(connectorRecord.getNumber());
         remoteStartTransactionRequest.setIdTag(
                 new IdToken(
                         ocppTagRecord.getIdTag()

@@ -10,7 +10,7 @@ import org.joda.time.DateTime;
 @AllArgsConstructor
 @ToString
 public class BootNotificationResponse {
-    private RegistrationStatus status;
     private DateTime currentTime;
     private Integer interval;
+    private RegistrationStatus status;
 }

@@ -2,19 +2,17 @@ package com.blucharge.ocpp.service.impl;
 
 import com.blucharge.db.ocpp.tables.records.ChargerRecord;
 import com.blucharge.db.ocpp.tables.records.ConnectorRecord;
-import com.blucharge.event.dto.ConnectorStatusUpdateEventDto;
 import com.blucharge.event.dto.HeartBeatEventDto;
 import com.blucharge.event.dto.KafkaPublishEventDto;
 import com.blucharge.ocpp.config.KafkaConfiguration;
 import com.blucharge.ocpp.constants.ApplicationConstants;
-import com.blucharge.ocpp.dto.api.*;
 import com.blucharge.ocpp.dto.boot_notification.BootNotificationRequest;
 import com.blucharge.ocpp.dto.boot_notification.BootNotificationResponse;
 import com.blucharge.ocpp.dto.heartbeat.HeartbeatRequest;
 import com.blucharge.ocpp.dto.heartbeat.HeartbeatResponse;
 import com.blucharge.ocpp.enums.RegistrationStatus;
 import com.blucharge.ocpp.repository.ChargerRepo;
-import com.blucharge.ocpp.repository.ConnectorRepository;
+import com.blucharge.ocpp.repository.ConnectorRepo;
 import com.blucharge.ocpp.repository.EventRepo;
 import com.blucharge.ocpp.service.ChargerService;
 import com.blucharge.util.utils.RequestContext;
@@ -38,7 +36,7 @@ public class ChargerServiceImpl implements ChargerService {
     private ChargerRepo chargerRepo;
 
     @Autowired
-    private ConnectorRepository connectorRepository;
+    private ConnectorRepo connectorRepo;
     @Autowired
     private EventRepo eventRepo;
     @Autowired
@@ -55,9 +53,9 @@ public class ChargerServiceImpl implements ChargerService {
         }
 
         return new BootNotificationResponse(
-                Boolean.TRUE.equals(isRegistered) ? RegistrationStatus.ACCEPTED : RegistrationStatus.REJECTED,
                 DateTime.now(),
-                HEART_BEAT_INTERVAL
+                HEART_BEAT_INTERVAL,
+                Boolean.TRUE.equals(isRegistered) ? RegistrationStatus.ACCEPTED : RegistrationStatus.REJECTED
         );
     }
 
@@ -65,9 +63,9 @@ public class ChargerServiceImpl implements ChargerService {
     public HeartbeatResponse insertHeartbeat(HeartbeatRequest request, String chargerName) {
         ChargerRecord chargerRecord = chargerRepo.getChargerRecordFromName(chargerName);
         chargerRepo.updateChargerHeartBeat(chargerRecord.getId(), DateTime.now());
-        List<ConnectorRecord> connectorRecords = connectorRepository.getConnectorRecordForChargerId(chargerRecord.getId());
+        List<ConnectorRecord> connectorRecords = connectorRepo.getConnectorRecordForChargerId(chargerRecord.getId());
         for (ConnectorRecord connectorRecord : connectorRecords) {
-            connectorRepository.updateConnectorHeartBeat(connectorRecord.getId(), DateTime.now());
+            connectorRepo.updateConnectorHeartBeat(connectorRecord.getId(), DateTime.now());
             // Info: kafka connector heart beat update event
             KafkaPublishEventDto<HeartBeatEventDto> eventDto = new KafkaPublishEventDto<>();
             eventDto.setTopic(DATA_TOPIC_NAME);
@@ -90,21 +88,6 @@ public class ChargerServiceImpl implements ChargerService {
     public Boolean isChargerRegistered(String chargerName) {
         ChargerRecord chargerRecord = chargerRepo.getChargerRecordFromName(chargerName);
         return !Objects.isNull(chargerRecord);
-    }
-
-    @Override
-    public GetConfigResponse getConfiguration(GetConfigRequest getConfigRequest, String chargerName) {
-        return new GetConfigResponse();
-    }
-
-    @Override
-    public ChangeConfigResponse changeConfiguration(ChangeConfigRequest changeConfigRequest, String chargerName) {
-        return new ChangeConfigResponse();
-    }
-
-    @Override
-    public TriggerMessageResponse triggerMessage(TriggerMessageRequest triggerMessageRequest, String chargerName) {
-        return new TriggerMessageResponse();
     }
 }
 

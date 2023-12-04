@@ -1,13 +1,14 @@
 package com.blucharge.ocpp.dto.status_notification;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @ToString
 public class StatusNotificationResponse {
-    private String msg;
 }

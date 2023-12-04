@@ -1,8 +1,7 @@
 package com.blucharge.ocpp.config;
 
-import com.blucharge.event.dto.KafkaPublishEventDto;
-import com.blucharge.event.dto.RemoteStartCommandDto;
-import com.blucharge.event.dto.RemoteStopCommandDto;
+import com.blucharge.event.dto.*;
+import com.blucharge.ocpp.service.ConnectorService;
 import com.blucharge.ocpp.service.TransactionService;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +16,8 @@ public class KafkaListenerConfig {
     private static final Gson gson = new Gson();
     @Autowired
     private TransactionService transactionService;
+    @Autowired
+    private ConnectorService connectorService;
 
     @KafkaListener(id = "DATA-EVENT", topics = {DATA_TOPIC_NAME}, containerFactory = "kafkaListenerContainerFactory", groupId = "OCPP")
     public void dataEventListener(String message) {
@@ -36,6 +37,18 @@ public class KafkaListenerConfig {
         } else if (REMOTE_START_COMMAND_EVENT_NAME.equals(eventName)) {
             RemoteStopCommandDto remoteStopCommandDto = gson.fromJson(eventData, RemoteStopCommandDto.class);
             transactionService.handleRemoteStopCommand(remoteStopCommandDto);
+        } else if (UNLOCK_GUN_COMMAND_EVENT_NAME.equals(eventName)) {
+            UnlockGunCommandDto unlockGunCommandDto = gson.fromJson(eventData, UnlockGunCommandDto.class);
+            connectorService.unlockConnector(unlockGunCommandDto);
+        } else if (TRIGGER_MESSAGE_COMMAND_EVENT_NAME.equals(eventName)) {
+            TriggerMessageCommandDto triggerMessageCommandDto = gson.fromJson(eventData, TriggerMessageCommandDto.class);
+            connectorService.triggerMessage(triggerMessageCommandDto);
+        } else if (GET_CONFIGURATION_COMMAND_EVENT_NAME.equals(eventName)) {
+            GetConfigurationCommandDto getConfigurationCommandDto = gson.fromJson(eventData, GetConfigurationCommandDto.class);
+            connectorService.getConfiguration(getConfigurationCommandDto);
+        } else if (CHANGE_CONFIGURATION_COMMAND_EVENT_NAME.equals(eventName)) {
+            ChangeConfigurationCommandDto changeConfigurationCommandDto = gson.fromJson(eventData, ChangeConfigurationCommandDto.class);
+            connectorService.changeConfiguration(changeConfigurationCommandDto);
         }
     }
 

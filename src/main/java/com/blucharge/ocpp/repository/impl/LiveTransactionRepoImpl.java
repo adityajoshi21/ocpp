@@ -26,16 +26,16 @@ public class LiveTransactionRepoImpl implements LiveTransactionRepo {
 
     @Override
     public void updateTransactionForMeterValue(Long transactionId, String socMeasurand, String energyImported, Boolean isStartSocNotSet) {
-        if(Boolean.TRUE.equals(isStartSocNotSet)){
+        if (Boolean.TRUE.equals(isStartSocNotSet)) {
             ctx.update(liveTransaction)
                     .set(liveTransaction.CURRENT_SOC, Integer.valueOf(socMeasurand))
                     .set(liveTransaction.UNIT_CONSUMED, Double.valueOf(energyImported))
                     .set(liveTransaction.UPDATED_ON, DateTime.now())
-                    .set(liveTransaction.START_SOC,Integer.valueOf(socMeasurand))
+                    .set(liveTransaction.START_SOC, Integer.valueOf(socMeasurand))
                     .where(liveTransaction.CHARGING_TRANSACTION_HISTORY_ID.eq(transactionId))
                     .and(liveTransaction.IS_ACTIVE.eq(true))
                     .execute();
-        }else {
+        } else {
             ctx.update(liveTransaction)
                     .set(liveTransaction.CURRENT_SOC, Integer.valueOf(socMeasurand))
                     .set(liveTransaction.UNIT_CONSUMED, Double.valueOf(energyImported))

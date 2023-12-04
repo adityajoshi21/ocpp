@@ -1,6 +1,5 @@
-package com.blucharge.ocpp.dto.meter_value;
+package com.blucharge.ocpp.dto;
 
-import com.blucharge.ocpp.dto.SampledValue;
 import lombok.*;
 import org.joda.time.DateTime;
 

@@ -1,9 +1,9 @@
 package com.blucharge.ocpp.repository.impl;
 
-import com.blucharge.ocpp.repository.EventRepo;
 import com.blucharge.db.ocpp.tables.Event;
 import com.blucharge.db.ocpp.tables.records.EventRecord;
 import com.blucharge.event.dto.KafkaPublishEventDto;
+import com.blucharge.ocpp.repository.EventRepo;
 import com.google.gson.Gson;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;

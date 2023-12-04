@@ -1,6 +1,5 @@
 package com.blucharge.ocpp.contoller;
 
-import com.blucharge.ocpp.dto.api.*;
 import com.blucharge.ocpp.dto.authorize.AuthorizeRequest;
 import com.blucharge.ocpp.dto.authorize.AuthorizeResponse;
 import com.blucharge.ocpp.dto.boot_notification.BootNotificationRequest;
@@ -18,7 +17,10 @@ import com.blucharge.ocpp.dto.stop_transaction.StopTransactionResponse;
 import com.blucharge.ocpp.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import static com.blucharge.ocpp.constants.StringConstant.TEST_CHARGER;
 
@@ -73,30 +75,5 @@ public class OcppController {
     public StopTransactionResponse handleStopTxn(@RequestBody StopTransactionRequest request) {
         return transactionService.stopTransaction(request, TEST_CHARGER);
     }
-
-    @GetMapping(value = "/get-config")
-    public GetConfigResponse handleGetConfig(@RequestBody GetConfigRequest request) {
-        // todo need to be made event based
-        return chargerService.getConfiguration(request, TEST_CHARGER);
-    }
-
-    @PostMapping(value = "/change-config")
-    public ChangeConfigResponse handleChangeConfig(@RequestBody ChangeConfigRequest request) {
-        // todo need to be made event based
-        return chargerService.changeConfiguration(request, TEST_CHARGER);
-    }
-
-    @PostMapping(value = "/trigger-message")
-    public TriggerMessageResponse handleTriggerMessage(@RequestBody TriggerMessageRequest request) {
-        // todo need to be made event based
-        return chargerService.triggerMessage(request, TEST_CHARGER);
-    }
-
-    @PostMapping(value = "/unlock-connector")
-    public UnlockConnectorResponse handleUnlockConnector(@RequestBody UnlockConnectorRequest unlockConnectorRequest) {
-        // todo need to be made event based
-        return connectorService.unlockConnector(unlockConnectorRequest, TEST_CHARGER);
-    }
-
 }
 

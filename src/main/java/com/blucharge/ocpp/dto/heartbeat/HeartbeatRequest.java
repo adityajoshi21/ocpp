@@ -1,14 +1,14 @@
 package com.blucharge.ocpp.dto.heartbeat;
 
 
-import lombok.*;
-import org.joda.time.DateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @ToString
 public class HeartbeatRequest {
-    private DateTime timestamp;
 }

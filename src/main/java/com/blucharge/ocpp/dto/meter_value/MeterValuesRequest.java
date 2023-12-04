@@ -1,5 +1,6 @@
 package com.blucharge.ocpp.dto.meter_value;
 
+import com.blucharge.ocpp.dto.MeterValue;
 import lombok.*;
 
 import java.util.List;
