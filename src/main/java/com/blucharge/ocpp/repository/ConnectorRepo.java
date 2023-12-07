@@ -17,4 +17,6 @@ public interface ConnectorRepo {
     void updateConnectorHeartBeat(Long connectorId, DateTime dateTime);
 
     ConnectorRecord getConnectorRecordFromUuid(String connectorId);
+
+    ConnectorRecord getConnectorRecordForId(Long connectorId);
 }

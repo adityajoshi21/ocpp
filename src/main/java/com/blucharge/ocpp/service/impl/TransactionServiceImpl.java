@@ -104,7 +104,9 @@ public class TransactionServiceImpl implements TransactionService {
         eventDto.setEventData(new StartTransactionEventDto(
                         chargingTransactionHistoryRecord1.getUuid(),
                         chargingTransactionHistoryRecord1.getStartSoc(),
-                        chargingTransactionHistoryRecord1.getStartTime()
+                        chargingTransactionHistoryRecord1.getStartTime(),
+                        ocppTagRepository.getOcppTagRecordForId(chargingTransactionHistoryRecord1.getOcppTagId()).getUuid(),
+                        connectorRepo.getConnectorRecordForId(chargingTransactionHistoryRecord1.getConnectorId()).getUuid()
                 )
         );
         eventRepo.createRecord(eventDto);
@@ -162,7 +164,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public void handleRemoteStopCommand(RemoteStopCommandDto remoteStopCommandDto) {
-        ChargingTransactionHistoryRecord chargingTransactionHistoryRecord = chargingTransactionHistoryRepo.getChargingTxnHistoryRecordForUuid(remoteStopCommandDto.getTxnId());
+        ChargingTransactionHistoryRecord chargingTransactionHistoryRecord = chargingTransactionHistoryRepo.getChargingTxnHistoryRecordForUuid(remoteStopCommandDto.getTxnUuid());
         // todo should we put check that same user should sent remote stop
         ChargerRecord chargerRecord = chargerRepo.getChargerRecordForId(chargingTransactionHistoryRecord.getChargerId());
         RemoteStopTransactionRequest remoteStopTransactionRequest = new RemoteStopTransactionRequest();
@@ -173,8 +175,8 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public void handleRemoteStartCommand(RemoteStartCommandDto remoteStartCommandDto) {
-        OcppTagRecord ocppTagRecord = ocppTagRepository.getOcppTagForCustomer(remoteStartCommandDto.getCustomerId());
-        ConnectorRecord connectorRecord = connectorRepo.getConnectorRecordFromUuid(remoteStartCommandDto.getConnectorId());
+        OcppTagRecord ocppTagRecord = ocppTagRepository.getOcppTagForCustomer(remoteStartCommandDto.getCustomerUuid());
+        ConnectorRecord connectorRecord = connectorRepo.getConnectorRecordFromUuid(remoteStartCommandDto.getConnectorUuid());
         ChargerRecord chargerRecord = chargerRepo.getChargerRecordForId(connectorRecord.getChargerId());
         RemoteStartTransactionRequest remoteStartTransactionRequest = new RemoteStartTransactionRequest();
         remoteStartTransactionRequest.setConnectorId(connectorRecord.getNumber());

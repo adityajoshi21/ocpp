@@ -72,4 +72,12 @@ public class ConnectorRepoImpl implements ConnectorRepo {
                 .and(connector.IS_ACTIVE.eq(true))
                 .fetchOneInto(ConnectorRecord.class);
     }
+
+    @Override
+    public ConnectorRecord getConnectorRecordForId(Long connectorId) {
+        return ctx.selectFrom(connector)
+                .where(connector.ID.eq(connectorId))
+                .and(connector.IS_ACTIVE.eq(true))
+                .fetchOneInto(ConnectorRecord.class);
+    }
 }

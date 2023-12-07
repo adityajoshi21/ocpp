@@ -77,7 +77,7 @@ public class ConnectorServiceImpl implements ConnectorService {
 
     @Override
     public void unlockConnector(UnlockGunCommandDto unlockGunCommandDto) {
-        ConnectorRecord connectorRecord = connectorRepo.getConnectorRecordFromUuid(unlockGunCommandDto.getConnectorId());
+        ConnectorRecord connectorRecord = connectorRepo.getConnectorRecordFromUuid(unlockGunCommandDto.getConnectorUuid());
         ChargerRecord chargerRecord = chargerRepo.getChargerRecordForId(connectorRecord.getChargerId());
         UnlockConnectorRequest unlockConnectorRequest = new UnlockConnectorRequest();
         unlockConnectorRequest.setConnectorId(connectorRecord.getNumber());
@@ -87,7 +87,7 @@ public class ConnectorServiceImpl implements ConnectorService {
 
     @Override
     public void triggerMessage(TriggerMessageCommandDto triggerMessageCommandDto) {
-        ConnectorRecord connectorRecord = connectorRepo.getConnectorRecordFromUuid(triggerMessageCommandDto.getConnectorId());
+        ConnectorRecord connectorRecord = connectorRepo.getConnectorRecordFromUuid(triggerMessageCommandDto.getConnectorUuid());
         ChargerRecord chargerRecord = chargerRepo.getChargerRecordForId(connectorRecord.getChargerId());
         TriggerMessageRequest triggerMessageRequest = new TriggerMessageRequest();
         triggerMessageRequest.setConnectorId(connectorRecord.getNumber());
@@ -98,7 +98,7 @@ public class ConnectorServiceImpl implements ConnectorService {
 
     @Override
     public void getConfiguration(GetConfigurationCommandDto getConfigurationCommandDto) {
-        ConnectorRecord connectorRecord = connectorRepo.getConnectorRecordFromUuid(getConfigurationCommandDto.getConnectorId());
+        ConnectorRecord connectorRecord = connectorRepo.getConnectorRecordFromUuid(getConfigurationCommandDto.getConnectorUuid());
         ChargerRecord chargerRecord = chargerRepo.getChargerRecordForId(connectorRecord.getChargerId());
         GetConfigurationRequest getConfigurationRequest = new GetConfigurationRequest();
         getConfigurationRequest.setKey(getConfigurationCommandDto.getConfigurationKeyString());
@@ -108,7 +108,7 @@ public class ConnectorServiceImpl implements ConnectorService {
 
     @Override
     public void changeConfiguration(ChangeConfigurationCommandDto changeConfigurationCommandDto) {
-        ConnectorRecord connectorRecord = connectorRepo.getConnectorRecordFromUuid(changeConfigurationCommandDto.getConnectorId());
+        ConnectorRecord connectorRecord = connectorRepo.getConnectorRecordFromUuid(changeConfigurationCommandDto.getConnectorUuid());
         ChargerRecord chargerRecord = chargerRepo.getChargerRecordForId(connectorRecord.getChargerId());
         ChangeConfigurationRequest changeConfigurationRequest = new ChangeConfigurationRequest();
         changeConfigurationRequest.setKey(changeConfigurationCommandDto.getConfigurationKey());

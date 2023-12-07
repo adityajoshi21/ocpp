@@ -34,4 +34,12 @@ public class OcppTagRepositoryImpl implements OcppTagRepository {
                 .and(ocppTag.IS_ACTIVE.equal(true))
                 .fetchOneInto(OcppTagRecord.class);
     }
+
+    @Override
+    public OcppTagRecord getOcppTagRecordForId(Long ocppTagId) {
+        return ctx.selectFrom(ocppTag)
+                .where(ocppTag.ID.equal(ocppTagId))
+                .and(ocppTag.IS_ACTIVE.equal(true))
+                .fetchOneInto(OcppTagRecord.class);
+    }
 }

@@ -22,7 +22,7 @@ public class EventRepoImpl implements EventRepo {
     @Override
     public void createRecord(KafkaPublishEventDto eventDto) {
         EventRecord eventRecord = new EventRecord();
-        eventRecord.setUuid(eventDto.getEventId());
+        eventRecord.setUuid(eventDto.getEventUuid());
         eventRecord.setTopic(eventDto.getTopic());
         eventRecord.setType(eventDto.getEventType());
         eventRecord.setName(eventDto.getEventName());
