@@ -4,6 +4,9 @@ import com.blucharge.db.ocpp.tables.records.ChargerRecord;
 import com.blucharge.db.ocpp.tables.records.ConnectorRecord;
 import com.blucharge.event.dto.HeartBeatEventDto;
 import com.blucharge.event.dto.KafkaPublishEventDto;
+import com.blucharge.event.enums.ConnectorEvent;
+import com.blucharge.event.enums.KafkaEventType;
+import com.blucharge.event.enums.KafkaTopic;
 import com.blucharge.ocpp.config.KafkaConfiguration;
 import com.blucharge.ocpp.constants.ApplicationConstants;
 import com.blucharge.ocpp.dto.boot_notification.BootNotificationRequest;
@@ -25,7 +28,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 
-import static com.blucharge.event.constants.KafkaStringConstants.*;
 import static com.blucharge.ocpp.constants.StringConstant.HEART_BEAT_INTERVAL;
 
 
@@ -68,9 +70,9 @@ public class ChargerServiceImpl implements ChargerService {
             connectorRepo.updateConnectorHeartBeat(connectorRecord.getId(), DateTime.now());
             // Info: kafka connector heart beat update event
             KafkaPublishEventDto<HeartBeatEventDto> eventDto = new KafkaPublishEventDto<>();
-            eventDto.setTopic(DATA_TOPIC_NAME);
-            eventDto.setEventType(DATA_EVENT_TYPE_NAME);
-            eventDto.setEventName(CONNECTOR_HEART_BEAT_EVENT_NAME);
+            eventDto.setTopic(KafkaTopic.CONNECTOR.name());
+            eventDto.setEventType(KafkaEventType.REQUEST.name());
+            eventDto.setEventName(ConnectorEvent.HEART_BEAT.name());
             eventDto.setApplicationSourceId(ApplicationConstants.APPLICATION_ID);
             eventDto.setOrganisationId(RequestContext.getOrganizationId());
             eventDto.setCreatedBy("OCPP");

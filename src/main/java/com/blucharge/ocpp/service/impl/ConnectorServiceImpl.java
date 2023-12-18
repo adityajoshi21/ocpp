@@ -3,6 +3,9 @@ package com.blucharge.ocpp.service.impl;
 import com.blucharge.db.ocpp.tables.records.ChargerRecord;
 import com.blucharge.db.ocpp.tables.records.ConnectorRecord;
 import com.blucharge.event.dto.*;
+import com.blucharge.event.enums.ConnectorEvent;
+import com.blucharge.event.enums.KafkaEventType;
+import com.blucharge.event.enums.KafkaTopic;
 import com.blucharge.ocpp.config.KafkaConfiguration;
 import com.blucharge.ocpp.constants.ApplicationConstants;
 import com.blucharge.ocpp.dto.change_configuration.ChangeConfigurationRequest;
@@ -24,9 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
-
-import static com.blucharge.event.constants.KafkaStringConstants.*;
-
 
 @Slf4j
 @Service
@@ -58,9 +58,9 @@ public class ConnectorServiceImpl implements ConnectorService {
         connectorRepo.updateConnectorStatus(parameters, connectorRecord.getId());
         // Info: publishing kafka connector status update event
         KafkaPublishEventDto<ConnectorStatusUpdateEventDto> eventDto = new KafkaPublishEventDto<>();
-        eventDto.setTopic(COMMAND_TOPIC_NAME);
-        eventDto.setEventType(REQUEST_EVENT_TYPE_NAME);
-        eventDto.setEventName(CONNECTOR_STATUS_EVENT_NAME);
+        eventDto.setTopic(KafkaTopic.CONNECTOR.name());
+        eventDto.setEventType(KafkaEventType.REQUEST.name());
+        eventDto.setEventName(ConnectorEvent.STATUS.name());
         eventDto.setApplicationSourceId(ApplicationConstants.APPLICATION_ID);
         eventDto.setOrganisationId(RequestContext.getOrganizationId());
         eventDto.setCreatedBy("OCPP");

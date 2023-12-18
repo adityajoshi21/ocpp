@@ -4,6 +4,9 @@ import com.blucharge.db.ocpp.tables.records.ChargingTransactionHistoryRecord;
 import com.blucharge.db.ocpp.tables.records.LiveTransactionRecord;
 import com.blucharge.event.dto.ChargingTxnUpdateEventDto;
 import com.blucharge.event.dto.KafkaPublishEventDto;
+import com.blucharge.event.enums.ConnectorEvent;
+import com.blucharge.event.enums.KafkaEventType;
+import com.blucharge.event.enums.KafkaTopic;
 import com.blucharge.ocpp.config.KafkaConfiguration;
 import com.blucharge.ocpp.constants.ApplicationConstants;
 import com.blucharge.ocpp.dto.MeterValue;
@@ -24,8 +27,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-
-import static com.blucharge.event.constants.KafkaStringConstants.*;
 
 @Slf4j
 @Service
@@ -63,9 +64,9 @@ public class MeterValuesServiceImpl implements MeterValuesService {
         }
         // Info: kafka charging txn update event
         KafkaPublishEventDto<ChargingTxnUpdateEventDto> eventDto = new KafkaPublishEventDto<>();
-        eventDto.setTopic(CONNECTOR_TOPIC_NAME);
-        eventDto.setEventType(DATA_EVENT_TYPE_NAME);
-        eventDto.setEventName(CHARGING_UPDATE_EVENT_NAME);
+        eventDto.setTopic(KafkaTopic.CONNECTOR.name());
+        eventDto.setEventType(KafkaEventType.REQUEST.name());
+        eventDto.setEventName(ConnectorEvent.CHARGING_UPDATE.name());
         eventDto.setApplicationSourceId(ApplicationConstants.APPLICATION_ID);
         eventDto.setOrganisationId(RequestContext.getOrganizationId());
         eventDto.setCreatedBy("OCPP");

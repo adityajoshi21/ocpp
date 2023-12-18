@@ -2,6 +2,9 @@ package com.blucharge.ocpp.service.impl;
 
 import com.blucharge.db.ocpp.tables.records.*;
 import com.blucharge.event.dto.*;
+import com.blucharge.event.enums.ConnectorEvent;
+import com.blucharge.event.enums.KafkaEventType;
+import com.blucharge.event.enums.KafkaTopic;
 import com.blucharge.ocpp.config.KafkaConfiguration;
 import com.blucharge.ocpp.constants.ApplicationConstants;
 import com.blucharge.ocpp.dto.IdTagInfo;
@@ -28,7 +31,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
-import static com.blucharge.event.constants.KafkaStringConstants.*;
 
 @Service
 @Slf4j
@@ -95,9 +97,9 @@ public class TransactionServiceImpl implements TransactionService {
 
         // Info: kafka start charging update event
         KafkaPublishEventDto<StartTransactionEventDto> eventDto = new KafkaPublishEventDto<>();
-        eventDto.setTopic(CONNECTOR_TOPIC_NAME);
-        eventDto.setEventType(DATA_EVENT_TYPE_NAME);
-        eventDto.setEventName(CHARGING_START_EVENT_NAME);
+        eventDto.setTopic(KafkaTopic.CONNECTOR.name());
+        eventDto.setEventType(KafkaEventType.REQUEST.name());
+        eventDto.setEventName(ConnectorEvent.CHARGING_START.name());
         eventDto.setApplicationSourceId(ApplicationConstants.APPLICATION_ID);
         eventDto.setOrganisationId(RequestContext.getOrganizationId());
         eventDto.setCreatedBy("OCPP");
@@ -142,9 +144,9 @@ public class TransactionServiceImpl implements TransactionService {
 
         // Info: kafka stop charging update event
         KafkaPublishEventDto<StopTransactionEventDto> eventDto = new KafkaPublishEventDto<>();
-        eventDto.setTopic(CONNECTOR_TOPIC_NAME);
-        eventDto.setEventType(DATA_EVENT_TYPE_NAME);
-        eventDto.setEventName(CHARGING_STOP_EVENT_NAME);
+        eventDto.setTopic(KafkaTopic.CONNECTOR.name());
+        eventDto.setEventType(KafkaEventType.REQUEST.name());
+        eventDto.setEventName(ConnectorEvent.CHARGING_STOP.name());
         eventDto.setApplicationSourceId(ApplicationConstants.APPLICATION_ID);
         eventDto.setOrganisationId(RequestContext.getOrganizationId());
         eventDto.setCreatedBy("OCPP");
