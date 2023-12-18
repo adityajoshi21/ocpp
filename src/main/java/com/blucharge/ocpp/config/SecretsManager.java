@@ -24,7 +24,7 @@ public class SecretsManager {
             return Credentials.builder().mysqlDatabase("bluchargeOcppLocal").mysqlHostName("localhost").mysqlUserName("root").mysqlPassword("root").mysqlPort("3306").mysqlPoolSize("10").build();
         }
         log.info("Env : {}", System.getenv("ENV"));
-        String secretName = "ocpp/" + System.getenv("ENV") + "/mysql";
+        String secretName = System.getenv("ENV") + "/ocpp/mysql";
         Region region = Region.of("ap-south-1");
 
         SecretsManagerClient client = SecretsManagerClient.builder()
