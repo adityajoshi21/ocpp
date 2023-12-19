@@ -188,6 +188,7 @@ public class TransactionServiceImpl implements TransactionService {
                 )
         );
         String chargerName = chargerRecord.getName();
+        System.out.println("COMMAND SEND FOR REMOTE START TO CHARGER");
         // todo socket publish with above details
     }
 

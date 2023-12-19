@@ -1,5 +1,6 @@
 package com.blucharge.ocpp.contoller;
 
+import com.blucharge.event.dto.RemoteStartCommandDto;
 import com.blucharge.ocpp.dto.authorize.AuthorizeRequest;
 import com.blucharge.ocpp.dto.authorize.AuthorizeResponse;
 import com.blucharge.ocpp.dto.boot_notification.BootNotificationRequest;
@@ -74,6 +75,11 @@ public class OcppController {
     @PostMapping(value = "/stop-transaction")
     public StopTransactionResponse handleStopTxn(@RequestBody StopTransactionRequest request) {
         return transactionService.stopTransaction(request, TEST_CHARGER);
+    }
+
+    @PostMapping(value = "/remote-start")
+    public void handleRemoteStart(@RequestBody RemoteStartCommandDto request) {
+        transactionService.handleRemoteStartCommand(request);
     }
 }
 
