@@ -13,7 +13,6 @@ public enum Phase {
     L_1_L_2("L1-L2"),
     L_2_L_3("L2-L3"),
     L_3_L_1("L3-L1");
-
     private final String value;
 
     Phase(String value) {

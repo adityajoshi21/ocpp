@@ -26,8 +26,6 @@ public enum Measurand {
     SOC("SoC"),
     TEMPERATURE("Temperature"),
     VOLTAGE("Voltage");
-
-
     private final String value;
 
     Measurand(String value) {
@@ -47,6 +45,4 @@ public enum Measurand {
     public String value() {
         return this.value;
     }
-
-
 }

@@ -30,7 +30,6 @@ public enum ReadingContext {
     public String value() {
         return this.value;
     }
-
 }
 
 

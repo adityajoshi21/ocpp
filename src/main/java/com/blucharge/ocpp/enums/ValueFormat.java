@@ -18,7 +18,6 @@ public enum ValueFormat {
             if (valueFormat.value.equalsIgnoreCase(value))
                 return valueFormat;
         throw new IllegalArgumentException("Invalid ValueFormat value: " + value);
-
     }
 
     public String value() {

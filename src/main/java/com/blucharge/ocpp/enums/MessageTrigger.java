@@ -1,26 +1,31 @@
 package com.blucharge.ocpp.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 public enum MessageTrigger {
-    BOOT_NOTIFICATION("BootNotification", false),  //here flag denotes if connectorId is needed or not
-    DIAGNOSTICS_STATUS_NOTIFICATION("DiagnosticsStatusNotification", false),
-    FIRMWARE_STATUS_NOTIFICATION("FirmwareStatusNotification", false),
-    HEARTBEAT("Heartbeat", false),
-    METER_VALUES("MeterValues", true),
-    STATUS_NOTIFICATION("StatusNotification", true);
-
+    BOOT_NOTIFICATION("BootNotification"),
+    DIAGNOSTICS_STATUS_NOTIFICATION("DiagnosticsStatusNotification"),
+    FIRMWARE_STATUS_NOTIFICATION("FirmwareStatusNotification"),
+    HEARTBEAT("Heartbeat"),
+    METER_VALUES("MeterValues"),
+    STATUS_NOTIFICATION("StatusNotification");
     private final String value;
-    private final Boolean isConnectorIdRequired;
 
-    MessageTrigger(String value, Boolean flag) {
+    MessageTrigger(String value) {
         this.value = value;
-        this.isConnectorIdRequired = flag;
     }
 
-    public String getValue() {
-        return value;
+    @JsonCreator
+    public static MessageTrigger fromValue(String value) {
+        for (MessageTrigger enumValue : MessageTrigger.values()) {
+            if (enumValue.value.equalsIgnoreCase(value)) {
+                return enumValue;
+            }
+        }
+        throw new IllegalArgumentException("Invalid Measurand value: " + value);
     }
 
-    public Boolean isConnectorIdRequired() {
-        return isConnectorIdRequired;
+    public String value() {
+        return this.value;
     }
 }

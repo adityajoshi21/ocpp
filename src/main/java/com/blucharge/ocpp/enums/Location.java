@@ -8,7 +8,6 @@ public enum Location {
     EV("EV"),
     INLET("Inlet"),
     OUTLET("Outlet");
-
     private final String value;
 
     Location(String value) {
@@ -21,7 +20,6 @@ public enum Location {
             if (location.value.equalsIgnoreCase(value))
                 return location;
         throw new IllegalArgumentException("Invalid Location value: " + value);
-
     }
 
     public String value() {
