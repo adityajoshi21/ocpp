@@ -77,7 +77,7 @@ public class MeterValuesServiceImpl implements MeterValuesService {
                         null
                 )
         );
-        eventRepo.createRecord(eventDto);
+        eventRepo.createRecordFromEvent(eventDto);
         kafkaConfiguration.kafkaTemplate().send(eventDto.getTopic(), new Gson().toJson(eventDto));
 
         return new MeterValuesResponse();

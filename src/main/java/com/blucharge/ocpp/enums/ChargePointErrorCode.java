@@ -30,7 +30,7 @@ public enum ChargePointErrorCode {
     @JsonCreator
     public static ChargePointErrorCode fromValue(String value) {
         for (ChargePointErrorCode enumValue : ChargePointErrorCode.values()) {
-            if (enumValue.value.equalsIgnoreCase(value)) {
+            if (enumValue.value.replaceAll("_"," ").equalsIgnoreCase(value)) {
                 return enumValue;
             }
         }

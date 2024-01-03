@@ -111,7 +111,7 @@ public class TransactionServiceImpl implements TransactionService {
                         connectorRepo.getConnectorRecordForId(chargingTransactionHistoryRecord1.getConnectorId()).getUuid()
                 )
         );
-        eventRepo.createRecord(eventDto);
+        eventRepo.createRecordFromEvent(eventDto);
         kafkaConfiguration.kafkaTemplate().send(eventDto.getTopic(), new Gson().toJson(eventDto));
 
         return new StartTransactionResponse(
@@ -157,7 +157,7 @@ public class TransactionServiceImpl implements TransactionService {
                         (double) (parameters.getMeterStop() - liveTransactionRecord.getMeterStartValue() / 1000) + Double.parseDouble("0." + ((parameters.getMeterStop() - liveTransactionRecord.getMeterStartValue()) % 1000))
                 )
         );
-        eventRepo.createRecord(eventDto);
+        eventRepo.createRecordFromEvent(eventDto);
         kafkaConfiguration.kafkaTemplate().send(eventDto.getTopic(), new Gson().toJson(eventDto));
 
         liveTransactionRepo.deleteRecord(liveTransactionRecord.getId());

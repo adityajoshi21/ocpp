@@ -3,6 +3,7 @@ package com.blucharge.ocpp.config;
 import com.blucharge.event.dto.*;
 import com.blucharge.event.enums.ConnectorEvent;
 import com.blucharge.ocpp.service.ConnectorService;
+import com.blucharge.ocpp.service.KafkaHelperService;
 import com.blucharge.ocpp.service.TransactionService;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,25 +12,20 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class KafkaListenerConfig {
-
     private static final Gson gson = new Gson();
     @Autowired
     private TransactionService transactionService;
     @Autowired
     private ConnectorService connectorService;
-
-    @KafkaListener(id = "DATA-EVENT", topics = {"DATA"}, containerFactory = "kafkaListenerContainerFactory", groupId = "OCPP")
-    public void dataEventListener(String message) {
-        KafkaPublishEventDto eventDto = gson.fromJson(message, KafkaPublishEventDto.class);
-        String eventType = eventDto.getEventType();
-        String eventData = eventDto.getEventData().toString();
-    }
+    @Autowired
+    private KafkaHelperService kafkaHelperService;
 
     @KafkaListener(id = "COMMAND-EVENT", topics = {"COMMAND"}, containerFactory = "kafkaListenerContainerFactory", groupId = "OCPP")
     public void commandEventListener(String message) {
         KafkaPublishEventDto eventDto = gson.fromJson(message, KafkaPublishEventDto.class);
         String eventName = eventDto.getEventName();
         String eventData = eventDto.getEventData().toString();
+        kafkaHelperService.logEvent(eventDto);
         if (ConnectorEvent.REMOTE_START.name().equals(eventName)) {
             RemoteStartCommandDto remoteStartCommandDto = gson.fromJson(eventData, RemoteStartCommandDto.class);
             transactionService.handleRemoteStartCommand(remoteStartCommandDto);
@@ -49,12 +45,5 @@ public class KafkaListenerConfig {
             ChangeConfigurationCommandDto changeConfigurationCommandDto = gson.fromJson(eventData, ChangeConfigurationCommandDto.class);
             connectorService.changeConfiguration(changeConfigurationCommandDto);
         }
-    }
-
-    @KafkaListener(id = "CONNECTOR-EVENT", topics = {"CONNECTOR"}, containerFactory = "kafkaListenerContainerFactory", groupId = "OCPP")
-    public void connectorEventListener(String message) {
-        KafkaPublishEventDto eventDto = gson.fromJson(message, KafkaPublishEventDto.class);
-        String eventType = eventDto.getEventType();
-        String eventData = eventDto.getEventData().toString();
     }
 }

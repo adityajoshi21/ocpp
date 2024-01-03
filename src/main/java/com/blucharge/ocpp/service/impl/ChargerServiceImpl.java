@@ -80,7 +80,7 @@ public class ChargerServiceImpl implements ChargerService {
                     connectorRecord.getUuid(),
                     DateTime.now().getMillis()
             ));
-            eventRepo.createRecord(eventDto);
+            eventRepo.createRecordFromEvent(eventDto);
             kafkaConfiguration.kafkaTemplate().send(eventDto.getTopic(), new Gson().toJson(eventDto));
         }
         return new HeartbeatResponse(DateTime.now());

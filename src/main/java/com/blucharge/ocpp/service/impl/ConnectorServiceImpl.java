@@ -19,6 +19,7 @@ import com.blucharge.ocpp.repository.ChargerRepo;
 import com.blucharge.ocpp.repository.ConnectorRepo;
 import com.blucharge.ocpp.repository.EventRepo;
 import com.blucharge.ocpp.service.ConnectorService;
+import com.blucharge.util.utils.RandomUuidString;
 import com.blucharge.util.utils.RequestContext;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -59,6 +60,7 @@ public class ConnectorServiceImpl implements ConnectorService {
         // Info: publishing kafka connector status update event
         KafkaPublishEventDto<ConnectorStatusUpdateEventDto> eventDto = new KafkaPublishEventDto<>();
         eventDto.setTopic(KafkaTopic.CONNECTOR.name());
+        eventDto.setEventUuid("EVT_"+ RandomUuidString.generateUuid());
         eventDto.setEventType(KafkaEventType.REQUEST.name());
         eventDto.setEventName(ConnectorEvent.STATUS.name());
         eventDto.setApplicationSourceId(ApplicationConstants.APPLICATION_ID);
@@ -69,7 +71,7 @@ public class ConnectorServiceImpl implements ConnectorService {
                 parameters.getStatus().name(),
                 parameters.getTimestamp().getMillis()
         ));
-        eventRepo.createRecord(eventDto);
+        eventRepo.createRecordFromEvent(eventDto);
         kafkaConfiguration.kafkaTemplate().send(eventDto.getTopic(), new Gson().toJson(eventDto));
 
         return new StatusNotificationResponse();

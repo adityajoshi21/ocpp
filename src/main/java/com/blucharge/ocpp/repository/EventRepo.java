@@ -1,8 +1,13 @@
 package com.blucharge.ocpp.repository;
 
 
+import com.blucharge.db.ocpp.tables.records.EventRecord;
 import com.blucharge.event.dto.KafkaPublishEventDto;
 
 public interface EventRepo {
-    void createRecord(KafkaPublishEventDto eventDto);
+    void createRecordFromEvent(KafkaPublishEventDto eventDto);
+
+    void createRecord(EventRecord eventRecord);
+
+    void updateAckForEventUuid(KafkaPublishEventDto event);
 }
