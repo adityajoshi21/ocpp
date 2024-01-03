@@ -21,18 +21,18 @@ public class KafkaHelperServiceImpl implements KafkaHelperService {
     @Override
     public void logEvent(KafkaPublishEventDto eventDto) {
         String eventType = eventDto.getEventType();
+        EventRecord eventRecord = new EventRecord();
+        eventRecord.setData(eventDto.getEventData().toString());
+        eventRecord.setApiSource(eventDto.getApplicationSourceId());
+        eventRecord.setCreatedBy(eventDto.getCreatedBy());
+        eventRecord.setOrganisationId(eventDto.getOrganisationId());
+        eventRecord.setExtEventUuid(eventDto.getEventUuid());
+        eventRecord.setUuid("EVT_"+RandomUuidString.generateUuid());
+        eventRecord.setTopic(eventDto.getTopic());
+        eventRecord.setType(eventDto.getEventType());
+        eventRecord.setName(eventDto.getEventName());
+        eventRepo.createRecord(eventRecord);
         if (KafkaEventType.REQUEST.name().equals(eventType)){
-            EventRecord eventRecord = new EventRecord();
-            eventRecord.setData(eventDto.getEventData().toString());
-            eventRecord.setApiSource(eventDto.getApplicationSourceId());
-            eventRecord.setCreatedBy(eventDto.getCreatedBy());
-            eventRecord.setOrganisationId(eventDto.getOrganisationId());
-            eventRecord.setExtEventUuid(eventDto.getEventUuid());
-            eventRecord.setUuid("EVT_"+RandomUuidString.generateUuid());
-            eventRecord.setTopic(eventDto.getTopic());
-            eventRecord.setType(eventDto.getEventType());
-            eventRecord.setName(eventDto.getEventName());
-            eventRepo.createRecord(eventRecord);
             KafkaPublishEventDto eventDto1 = new KafkaPublishEventDto<>();
             eventDto1.setEventUuid(eventDto.getEventUuid());
             eventDto1.setEventType(KafkaEventType.RESPONSE.name());
