@@ -21,6 +21,10 @@ public class KafkaHelperServiceImpl implements KafkaHelperService {
     @Override
     public void logEvent(KafkaPublishEventDto eventDto) {
         String eventType = eventDto.getEventType();
+        if (KafkaEventType.RESPONSE.name().equals(eventType)) {
+            eventRepo.updateAckForEventUuid(eventDto);
+            return;
+        }
         EventRecord eventRecord = new EventRecord();
         eventRecord.setData(eventDto.getEventData().toString());
         eventRecord.setApiSource(eventDto.getApplicationSourceId());
@@ -42,8 +46,6 @@ public class KafkaHelperServiceImpl implements KafkaHelperService {
             eventDto1.setCreatedBy(ApplicationConstants.APPLICATION_ID);
             eventDto1.setOrganisationId(eventDto1.getOrganisationId());
             kafkaConfiguration.kafkaTemplate().send(eventDto1.getTopic(),new Gson().toJson(eventDto1));
-        } else if (KafkaEventType.RESPONSE.name().equals(eventType)) {
-            eventRepo.updateAckForEventUuid(eventDto);
         }
     }
 }
