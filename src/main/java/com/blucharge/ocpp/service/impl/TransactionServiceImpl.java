@@ -108,7 +108,8 @@ public class TransactionServiceImpl implements TransactionService {
                         chargingTransactionHistoryRecord1.getStartSoc(),
                         chargingTransactionHistoryRecord1.getStartTime(),
                         ocppTagRepository.getOcppTagRecordForId(chargingTransactionHistoryRecord1.getOcppTagId()).getUuid(),
-                        connectorRepo.getConnectorRecordForId(chargingTransactionHistoryRecord1.getConnectorId()).getUuid()
+                        connectorRepo.getConnectorRecordForId(chargingTransactionHistoryRecord1.getConnectorId()).getUuid(),
+                        null
                 )
         );
         eventRepo.createRecordFromEvent(eventDto);
@@ -154,7 +155,8 @@ public class TransactionServiceImpl implements TransactionService {
                         liveTransactionRecord.getUuid(),
                         parameters.getReason().name(),
                         liveTransactionRecord.getCurrentSoc(),
-                        (double) (parameters.getMeterStop() - liveTransactionRecord.getMeterStartValue() / 1000) + Double.parseDouble("0." + ((parameters.getMeterStop() - liveTransactionRecord.getMeterStartValue()) % 1000))
+                        (double) (parameters.getMeterStop() - liveTransactionRecord.getMeterStartValue() / 1000) + Double.parseDouble("0." + ((parameters.getMeterStop() - liveTransactionRecord.getMeterStartValue()) % 1000)),
+                        null
                 )
         );
         eventRepo.createRecordFromEvent(eventDto);

@@ -46,7 +46,7 @@ public class EventRepoImpl implements EventRepo {
     @Override
     public void updateAckForEventUuid(KafkaPublishEventDto eventDto) {
         ctx.update(event)
-                .set(event.ACK,true)
+                .set(event.ACK, true)
                 .set(event.UPDATED_ON, DateTime.now())
                 .set(event.UPDATED_BY, eventDto.getCreatedBy())
                 .execute();

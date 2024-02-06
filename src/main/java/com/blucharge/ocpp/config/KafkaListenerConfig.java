@@ -20,7 +20,7 @@ public class KafkaListenerConfig {
     @Autowired
     private KafkaHelperService kafkaHelperService;
 
-    @KafkaListener(id = "COMMAND-EVENT", topics = {"COMMAND"}, containerFactory = "kafkaListenerContainerFactory", groupId = "OCPP")
+    @KafkaListener(id = "COMMAND-EVENT", topics = {"COMMAND-EVENT"}, containerFactory = "kafkaListenerContainerFactory", groupId = "OCPP")
     public void commandEventListener(String message) {
         KafkaPublishEventDto eventDto = gson.fromJson(message, KafkaPublishEventDto.class);
         String eventName = eventDto.getEventName();

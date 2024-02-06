@@ -3,6 +3,7 @@ package com.blucharge.ocpp.contoller;
 import com.blucharge.event.dto.RemoteStartCommandDto;
 import com.blucharge.ocpp.dto.authorize.AuthorizeRequest;
 import com.blucharge.ocpp.dto.authorize.AuthorizeResponse;
+import com.blucharge.ocpp.dto.blucgn.OcppSocketDataFromBlucgnDto;
 import com.blucharge.ocpp.dto.boot_notification.BootNotificationRequest;
 import com.blucharge.ocpp.dto.boot_notification.BootNotificationResponse;
 import com.blucharge.ocpp.dto.heartbeat.HeartbeatRequest;
@@ -39,6 +40,8 @@ public class OcppController {
     private OcppTagService ocppTagService;
     @Autowired
     private MeterValuesService meterValueService;
+    @Autowired
+    private LogService logService;
 
     @PostMapping(value = "/boot-notification")
     public BootNotificationResponse handleBootNotification(@RequestBody BootNotificationRequest request) {
@@ -80,6 +83,11 @@ public class OcppController {
     @PostMapping(value = "/remote-start")
     public void handleRemoteStart(@RequestBody RemoteStartCommandDto request) {
         transactionService.handleRemoteStartCommand(request);
+    }
+
+    @PostMapping(value = "/blucgn")
+    public void handleIncomingMessage(@RequestBody OcppSocketDataFromBlucgnDto ocppSocketDataFromBlucgnDto) {
+        logService.handleIncomingMessage(ocppSocketDataFromBlucgnDto);
     }
 }
 

@@ -60,7 +60,7 @@ public class ConnectorServiceImpl implements ConnectorService {
         // Info: publishing kafka connector status update event
         KafkaPublishEventDto<ConnectorStatusUpdateEventDto> eventDto = new KafkaPublishEventDto<>();
         eventDto.setTopic(KafkaTopic.CONNECTOR.name());
-        eventDto.setEventUuid("EVT_"+ RandomUuidString.generateUuid());
+        eventDto.setEventUuid("EVT_" + RandomUuidString.generateUuid());
         eventDto.setEventType(KafkaEventType.REQUEST.name());
         eventDto.setEventName(ConnectorEvent.STATUS.name());
         eventDto.setApplicationSourceId(ApplicationConstants.APPLICATION_ID);
