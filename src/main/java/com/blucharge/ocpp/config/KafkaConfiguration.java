@@ -21,7 +21,7 @@ import java.util.Map;
 @Configuration
 @DependsOn("ApplicationConstants")
 public class KafkaConfiguration {
-    @Bean
+//    @Bean
     public Map<String, Object> producerConfigs() {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -30,7 +30,7 @@ public class KafkaConfiguration {
         return props;
     }
 
-    @Bean
+//    @Bean
     public Map<String, Object> consumerConfigs() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -39,24 +39,24 @@ public class KafkaConfiguration {
         return props;
     }
 
-    @Bean
+//    @Bean
     public ConsumerFactory<String, Object> consumerFactory() {
         return new DefaultKafkaConsumerFactory<>(consumerConfigs());
     }
 
-    @Bean("kafkaListenerContainerFactory")
+//    @Bean("kafkaListenerContainerFactory")
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, Object>> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         return factory;
     }
 
-    @Bean
+//    @Bean
     public ProducerFactory<String, Object> producerFactory() {
         return new DefaultKafkaProducerFactory<>(producerConfigs());
     }
 
-    @Bean
+//    @Bean
     public KafkaTemplate<String, Object> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
