@@ -1,9 +1,5 @@
 package com.blucharge.ocpp.config;
 
-
-//import com.zaxxer.hikari.HikariConfig;
-//import com.zaxxer.hikari.HikariDataSource;
-
 import com.blucharge.ocpp.dto.Credentials;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -24,28 +20,18 @@ public class SecretsManager {
 
     @Bean
     public Credentials getSecret() {
-
-        log.info("Env : {}",System.getenv("ENV"));
-        if("local".equals(System.getenv("ENV"))){
-            return Credentials.builder().mysqlPoolSize("5")
-                    .mysqlDatabase("bluchargeOcppLocal")
-                    .mysqlHostName("localhost")
-                    .mysqlUserName("root")
-                    .mysqlPassword("root")
-                    .mysqlPort("3306")
-                    .mysqlPoolSize("10")
-                    .build();
+        if ("local".equals(System.getenv("ENV"))) {
+            return Credentials.builder().mysqlDatabase("bluchargeOcppLocal").mysqlHostName("localhost").mysqlUserName("root").mysqlPassword("root").mysqlPort("3306").mysqlPoolSize("10").build();
         }
-
-        String secretName = System.getenv("ENV")+"/ocpp/mysql";
-
+        log.info("Env : {}", System.getenv("ENV"));
+        String secretName = System.getenv("ENV") + "/ocpp/mysql";
         Region region = Region.of("ap-south-1");
 
         SecretsManagerClient client = SecretsManagerClient.builder()
                 .region(region)
                 .build();
 
-        String secret=null, decodedBinarySecret = null;
+        String secret = null, decodedBinarySecret = null;
         GetSecretValueRequest getSecretValueRequest = GetSecretValueRequest.builder()
                 .secretId(secretName)
                 .build();
@@ -64,11 +50,8 @@ public class SecretsManager {
             decodedBinarySecret = new String(Base64.getDecoder().decode(getSecretValueResponse.secretBinary().asByteBuffer()).array());
         }
 
-        return  new Gson().fromJson(secret,Credentials.class);
+        return new Gson().fromJson(secret, Credentials.class);
 
     }
-
-
-
 
 }
