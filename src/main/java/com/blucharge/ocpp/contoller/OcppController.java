@@ -28,7 +28,7 @@ import static com.blucharge.ocpp.constants.StringConstant.TEST_CHARGER;
 
 @Slf4j
 @RestController
-@RequestMapping("api/v1/ocpp")
+@RequestMapping("/api/v1/ocpp")
 public class OcppController {
     @Autowired
     private ChargerService chargerService;
