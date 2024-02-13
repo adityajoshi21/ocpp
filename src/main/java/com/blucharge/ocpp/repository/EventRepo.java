@@ -9,5 +9,5 @@ public interface EventRepo {
 
     void createRecord(EventRecord eventRecord);
 
-    void updateAckForEventUuid(KafkaPublishEventDto event);
+//    void updateAckForEventUuid(KafkaPublishEventDto event);
 }
