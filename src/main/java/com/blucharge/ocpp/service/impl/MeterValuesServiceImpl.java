@@ -68,7 +68,7 @@ public class MeterValuesServiceImpl implements MeterValuesService {
         eventDto.setEventType(KafkaEventType.REQUEST.name());
         eventDto.setEventName(ConnectorEvent.CHARGING_UPDATE.name());
         eventDto.setApplicationSourceId(ApplicationConstants.APPLICATION_ID);
-        eventDto.setOrganisationId(RequestContext.getOrganizationId());
+        eventDto.setOrganisationId("BLUCHARGE");
         eventDto.setCreatedBy("OCPP");
         eventDto.setEventData(new ChargingTxnUpdateEventDto(
                         liveTransactionRecord.getUuid(),

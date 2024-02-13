@@ -74,7 +74,7 @@ public class ChargerServiceImpl implements ChargerService {
             eventDto.setEventType(KafkaEventType.REQUEST.name());
             eventDto.setEventName(ConnectorEvent.HEART_BEAT.name());
             eventDto.setApplicationSourceId(ApplicationConstants.APPLICATION_ID);
-            eventDto.setOrganisationId(RequestContext.getOrganizationId());
+            eventDto.setOrganisationId("BLUCHARGE");
             eventDto.setCreatedBy("OCPP");
             eventDto.setEventData(new HeartBeatEventDto(
                     connectorRecord.getUuid(),

@@ -26,7 +26,7 @@ public class JooqAutoInsertUpdateListener extends DefaultRecordListener {
 
         String ssoId = RequestContext.getSsoId();
         Record record = ctx.record();
-        String organisationId = RequestContext.getOrganizationId();
+        String organisationId = "BLUCHARGE";
 
         if (record.field(CREATED_TIMESTAMP) != null && record.get(record.field(CREATED_TIMESTAMP)) == null)
             record.set((Field<? super DateTime>) record.field(CREATED_TIMESTAMP), DateTime.now());
@@ -58,7 +58,7 @@ public class JooqAutoInsertUpdateListener extends DefaultRecordListener {
     public void updateStart(RecordContext ctx) {
         String ssoId = RequestContext.getSsoId();
         Record record = ctx.record();
-        String organisationId = RequestContext.getOrganizationId();
+        String organisationId = "BLUCHARGE";
         if (record.field(UPDATED_TIMESTAMP) != null)
             record.set((Field<? super DateTime>) record.field(UPDATED_TIMESTAMP), DateTime.now());
         else if (record.field(UPDATED_ON) != null)

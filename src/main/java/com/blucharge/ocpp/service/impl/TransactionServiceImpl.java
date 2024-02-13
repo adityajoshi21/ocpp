@@ -101,7 +101,7 @@ public class TransactionServiceImpl implements TransactionService {
         eventDto.setEventType(KafkaEventType.REQUEST.name());
         eventDto.setEventName(ConnectorEvent.CHARGING_START.name());
         eventDto.setApplicationSourceId(ApplicationConstants.APPLICATION_ID);
-        eventDto.setOrganisationId(RequestContext.getOrganizationId());
+        eventDto.setOrganisationId("BLUCHARGE");
         eventDto.setCreatedBy("OCPP");
         eventDto.setEventData(new StartTransactionEventDto(
                         chargingTransactionHistoryRecord1.getUuid(),
@@ -149,7 +149,7 @@ public class TransactionServiceImpl implements TransactionService {
         eventDto.setEventType(KafkaEventType.REQUEST.name());
         eventDto.setEventName(ConnectorEvent.CHARGING_STOP.name());
         eventDto.setApplicationSourceId(ApplicationConstants.APPLICATION_ID);
-        eventDto.setOrganisationId(RequestContext.getOrganizationId());
+        eventDto.setOrganisationId("BLUCHARGE");
         eventDto.setCreatedBy("OCPP");
         eventDto.setEventData(new StopTransactionEventDto(
                         liveTransactionRecord.getUuid(),

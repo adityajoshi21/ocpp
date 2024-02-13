@@ -64,7 +64,7 @@ public class ConnectorServiceImpl implements ConnectorService {
         eventDto.setEventType(KafkaEventType.REQUEST.name());
         eventDto.setEventName(ConnectorEvent.STATUS.name());
         eventDto.setApplicationSourceId(ApplicationConstants.APPLICATION_ID);
-        eventDto.setOrganisationId(RequestContext.getOrganizationId());
+        eventDto.setOrganisationId("BLUCHARGE");
         eventDto.setCreatedBy("OCPP");
         eventDto.setEventData(new ConnectorStatusUpdateEventDto(
                 connectorRecord.getUuid(),
