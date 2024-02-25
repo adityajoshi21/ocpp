@@ -16,10 +16,9 @@ public class LogServiceImpl implements LogService {
     @Override
     public void handleIncomingMessage(OcppSocketDataFromBlucgnDto ocppSocketDataFromBlucgnDto) {
         LogHistoryRecord logHistoryRecord = new LogHistoryRecord();
-        logHistoryRecord.setMessageId("RESPONSE");
+        logHistoryRecord.setMessageType("RESPONSE");
         logHistoryRecord.setMessageName(ocppSocketDataFromBlucgnDto.getInputType());
         logHistoryRecord.setMessageJson(ocppSocketDataFromBlucgnDto.getInputData());
-        logHistoryRecord.setMessageType(ocppSocketDataFromBlucgnDto.getInputType());
         logHistoryRecord.setChargerId(ocppSocketDataFromBlucgnDto.getChargeId());
         logHistoryRecord.setMessageOrigin("BLUCGN");
         logHistoryRepo.addRecord(logHistoryRecord);
