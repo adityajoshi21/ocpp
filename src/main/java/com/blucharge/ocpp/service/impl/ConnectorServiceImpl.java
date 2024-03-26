@@ -2,12 +2,10 @@ package com.blucharge.ocpp.service.impl;
 
 import com.blucharge.db.ocpp.tables.records.ChargerRecord;
 import com.blucharge.db.ocpp.tables.records.ConnectorRecord;
-import com.blucharge.event.dto.*;
-import com.blucharge.event.enums.ConnectorEvent;
-import com.blucharge.event.enums.KafkaEventType;
-import com.blucharge.event.enums.KafkaTopic;
-import com.blucharge.ocpp.config.KafkaConfiguration;
-import com.blucharge.ocpp.constants.ApplicationConstants;
+import com.blucharge.event.dto.ChangeConfigurationCommandDto;
+import com.blucharge.event.dto.GetConfigurationCommandDto;
+import com.blucharge.event.dto.TriggerMessageCommandDto;
+import com.blucharge.event.dto.UnlockGunCommandDto;
 import com.blucharge.ocpp.dto.change_configuration.ChangeConfigurationRequest;
 import com.blucharge.ocpp.dto.get_configuration.GetConfigurationRequest;
 import com.blucharge.ocpp.dto.status_notification.StatusNotificationRequest;
@@ -17,11 +15,7 @@ import com.blucharge.ocpp.dto.unlock_connector.UnlockConnectorRequest;
 import com.blucharge.ocpp.enums.MessageTrigger;
 import com.blucharge.ocpp.repository.ChargerRepo;
 import com.blucharge.ocpp.repository.ConnectorRepo;
-import com.blucharge.ocpp.repository.EventRepo;
 import com.blucharge.ocpp.service.ConnectorService;
-import com.blucharge.util.utils.RandomUuidString;
-import com.blucharge.util.utils.RequestContext;
-import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +31,6 @@ public class ConnectorServiceImpl implements ConnectorService {
     private ConnectorRepo connectorRepo;
     @Autowired
     private ChargerRepo chargerRepo;
-    @Autowired
-    private KafkaConfiguration kafkaConfiguration;
-    @Autowired
-    private EventRepo eventRepo;
 
     @Override
     public StatusNotificationResponse insertStatusNotification(StatusNotificationRequest parameters, String chargerName) {
@@ -57,23 +47,6 @@ public class ConnectorServiceImpl implements ConnectorService {
             return new StatusNotificationResponse();
         }
         connectorRepo.updateConnectorStatus(parameters, connectorRecord.getId());
-        // Info: publishing kafka connector status update event
-        KafkaPublishEventDto<ConnectorStatusUpdateEventDto> eventDto = new KafkaPublishEventDto<>();
-        eventDto.setTopic(KafkaTopic.CONNECTOR.name());
-        eventDto.setEventUuid("EVT_" + RandomUuidString.generateUuid());
-        eventDto.setEventType(KafkaEventType.REQUEST.name());
-        eventDto.setEventName(ConnectorEvent.STATUS.name());
-        eventDto.setApplicationSourceId(ApplicationConstants.APPLICATION_ID);
-        eventDto.setOrganisationId("BLUCHARGE");
-        eventDto.setCreatedBy("OCPP");
-        eventDto.setEventData(new ConnectorStatusUpdateEventDto(
-                connectorRecord.getUuid(),
-                parameters.getStatus().name(),
-                parameters.getTimestamp().getMillis()
-        ));
-        eventRepo.createRecordFromEvent(eventDto);
-        kafkaConfiguration.kafkaTemplate().send(eventDto.getTopic(), new Gson().toJson(eventDto));
-
         return new StatusNotificationResponse();
     }
 
