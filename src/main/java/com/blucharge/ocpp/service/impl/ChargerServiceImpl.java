@@ -2,13 +2,6 @@ package com.blucharge.ocpp.service.impl;
 
 import com.blucharge.db.ocpp.tables.records.ChargerRecord;
 import com.blucharge.db.ocpp.tables.records.ConnectorRecord;
-import com.blucharge.event.dto.HeartBeatEventDto;
-import com.blucharge.event.dto.KafkaPublishEventDto;
-import com.blucharge.event.enums.ConnectorEvent;
-import com.blucharge.event.enums.KafkaEventType;
-import com.blucharge.event.enums.KafkaTopic;
-import com.blucharge.ocpp.config.KafkaConfiguration;
-import com.blucharge.ocpp.constants.ApplicationConstants;
 import com.blucharge.ocpp.dto.boot_notification.BootNotificationRequest;
 import com.blucharge.ocpp.dto.boot_notification.BootNotificationResponse;
 import com.blucharge.ocpp.dto.heartbeat.HeartbeatRequest;
@@ -16,10 +9,7 @@ import com.blucharge.ocpp.dto.heartbeat.HeartbeatResponse;
 import com.blucharge.ocpp.enums.RegistrationStatus;
 import com.blucharge.ocpp.repository.ChargerRepo;
 import com.blucharge.ocpp.repository.ConnectorRepo;
-import com.blucharge.ocpp.repository.EventRepo;
 import com.blucharge.ocpp.service.ChargerService;
-import com.blucharge.util.utils.RequestContext;
-import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +29,6 @@ public class ChargerServiceImpl implements ChargerService {
 
     @Autowired
     private ConnectorRepo connectorRepo;
-    @Autowired
-    private EventRepo eventRepo;
-    @Autowired
-    private KafkaConfiguration kafkaConfiguration;
 
     @Override
     public BootNotificationResponse insertBootNotification(BootNotificationRequest parameters, String chargerName) {
@@ -68,20 +54,6 @@ public class ChargerServiceImpl implements ChargerService {
         List<ConnectorRecord> connectorRecords = connectorRepo.getConnectorRecordForChargerId(chargerRecord.getId());
         for (ConnectorRecord connectorRecord : connectorRecords) {
             connectorRepo.updateConnectorHeartBeat(connectorRecord.getId(), DateTime.now());
-            // Info: kafka connector heart beat update event
-            KafkaPublishEventDto<HeartBeatEventDto> eventDto = new KafkaPublishEventDto<>();
-            eventDto.setTopic(KafkaTopic.CONNECTOR.name());
-            eventDto.setEventType(KafkaEventType.REQUEST.name());
-            eventDto.setEventName(ConnectorEvent.HEART_BEAT.name());
-            eventDto.setApplicationSourceId(ApplicationConstants.APPLICATION_ID);
-            eventDto.setOrganisationId("BLUCHARGE");
-            eventDto.setCreatedBy("OCPP");
-            eventDto.setEventData(new HeartBeatEventDto(
-                    connectorRecord.getUuid(),
-                    DateTime.now().getMillis()
-            ));
-            eventRepo.createRecordFromEvent(eventDto);
-            kafkaConfiguration.kafkaTemplate().send(eventDto.getTopic(), new Gson().toJson(eventDto));
         }
         return new HeartbeatResponse(DateTime.now());
     }

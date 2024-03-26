@@ -9,7 +9,6 @@ import javax.annotation.PostConstruct;
 @Component("ApplicationConstants")
 public class ApplicationConstants {
     public static String APPLICATION_ID;
-    public static String KAFKA_URL;
     @Autowired
     private ConstantUtil constantUtil;
 

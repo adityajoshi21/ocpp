@@ -1,12 +1,8 @@
 package com.blucharge.ocpp.service.impl;
 
 import com.blucharge.db.ocpp.tables.records.*;
-import com.blucharge.event.dto.*;
-import com.blucharge.event.enums.ConnectorEvent;
-import com.blucharge.event.enums.KafkaEventType;
-import com.blucharge.event.enums.KafkaTopic;
-import com.blucharge.ocpp.config.KafkaConfiguration;
-import com.blucharge.ocpp.constants.ApplicationConstants;
+import com.blucharge.event.dto.RemoteStartCommandDto;
+import com.blucharge.event.dto.RemoteStopCommandDto;
 import com.blucharge.ocpp.dto.IdTagInfo;
 import com.blucharge.ocpp.dto.IdToken;
 import com.blucharge.ocpp.dto.authorize.AuthorizeRequest;
@@ -23,8 +19,6 @@ import com.blucharge.ocpp.service.MeterValuesService;
 import com.blucharge.ocpp.service.OcppTagService;
 import com.blucharge.ocpp.service.TransactionService;
 import com.blucharge.util.utils.RandomUuidString;
-import com.blucharge.util.utils.RequestContext;
-import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,10 +43,6 @@ public class TransactionServiceImpl implements TransactionService {
     private LiveTransactionRepo liveTransactionRepo;
     @Autowired
     private MeterValuesService meterValuesService;
-    @Autowired
-    private KafkaConfiguration kafkaConfiguration;
-    @Autowired
-    private EventRepo eventRepo;
 
     @Override
     public StartTransactionResponse startTransaction(StartTransactionRequest request, String chargerName) {
@@ -95,26 +85,6 @@ public class TransactionServiceImpl implements TransactionService {
         liveTransactionRecord.setUnitConsumed(0.0);
         liveTransactionRepo.createRecord(liveTransactionRecord);
 
-        // Info: kafka start charging update event
-        KafkaPublishEventDto<StartTransactionEventDto> eventDto = new KafkaPublishEventDto<>();
-        eventDto.setTopic(KafkaTopic.CONNECTOR.name());
-        eventDto.setEventType(KafkaEventType.REQUEST.name());
-        eventDto.setEventName(ConnectorEvent.CHARGING_START.name());
-        eventDto.setApplicationSourceId(ApplicationConstants.APPLICATION_ID);
-        eventDto.setOrganisationId("BLUCHARGE");
-        eventDto.setCreatedBy("OCPP");
-        eventDto.setEventData(new StartTransactionEventDto(
-                        chargingTransactionHistoryRecord1.getUuid(),
-                        chargingTransactionHistoryRecord1.getStartSoc(),
-                        chargingTransactionHistoryRecord1.getStartTime(),
-                        ocppTagRepository.getOcppTagRecordForId(chargingTransactionHistoryRecord1.getOcppTagId()).getUuid(),
-                        connectorRepo.getConnectorRecordForId(chargingTransactionHistoryRecord1.getConnectorId()).getUuid(),
-                        null
-                )
-        );
-        eventRepo.createRecordFromEvent(eventDto);
-        kafkaConfiguration.kafkaTemplate().send(eventDto.getTopic(), new Gson().toJson(eventDto));
-
         return new StartTransactionResponse(
                 idTagInfo,
                 chargingTransactionHistoryRecord1.getId().intValue()
@@ -142,25 +112,6 @@ public class TransactionServiceImpl implements TransactionService {
                 liveTransactionRecord.getMeterStartValue(),
                 liveTransactionRecord.getCurrentSoc()
         );
-
-        // Info: kafka stop charging update event
-        KafkaPublishEventDto<StopTransactionEventDto> eventDto = new KafkaPublishEventDto<>();
-        eventDto.setTopic(KafkaTopic.CONNECTOR.name());
-        eventDto.setEventType(KafkaEventType.REQUEST.name());
-        eventDto.setEventName(ConnectorEvent.CHARGING_STOP.name());
-        eventDto.setApplicationSourceId(ApplicationConstants.APPLICATION_ID);
-        eventDto.setOrganisationId("BLUCHARGE");
-        eventDto.setCreatedBy("OCPP");
-        eventDto.setEventData(new StopTransactionEventDto(
-                        liveTransactionRecord.getUuid(),
-                        parameters.getReason().name(),
-                        liveTransactionRecord.getCurrentSoc(),
-                        (double) (parameters.getMeterStop() - liveTransactionRecord.getMeterStartValue() / 1000) + Double.parseDouble("0." + ((parameters.getMeterStop() - liveTransactionRecord.getMeterStartValue()) % 1000)),
-                        null
-                )
-        );
-        eventRepo.createRecordFromEvent(eventDto);
-        kafkaConfiguration.kafkaTemplate().send(eventDto.getTopic(), new Gson().toJson(eventDto));
 
         liveTransactionRepo.deleteRecord(liveTransactionRecord.getId());
         return new StopTransactionResponse();
