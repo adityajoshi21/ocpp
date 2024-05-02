@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.ExecutorService;
+
 import static com.blucharge.ocpp.constants.StringConstant.TEST_CHARGER;
 
 @Slf4j
@@ -42,6 +44,8 @@ public class OcppController {
     private MeterValuesService meterValueService;
     @Autowired
     private LogService logService;
+    @Autowired
+    private ExecutorService executorService;
 
     @PostMapping(value = "/boot-notification")
     public BootNotificationResponse handleBootNotification(@RequestBody BootNotificationRequest request) {
@@ -87,7 +91,9 @@ public class OcppController {
 
     @PostMapping(value = "/blucgn")
     public void handleIncomingMessage(@RequestBody OcppSocketDataFromBlucgnDto ocppSocketDataFromBlucgnDto) {
-        logService.handleIncomingMessage(ocppSocketDataFromBlucgnDto);
+        executorService.submit(() -> {
+            logService.handleIncomingMessage(ocppSocketDataFromBlucgnDto);
+        });
     }
 }
 
