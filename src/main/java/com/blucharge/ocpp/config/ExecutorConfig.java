@@ -17,9 +17,9 @@ public class ExecutorConfig {
     @Bean(name = "asyncExecutor")
     public Executor asyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
-        executor.setMaxPoolSize(5);
-        executor.setQueueCapacity(100);
+        executor.setCorePoolSize(30);
+        executor.setMaxPoolSize(30);
+        executor.setQueueCapacity(200);
         executor.setThreadNamePrefix("AsyncThread--");
         executor.initialize();
         return executor;
@@ -31,7 +31,7 @@ public class ExecutorConfig {
         ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("SteVe-Executor-%d")
                 .build();
 
-        return new ScheduledThreadPoolExecutor(5, threadFactory);
+        return new ScheduledThreadPoolExecutor(30, threadFactory);
     }
 
 }
