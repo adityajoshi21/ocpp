@@ -1,24 +1,36 @@
 package com.blucharge.ocpp.service.impl;
 
 import com.blucharge.db.ocpp.tables.records.LogHistoryRecord;
+import com.blucharge.ocpp.config.JooqConfig;
+import com.blucharge.ocpp.dto.Credentials;
 import com.blucharge.ocpp.dto.OcppLogData;
 import com.blucharge.ocpp.dto.OcppLogRequestBody;
 import com.blucharge.ocpp.dto.OcppLogResponseData;
 import com.blucharge.ocpp.dto.blucgn.OcppSocketDataFromBlucgnDto;
-import com.blucharge.ocpp.repository.LogHistoryRepo;
+import com.blucharge.ocpp.repository.*;
 import com.blucharge.ocpp.service.LogService;
 import com.google.gson.Gson;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class LogServiceImpl implements LogService {
 
     @Autowired
     private LogHistoryRepo logHistoryRepo;
+    @Autowired
+    private JooqConfig jooqConfig;
+    @Autowired
+    private Credentials credentials;
 
     @Override
     public void handleIncomingMessage(OcppSocketDataFromBlucgnDto ocppSocketDataFromBlucgnDto) {
@@ -28,13 +40,13 @@ public class LogServiceImpl implements LogService {
         logHistoryRecord.setMessageJson(ocppSocketDataFromBlucgnDto.getInputData());
         logHistoryRecord.setChargerId(ocppSocketDataFromBlucgnDto.getChargeId());
         logHistoryRecord.setMessageOrigin("BLUCGN");
-        logHistoryRepo.addRecord(logHistoryRecord);
+        logHistoryRepo.addRecord(logHistoryRecord, jooqConfig.dslOcppContext());
     }
 
     @Override
     public List<OcppLogResponseData> generateLogForChargeBox(OcppLogRequestBody ocppLogRequestBody) {
         List<OcppLogResponseData> response = new ArrayList<>();
-        List<LogHistoryRecord> logHistoryRecords = logHistoryRepo.getRecord(ocppLogRequestBody);
+        List<LogHistoryRecord> logHistoryRecords = logHistoryRepo.getRecord(ocppLogRequestBody, jooqConfig.dslOcppContext());
         for (LogHistoryRecord logHistoryRecord : logHistoryRecords) {
             if (logHistoryRecord.getCreatedOn().getMillis() >= ocppLogRequestBody.getStartTime() && logHistoryRecord.getCreatedOn().getMillis() <= ocppLogRequestBody.getEndTime()) {
                 OcppLogResponseData ocppLogResponseData = new OcppLogResponseData();
@@ -48,5 +60,30 @@ public class LogServiceImpl implements LogService {
             }
         }
         return response;
+    }
+
+    @Override
+    public void processLogHisToryTempToHubWiseUpTime() {
+        Connection connection = null;
+        CallableStatement callableStatement = null;
+        try {
+            connection = DriverManager.getConnection("jdbc:mysql://" + credentials.getMysqlOcppHostName() + ":" + credentials.getMysqlOcppPort() + "/" + credentials.getMysqlOcppDatabase() + "?serverTimezone=UTC&autoReconnect=true&useSSL=false"
+                    , credentials.getMysqlOcppUserName(), credentials.getMysqlOcppPassword());
+
+            String sql = "{call hubwise_charger_uptime_proc()}";
+            callableStatement = connection.prepareCall(sql);
+            callableStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            // Close the resources
+            if (callableStatement != null) {
+                try {
+                    callableStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

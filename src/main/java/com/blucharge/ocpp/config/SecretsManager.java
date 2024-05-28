@@ -13,7 +13,7 @@ import java.security.InvalidParameterException;
 import java.util.Base64;
 
 
-@Configuration
+@Configuration("secretsManager")
 @Slf4j
 public class SecretsManager {
 
@@ -21,7 +21,20 @@ public class SecretsManager {
     @Bean
     public Credentials getSecret() {
         if ("local".equals(System.getenv("ENV"))) {
-            return Credentials.builder().mysqlDatabase("bluchargeOcppLocal").mysqlHostName("localhost").mysqlUserName("root").mysqlPassword("root").mysqlPort("3306").mysqlPoolSize("10").build();
+            return Credentials.builder()
+                    .mysqlOcppDatabase("bluchargeOcppLocal")
+                    .mysqlOcppHostName("localhost")
+                    .mysqlOcppUserName("root")
+                    .mysqlOcppPassword("root")
+                    .mysqlOcppPort("3306")
+                    .mysqlOcppPoolSize("10")
+                    .mysqlAnalyticsDatabase("bluchargeAnalyticsLocal")
+                    .mysqlAnalyticsHostName("localhost")
+                    .mysqlAnalyticsUserName("root")
+                    .mysqlAnalyticsPassword("root")
+                    .mysqlAnalyticsPort("3306")
+                    .mysqlAnalyticsPoolSize("10")
+                    .build();
         }
         log.info("Env : {}", System.getenv("ENV"));
         String secretName = System.getenv("ENV") + "/ocpp/mysql";

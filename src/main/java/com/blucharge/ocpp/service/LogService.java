@@ -7,6 +7,8 @@ import com.blucharge.ocpp.dto.blucgn.OcppSocketDataFromBlucgnDto;
 import java.util.List;
 
 public interface LogService {
+    void processLogHisToryTempToHubWiseUpTime();
+
     void handleIncomingMessage(OcppSocketDataFromBlucgnDto ocppSocketDataFromBlucgnDto);
 
     List<OcppLogResponseData> generateLogForChargeBox(OcppLogRequestBody ocppLogRequestBody);

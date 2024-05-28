@@ -53,16 +53,19 @@ dependencies {
 
 	if (System.getenv("ENV") == 'local' || System.getenv("ENV") == null) {
 		implementation 'com.blucharge.db:ocpp-db-local:1.0'
+		implementation 'com.blucharge.db:analytics-db-local:1.0'
 		implementation 'com.blucharge:core-local:1.0-SNAPSHOT'
 		implementation 'com.blucharge:event-local:1.0-SNAPSHOT'
 		implementation 'com.blucharge:util-local:1.0-SNAPSHOT'
 	} else if (System.getenv("ENV") == 'staging') {
 		implementation 'com.blucharge.db:ocpp-db-staging:1.0'
+		implementation 'com.blucharge.db:analytics-db-staging:1.0'
 		implementation 'com.blucharge:core-staging:1.0-SNAPSHOT'
 		implementation 'com.blucharge:event-staging:1.0-SNAPSHOT'
 		implementation 'com.blucharge:util-staging:1.0-SNAPSHOT'
 	} else if (System.getenv("ENV") == 'prod') {
 		implementation 'com.blucharge.db:ocpp-db-prod:1.0'
+		implementation 'com.blucharge.db:analytics-db-prod:1.0'
 		implementation 'com.blucharge:core-prod:1.0-SNAPSHOT'
 		implementation 'com.blucharge:event-prod:1.0-SNAPSHOT'
 		implementation 'com.blucharge:util-prod:1.0-SNAPSHOT'
