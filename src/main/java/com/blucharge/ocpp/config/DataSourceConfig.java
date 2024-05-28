@@ -16,11 +16,10 @@ import javax.sql.DataSource;
 @DependsOn("secretsManager")
 public class DataSourceConfig {
     @Autowired
-    private SecretsManager secretsManager;
+    private Credentials credentials;
 
     @Bean
     public DataSource getOcppDataSource() {
-        Credentials credentials = secretsManager.getSecret();
         HikariConfig config = new HikariConfig();
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
         config.setMaximumPoolSize(Integer.parseInt(credentials.getMysqlOcppPoolSize()));
@@ -32,7 +31,6 @@ public class DataSourceConfig {
 
     @Bean
     public DataSource getAnalyticsDataSource() {
-        Credentials credentials = secretsManager.getSecret();
         HikariConfig config = new HikariConfig();
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
         config.setMaximumPoolSize(Integer.parseInt(credentials.getMysqlAnalyticsPoolSize()));
