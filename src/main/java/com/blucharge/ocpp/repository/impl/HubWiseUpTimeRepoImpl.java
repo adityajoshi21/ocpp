@@ -5,8 +5,8 @@ import com.blucharge.db.analytics.tables.records.HubwiseChargerUptimeRecord;
 import com.blucharge.ocpp.repository.HubWiseUpTimeRepo;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
+
 
 @Repository
 public class HubWiseUpTimeRepoImpl implements HubWiseUpTimeRepo {
