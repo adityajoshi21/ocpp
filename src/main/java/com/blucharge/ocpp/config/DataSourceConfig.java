@@ -35,7 +35,7 @@ public class DataSourceConfig {
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
         config.setMaximumPoolSize(Integer.parseInt(credentials.getMysqlAnalyticsPoolSize()));
         config.setUsername(credentials.getMysqlAnalyticsUserName());
-        config.setJdbcUrl("jdbc:mysql://" + credentials.getMysqlAnalyticsHostName() + ":" + credentials.getMysqlAnalyticsPort() + "/" + credentials.getMysqlAnalyticsDatabase() + "?serverTimezone=UTC&autoReconnect=true&useSSL=false");
+        config.setJdbcUrl("jdbc:mysql://" + credentials.getMysqlAnalyticsHostName() + ":" + credentials.getMysqlAnalyticsPort() + "/" + credentials.getMysqlAnalyticsDatabase() + "?serverTimezone=UTC&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true");
         config.setPassword(credentials.getMysqlAnalyticsPassword());
         return new HikariDataSource(config);
     }
