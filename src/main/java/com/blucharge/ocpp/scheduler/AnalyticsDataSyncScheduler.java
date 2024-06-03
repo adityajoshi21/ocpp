@@ -36,7 +36,7 @@ public class AnalyticsDataSyncScheduler {
     @Autowired
     private Credentials credentials;
 
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?")
     public void loadLogHisToryTempFromLogHistory() {
         List<LogHistoryRecord> logHistoryRecords = logHistoryRepo.getLastOneDayRecord(jooqConfig.dslOcppContext());
         for (LogHistoryRecord logHistoryRecord : logHistoryRecords) {
