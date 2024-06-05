@@ -1,13 +1,13 @@
 package com.blucharge.ocpp.service.impl;
 
+import com.blucharge.db.ocpp.tables.records.HubwiseChargerUptimeRecord;
 import com.blucharge.db.ocpp.tables.records.LogHistoryRecord;
 import com.blucharge.ocpp.config.JooqConfig;
-import com.blucharge.ocpp.dto.Credentials;
-import com.blucharge.ocpp.dto.OcppLogData;
-import com.blucharge.ocpp.dto.OcppLogRequestBody;
-import com.blucharge.ocpp.dto.OcppLogResponseData;
+import com.blucharge.ocpp.dto.*;
 import com.blucharge.ocpp.dto.blucgn.OcppSocketDataFromBlucgnDto;
-import com.blucharge.ocpp.repository.*;
+import com.blucharge.ocpp.repository.HubWiseUpTimeRepo;
+import com.blucharge.ocpp.repository.LogHistoryRepo;
+import com.blucharge.ocpp.repository.LogHistoryTempRepo;
 import com.blucharge.ocpp.service.LogService;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +31,10 @@ public class LogServiceImpl implements LogService {
     private JooqConfig jooqConfig;
     @Autowired
     private Credentials credentials;
+    @Autowired
+    private LogHistoryTempRepo logHistoryTempRepo;
+    @Autowired
+    private HubWiseUpTimeRepo hubWiseUpTimeRepo;
 
     @Override
     public void handleIncomingMessage(OcppSocketDataFromBlucgnDto ocppSocketDataFromBlucgnDto) {
@@ -63,8 +67,45 @@ public class LogServiceImpl implements LogService {
     }
 
     @Override
+    public void insertDataInTempTable(LogTempDataInsertRequestDto logTempDataInsertRequestDto) {
+        List<LogHistoryRecord> logHistoryRecords = logHistoryRepo.getLastOneDayRecordWithTimeStamp(jooqConfig.dslOcppContext(),logTempDataInsertRequestDto.getTimestamp());
+        for (LogHistoryRecord logHistoryRecord : logHistoryRecords) {
+            logHistoryTempRepo.createRecord(logHistoryRecord, jooqConfig.dslOcppContext());
+        }
+    }
+
+    @Override
+    public void sendDataToHubWiseAnalytics() {
+        List<HubwiseChargerUptimeRecord> hubwiseChargerUptimeRecords = hubWiseUpTimeRepo.getRecords(jooqConfig.dslOcppContext());
+        for (HubwiseChargerUptimeRecord hubwiseChargerUptimeRecord : hubwiseChargerUptimeRecords) {
+            hubWiseUpTimeRepo.createAnalyticsHubUpTimeRecord(hubwiseChargerUptimeRecord, jooqConfig.dslAnalyticsContext());
+        }
+        Connection connection;
+        CallableStatement callableStatement = null;
+        try {
+            connection = DriverManager.getConnection("jdbc:mysql://" + credentials.getMysqlOcppHostName() + ":" + credentials.getMysqlOcppPort() + "/" + credentials.getMysqlOcppDatabase() + "?serverTimezone=UTC&autoReconnect=true&useSSL=false"
+                    , credentials.getMysqlOcppUserName(), credentials.getMysqlOcppPassword());
+
+            String sql = "{call delete_charger_uptime()}";
+            callableStatement = connection.prepareCall(sql);
+            callableStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            // Close the resources
+            if (callableStatement != null) {
+                try {
+                    callableStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    @Override
     public void processLogHisToryTempToHubWiseUpTime() {
-        Connection connection = null;
+        Connection connection;
         CallableStatement callableStatement = null;
         try {
             connection = DriverManager.getConnection("jdbc:mysql://" + credentials.getMysqlOcppHostName() + ":" + credentials.getMysqlOcppPort() + "/" + credentials.getMysqlOcppDatabase() + "?serverTimezone=UTC&autoReconnect=true&useSSL=false"
@@ -86,4 +127,7 @@ public class LogServiceImpl implements LogService {
             }
         }
     }
+
+
+
 }

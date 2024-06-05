@@ -12,12 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Types;
-
 import java.util.List;
 
 
@@ -46,7 +45,7 @@ public class AnalyticsDataSyncScheduler {
 
     @Scheduled(cron = "0 0 4 * * ?")
     public void processLogHisToryTempToHubWiseUpTime() {
-        Connection connection = null;
+        Connection connection;
         CallableStatement callableStatement = null;
         try {
             connection = DriverManager.getConnection("jdbc:mysql://" + credentials.getMysqlOcppHostName() + ":" + credentials.getMysqlOcppPort() + "/" + credentials.getMysqlOcppDatabase() + "?serverTimezone=UTC&autoReconnect=true&useSSL=false"
@@ -58,7 +57,6 @@ public class AnalyticsDataSyncScheduler {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            // Close the resources
             if (callableStatement != null) {
                 try {
                     callableStatement.close();
@@ -75,7 +73,7 @@ public class AnalyticsDataSyncScheduler {
         for (HubwiseChargerUptimeRecord hubwiseChargerUptimeRecord : hubwiseChargerUptimeRecords) {
             hubWiseUpTimeRepo.createAnalyticsHubUpTimeRecord(hubwiseChargerUptimeRecord, jooqConfig.dslAnalyticsContext());
         }
-        Connection connection = null;
+        Connection connection;
         CallableStatement callableStatement = null;
         try {
             connection = DriverManager.getConnection("jdbc:mysql://" + credentials.getMysqlOcppHostName() + ":" + credentials.getMysqlOcppPort() + "/" + credentials.getMysqlOcppDatabase() + "?serverTimezone=UTC&autoReconnect=true&useSSL=false"
@@ -87,7 +85,6 @@ public class AnalyticsDataSyncScheduler {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            // Close the resources
             if (callableStatement != null) {
                 try {
                     callableStatement.close();

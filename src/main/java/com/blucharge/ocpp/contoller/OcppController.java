@@ -1,5 +1,6 @@
 package com.blucharge.ocpp.contoller;
 
+import com.blucharge.ocpp.dto.LogTempDataInsertRequestDto;
 import com.blucharge.ocpp.dto.blucgn.OcppSocketDataFromBlucgnDto;
 import com.blucharge.ocpp.service.LogService;
 import lombok.extern.slf4j.Slf4j;
@@ -19,14 +20,24 @@ public class OcppController {
 
     @PostMapping(value = "/blucgn")
     public void handleIncomingMessage(@RequestBody OcppSocketDataFromBlucgnDto ocppSocketDataFromBlucgnDto) {
-        executorService.submit(() -> {
-            logService.handleIncomingMessage(ocppSocketDataFromBlucgnDto);
-        });
+        executorService.submit(() -> logService.handleIncomingMessage(ocppSocketDataFromBlucgnDto));
     }
 
-    @GetMapping(value = "/update-analytics")
-    public void updateAnalytics() {
+    @GetMapping(value = "/process-temp-log")
+    public void updateLogTempTable() {
         logService.processLogHisToryTempToHubWiseUpTime();
     }
+
+
+    @PostMapping(value = "/insert-data-log-temp")
+    public void addDataToTempLog(@RequestBody LogTempDataInsertRequestDto logTempDataInsertRequestDto) {
+        logService.insertDataInTempTable(logTempDataInsertRequestDto);
+    }
+
+    @GetMapping(value = "/send-data-hub-analytics")
+    public void sendDataToHubWiseAnalytics() {
+        logService.sendDataToHubWiseAnalytics();
+    }
+
 }
 
