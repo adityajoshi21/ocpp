@@ -35,7 +35,7 @@ public class AnalyticsDataSyncScheduler {
     @Autowired
     private Credentials credentials;
 
-    @Scheduled(cron = "0 0 0 * * ?")
+//    @Scheduled(cron = "0 0 0 * * ?")
     public void loadLogHisToryTempFromLogHistory() {
         List<LogHistoryRecord> logHistoryRecords = logHistoryRepo.getLastOneDayRecord(jooqConfig.dslOcppContext());
         for (LogHistoryRecord logHistoryRecord : logHistoryRecords) {
@@ -43,7 +43,7 @@ public class AnalyticsDataSyncScheduler {
         }
     }
 
-    @Scheduled(cron = "0 0 4 * * ?")
+//    @Scheduled(cron = "0 0 4 * * ?")
     public void processLogHisToryTempToHubWiseUpTime() {
         Connection connection;
         CallableStatement callableStatement = null;
