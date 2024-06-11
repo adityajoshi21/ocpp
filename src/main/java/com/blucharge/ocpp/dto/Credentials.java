@@ -7,16 +7,28 @@ import lombok.Data;
 @Data
 @Builder
 public class Credentials {
-    @SerializedName("hostname")
-    private String mysqlHostName;
-    @SerializedName("port")
-    private String mysqlPort;
-    @SerializedName("username")
-    private String mysqlUserName;
-    @SerializedName("password")
-    private String mysqlPassword;
-    @SerializedName("database")
-    private String mysqlDatabase;
-    @SerializedName("pool-size")
-    private String mysqlPoolSize;
+    @SerializedName("ocpp-hostname")
+    private String mysqlOcppHostName;
+    @SerializedName("ocpp-port")
+    private String mysqlOcppPort;
+    @SerializedName("ocpp-username")
+    private String mysqlOcppUserName;
+    @SerializedName("ocpp-password")
+    private String mysqlOcppPassword;
+    @SerializedName("ocpp-database")
+    private String mysqlOcppDatabase;
+    @SerializedName("pool-size-ocpp")
+    private String mysqlOcppPoolSize;
+    @SerializedName("analytics-hostname")
+    private String mysqlAnalyticsHostName;
+    @SerializedName("analytics-port")
+    private String mysqlAnalyticsPort;
+    @SerializedName("analytics-username")
+    private String mysqlAnalyticsUserName;
+    @SerializedName("analytics-password")
+    private String mysqlAnalyticsPassword;
+    @SerializedName("analytics-database")
+    private String mysqlAnalyticsDatabase;
+    @SerializedName("pool-size-analytics")
+    private String mysqlAnalyticsPoolSize;
 }
