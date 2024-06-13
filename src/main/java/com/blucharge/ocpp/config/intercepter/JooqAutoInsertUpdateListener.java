@@ -17,8 +17,6 @@ public class JooqAutoInsertUpdateListener extends DefaultRecordListener {
     public static final String CREATED_BY = "created_by";
     public static final String UPDATED_BY = "updated_by";
     public static final String API_SOURCE = "api_source";
-    public static final String ORGANISATION_ID = "organisation_id";
-
     public static final String IS_ACTIVE = "is_active";
 
     @Override
@@ -47,8 +45,6 @@ public class JooqAutoInsertUpdateListener extends DefaultRecordListener {
         if (record.field(API_SOURCE) != null)
             record.set((Field<? super String>) record.field(API_SOURCE), RequestContext.getApplicationSource());
 
-        if (record.field(ORGANISATION_ID) != null)
-            record.set((Field<? super String>) record.field(ORGANISATION_ID), organisationId);
         if (record.field(IS_ACTIVE) != null) {
             record.set((Field<? super Boolean>) record.field(IS_ACTIVE), true);
         }
@@ -64,8 +60,6 @@ public class JooqAutoInsertUpdateListener extends DefaultRecordListener {
         else if (record.field(UPDATED_ON) != null)
             record.set((Field<? super DateTime>) record.field(UPDATED_ON), DateTime.now());
 
-        if (record.field(ORGANISATION_ID) != null)
-            record.set((Field<? super String>) record.field(ORGANISATION_ID), organisationId);
         if (record.field(UPDATED_BY) != null)
             record.set((Field<? super String>) record.field(UPDATED_BY), ssoId);
         if (record.field(API_SOURCE) != null)

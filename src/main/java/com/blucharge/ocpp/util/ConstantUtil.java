@@ -3,10 +3,12 @@ package com.blucharge.ocpp.util;
 
 import com.blucharge.core.enums.PropertyTypes;
 import com.blucharge.db.ocpp.tables.records.ApplicationPropertiesRecord;
+import com.blucharge.ocpp.config.JooqConfig;
 import com.blucharge.ocpp.repository.ApplicationPropertiesRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
@@ -16,13 +18,16 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Service
+@Component("constantUtil")
+@DependsOn("jooqConfig")
 public class ConstantUtil {
     @Autowired
     private ApplicationPropertiesRepo applicationPropertiesRepo;
+    @Autowired
+    private JooqConfig jooqConfig;
 
     public void configurationOfConstantsFromDataBase(Object app) throws IllegalAccessException {
-        Map<String, ApplicationPropertiesRecord> configMap = applicationPropertiesRepo.getPropertyMap();
+        Map<String, ApplicationPropertiesRecord> configMap = applicationPropertiesRepo.getPropertyMap(jooqConfig.dslOcppContext());
         if (configMap == null) return;
         Field[] fields = app.getClass().getDeclaredFields();
         for (Field field : fields) {
@@ -41,7 +46,7 @@ public class ConstantUtil {
                     case MAP:
                         break;
                     case INTEGERLIST:
-                        field.set(app, Arrays.asList(configMap.get(field.getName()).getPropertyValue().split(",")).stream().map(String::trim).map(Integer::valueOf).collect(Collectors.toList()));
+                        field.set(app, Arrays.stream(configMap.get(field.getName()).getPropertyValue().split(",")).map(String::trim).map(Integer::valueOf).collect(Collectors.toList()));
                         break;
                     case LONG:
                         field.set(app, Long.valueOf(configMap.get(field.getName()).getPropertyValue()));

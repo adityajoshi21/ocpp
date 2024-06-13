@@ -7,21 +7,39 @@ import org.jooq.impl.DataSourceConnectionProvider;
 import org.jooq.impl.DefaultConfiguration;
 import org.jooq.impl.DefaultDSLContext;
 import org.jooq.impl.DefaultRecordListenerProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 
 import javax.sql.DataSource;
 
 
-@Configuration
+@Configuration("jooqConfig")
+@DependsOn("dataSourceConfig")
 public class JooqConfig {
+    @Autowired
+    private DataSourceConfig dataSourceConfig;
+
+    @Bean
+    public DefaultDSLContext dslOcppContext() {
+
+        return new DefaultDSLContext(configuration(dataSourceConfig.getOcppDataSource()));
+    }
+
+    @Bean
+    public DefaultDSLContext dslAnalyticsContext() {
+
+        return new DefaultDSLContext(configuration(dataSourceConfig.getAnalyticsDataSource()));
+    }
 
     @Bean
     public DataSourceConnectionProvider connectionProvider(DataSource dataSource) {
         return new DataSourceConnectionProvider
                 (new TransactionAwareDataSourceProxy(dataSource));
     }
+
 
     public DefaultConfiguration configuration(DataSource dataSource) {
         DefaultConfiguration jooqConfiguration = new DefaultConfiguration();
@@ -32,9 +50,5 @@ public class JooqConfig {
         return jooqConfiguration;
     }
 
-    @Bean
-    public DefaultDSLContext dsl(DataSource dataSource) {
-        return new DefaultDSLContext(configuration(dataSource));
-    }
 
 }
