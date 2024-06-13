@@ -62,7 +62,7 @@ public class SecretsManager {
         } else {
             decodedBinarySecret = new String(Base64.getDecoder().decode(getSecretValueResponse.secretBinary().asByteBuffer()).array());
         }
-
+        log.info("Secrets fetched: "+ new Gson().toJson(secret));
         return new Gson().fromJson(secret, Credentials.class);
 
     }
