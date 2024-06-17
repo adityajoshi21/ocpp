@@ -1,6 +1,7 @@
 package com.blucharge.ocpp.config;
 
 import com.blucharge.ocpp.config.intercepter.JooqAutoInsertUpdateListener;
+import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DataSourceConnectionProvider;
@@ -23,13 +24,13 @@ public class JooqConfig {
     private DataSourceConfig dataSourceConfig;
 
     @Bean
-    public DefaultDSLContext dslOcppContext() {
+    public DSLContext dslOcppContext() {
 
         return new DefaultDSLContext(configuration(dataSourceConfig.getOcppDataSource()));
     }
 
     @Bean
-    public DefaultDSLContext dslAnalyticsContext() {
+    public DSLContext dslAnalyticsContext() {
 
         return new DefaultDSLContext(configuration(dataSourceConfig.getAnalyticsDataSource()));
     }
