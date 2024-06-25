@@ -15,4 +15,8 @@ public interface LogHistoryRepo {
     List<LogHistoryRecord> getLastOneDayRecord(DSLContext dslOcppContext);
 
     List<LogHistoryRecord> getLastOneDayRecordWithTimeStamp(DSLContext dslOcppContext, DateTime time);
+
+    List<LogHistoryRecord> getRecordForStartAndEnd(DateTime startTime, DateTime endTime, DSLContext ctx);
+
+    void deleteRecord(Long id, DSLContext dslOcppContext);
 }

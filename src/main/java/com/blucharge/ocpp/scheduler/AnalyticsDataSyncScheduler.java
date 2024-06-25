@@ -10,7 +10,6 @@ import com.blucharge.ocpp.repository.LogHistoryTempRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.sql.CallableStatement;
@@ -35,7 +34,7 @@ public class AnalyticsDataSyncScheduler {
     @Autowired
     private Credentials credentials;
 
-//    @Scheduled(cron = "0 0 0 * * ?")
+    //    @Scheduled(cron = "0 0 0 * * ?")
     public void loadLogHisToryTempFromLogHistory() {
         List<LogHistoryRecord> logHistoryRecords = logHistoryRepo.getLastOneDayRecord(jooqConfig.dslOcppContext());
         for (LogHistoryRecord logHistoryRecord : logHistoryRecords) {
@@ -43,7 +42,7 @@ public class AnalyticsDataSyncScheduler {
         }
     }
 
-//    @Scheduled(cron = "0 0 4 * * ?")
+    //    @Scheduled(cron = "0 0 4 * * ?")
     public void processLogHisToryTempToHubWiseUpTime() {
         Connection connection;
         CallableStatement callableStatement = null;
@@ -67,7 +66,7 @@ public class AnalyticsDataSyncScheduler {
         }
     }
 
-    @Scheduled(cron = "0 0 6 * * ?")
+    //    @Scheduled(cron = "0 0 6 * * ?")
     public void writeDataToAnalytics() {
         List<HubwiseChargerUptimeRecord> hubwiseChargerUptimeRecords = hubWiseUpTimeRepo.getRecords(jooqConfig.dslOcppContext());
         for (HubwiseChargerUptimeRecord hubwiseChargerUptimeRecord : hubwiseChargerUptimeRecords) {

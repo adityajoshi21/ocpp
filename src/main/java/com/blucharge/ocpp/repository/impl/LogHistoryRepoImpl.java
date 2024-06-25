@@ -13,6 +13,7 @@ import java.util.List;
 @Repository
 public class LogHistoryRepoImpl implements LogHistoryRepo {
     private static final LogHistory logHistory = LogHistory.LOG_HISTORY;
+
     @Override
     public void addRecord(LogHistoryRecord logHistoryRecord, DSLContext ctx) {
         LogHistoryRecord logHistoryRecord1 = ctx.newRecord(logHistory, logHistoryRecord);
@@ -41,5 +42,20 @@ public class LogHistoryRepoImpl implements LogHistoryRepo {
                 .where(logHistory.CREATED_ON.greaterOrEqual(time))
                 .and(logHistory.CREATED_ON.lessOrEqual(time.minusDays(1)))
                 .fetchInto(LogHistoryRecord.class);
+    }
+
+    @Override
+    public List<LogHistoryRecord> getRecordForStartAndEnd(DateTime startTime, DateTime endTime, DSLContext ctx) {
+        return ctx.selectFrom(logHistory)
+                .where(logHistory.CREATED_ON.greaterOrEqual(startTime))
+                .and(logHistory.CREATED_ON.lessOrEqual(endTime))
+                .fetchInto(LogHistoryRecord.class);
+    }
+
+    @Override
+    public void deleteRecord(Long id, DSLContext dslOcppContext) {
+        dslOcppContext.deleteFrom(logHistory)
+                .where(logHistory.ID.eq(id))
+                .execute();
     }
 }
