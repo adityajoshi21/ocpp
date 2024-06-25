@@ -11,6 +11,9 @@ import javax.annotation.PostConstruct;
 @DependsOn("constantUtil")
 public class ApplicationConstants {
     public static String APPLICATION_ID;
+    public static String AWS_ACCESS_KEY_ID;
+    public static String AWS_ACCESS_KEY_SECRET;
+    public static String AWS_S3_BUCKET_NAME;
     @Autowired
     private ConstantUtil constantUtil;
 

@@ -1,8 +1,12 @@
 package com.blucharge.ocpp.service.impl;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.blucharge.core.exception.ResponseException;
 import com.blucharge.db.ocpp.tables.records.HubwiseChargerUptimeRecord;
 import com.blucharge.db.ocpp.tables.records.LogHistoryRecord;
 import com.blucharge.ocpp.config.JooqConfig;
+import com.blucharge.ocpp.constants.ApplicationConstants;
 import com.blucharge.ocpp.dto.*;
 import com.blucharge.ocpp.dto.blucgn.OcppSocketDataFromBlucgnDto;
 import com.blucharge.ocpp.repository.HubWiseUpTimeRepo;
@@ -14,6 +18,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -29,6 +38,8 @@ public class LogServiceImpl implements LogService {
     private LogHistoryRepo logHistoryRepo;
     @Autowired
     private JooqConfig jooqConfig;
+    @Autowired
+    private AmazonS3 s3Client;
     @Autowired
     private Credentials credentials;
     @Autowired
@@ -68,7 +79,7 @@ public class LogServiceImpl implements LogService {
 
     @Override
     public void insertDataInTempTable(LogTempDataInsertRequestDto logTempDataInsertRequestDto) {
-        List<LogHistoryRecord> logHistoryRecords = logHistoryRepo.getLastOneDayRecordWithTimeStamp(jooqConfig.dslOcppContext(),logTempDataInsertRequestDto.getTimestamp());
+        List<LogHistoryRecord> logHistoryRecords = logHistoryRepo.getLastOneDayRecordWithTimeStamp(jooqConfig.dslOcppContext(), logTempDataInsertRequestDto.getTimestamp());
         for (LogHistoryRecord logHistoryRecord : logHistoryRecords) {
             logHistoryTempRepo.createRecord(logHistoryRecord, jooqConfig.dslOcppContext());
         }
@@ -104,6 +115,67 @@ public class LogServiceImpl implements LogService {
     }
 
     @Override
+    public void sendDataToS3(S3DataInsertRequestDto s3DataInsertRequestDto) {
+        List<LogHistoryRecord> logHistoryRecords = logHistoryRepo.getRecordForStartAndEnd(s3DataInsertRequestDto.getStartTime(), s3DataInsertRequestDto.getEndTime(), jooqConfig.dslOcppContext());
+        System.out.println("logHistoryRecords = " + logHistoryRecords.size());
+        StringBuilder s = new StringBuilder();
+        s.append("CHARGER_ID\tMESSAGE_TYPE\tMESSAGE_NAME\tMESSAGE_JSON\tCREATED_ON\n");
+        for (LogHistoryRecord logHistoryRecord : logHistoryRecords) {
+            try {
+                s.append(logHistoryRecord.getChargerId()).append("\t");
+                s.append(logHistoryRecord.getMessageType()).append("\t");
+                s.append(logHistoryRecord.getMessageName()).append("\t");
+                s.append(logHistoryRecord.getMessageJson()).append("\t");
+                s.append(logHistoryRecord.getCreatedOn()).append("\n");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        File file = createFile(s3DataInsertRequestDto.getName(), s.toString());
+        uploadFile(file, s3DataInsertRequestDto.getName());
+    }
+
+    @Override
+    public void deleteLogData(S3DataInsertRequestDto s3DataInsertRequestDto) {
+        List<LogHistoryRecord> logHistoryRecords = logHistoryRepo.getRecordForStartAndEnd(s3DataInsertRequestDto.getStartTime(), s3DataInsertRequestDto.getEndTime(), jooqConfig.dslOcppContext());
+        for (LogHistoryRecord logHistoryRecord : logHistoryRecords) {
+            logHistoryRepo.deleteRecord(logHistoryRecord.getId(), jooqConfig.dslOcppContext());
+        }
+    }
+
+    private File createFile(String fileName, String data) {
+        File file = new File(fileName);
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write(data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return file;
+    }
+
+    private void uploadFile(File tmpfile, String name) {
+        try {
+            if (tmpfile == null)
+                throw new ResponseException("No file present.");
+            try {
+                if (!tmpfile.exists() && !tmpfile.createNewFile())
+                    log.info("unable to create new file");
+                s3Client.putObject(new PutObjectRequest(ApplicationConstants.AWS_S3_BUCKET_NAME, "ocpp/log" + "/" + name, tmpfile));
+                Files.deleteIfExists(Paths.get(name));
+            } catch (Exception e) {
+                log.info("Error in saving file" + new Gson().toJson(e));
+                throw e;
+            } finally {
+                if (tmpfile.exists() && tmpfile.delete())
+                    log.info("temp file deleted successfully in final block" + name);
+            }
+        } catch (IOException e) {
+            log.info("Error in storing file" + name + new Gson().toJson(e));
+            throw new ResponseException("Failed to store file.");
+        }
+    }
+
+    @Override
     public void processLogHisToryTempToHubWiseUpTime() {
         Connection connection;
         CallableStatement callableStatement = null;
@@ -127,7 +199,4 @@ public class LogServiceImpl implements LogService {
             }
         }
     }
-
-
-
 }
