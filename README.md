@@ -1,4 +1,4 @@
-# BluSmart Ocpp
+#OCPP 1.6
 
 
 
